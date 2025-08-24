@@ -41,6 +41,7 @@ import CreateRegionPage from './pages/Admin/CreateRegionPage';
 import ExcelUploadPanel from './components/ExcelUploadPanel/ExcelUploadPanel';
 import { RegionProvider, useRegion } from "./context/RegionContext";
 import { Toaster } from 'react-hot-toast';
+import useLenis from './hooks/useLenis';
 
 // The API URL, make sure this is correct
 const API_URL = 'https://gvs-cargo-dynamic.onrender.com/api';
@@ -132,6 +133,7 @@ const MainLayout = () => {
 };
 
 function App() {
+useLenis()
   return (
     <Router>
       <Toaster 
