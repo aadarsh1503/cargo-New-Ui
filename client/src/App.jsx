@@ -82,6 +82,7 @@ const MainLayout = () => {
   const currentRegionData = availableRegions.find(r => r.code === region);
   const regionName = currentRegionData ? currentRegionData.name : 'Loading...';
   const regionFlag = currentRegionData ? currentRegionData.country_flag : '🌍';
+  const regionCoords = currentRegionData?.coords || { x: 0.5, y: 0.5 };
 
   return (
     <>
@@ -89,6 +90,7 @@ const MainLayout = () => {
         isVisible={isChangingRegion}
         regionName={regionName}
         regionFlag={regionFlag}
+        regionCoords={regionCoords}
       />
 
       <Navbar />
@@ -133,7 +135,6 @@ const MainLayout = () => {
 };
 
 function App() {
-useLenis()
   return (
     <Router>
       <Toaster 

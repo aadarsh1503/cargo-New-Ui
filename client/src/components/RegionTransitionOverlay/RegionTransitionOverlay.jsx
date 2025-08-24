@@ -2,27 +2,31 @@ import React from 'react';
 import './RegionTransitionOverlay.css';
 
 const RegionTransitionOverlay = ({ isVisible, regionName, regionFlag }) => {
+  // We don't render anything if it's not visible to keep the DOM clean.
   if (!isVisible) return null;
 
   const nameChars = regionName ? regionName.split('') : [];
 
   return (
+    // The 'visible' class will trigger all the animations.
     <div className={`transition-overlay ${isVisible ? 'visible' : ''}`}>
-      <div className="map-background"></div>
-      
-      {/* The main container element that will hold the doors and content */}
-      <div className="cargo-container">
+      {/* A new background with an animated blueprint grid */}
+      <div className="blueprint-background"></div>
+
+      {/* The main container for the content and sliding panels */}
+      <div className="transition-container">
         
-        {/* The content that appears inside the container */}
-        <div className="container-content">
+        {/* The content appears from behind the panels */}
+        <div className="transition-content">
           <div className="flag-container">
             {regionFlag}
           </div>
           <h1 className="name-container">
             {nameChars.map((char, index) => (
-              <span 
-                key={index} 
-                style={{ animationDelay: `${0.8 + index * 0.05}s` }} 
+              <span
+                key={index}
+                // Staggered animation for each character
+                style={{ animationDelay: `${0.8 + index * 0.05}s` }}
               >
                 {char === ' ' ? '\u00A0' : char}
               </span>
@@ -30,13 +34,17 @@ const RegionTransitionOverlay = ({ isVisible, regionName, regionFlag }) => {
           </h1>
         </div>
 
-        {/* The two doors of the container */}
-        <div className="container-door door-left"></div>
-        <div className="container-door door-right"></div>
+        {/* The two main sliding panels */}
+        <div className="panel panel-left"></div>
+        <div className="panel panel-right"></div>
+
+        {/* Thin accent lines for a touch of modern flair */}
+        <div className="accent-line line-top"></div>
+        <div className="accent-line line-bottom"></div>
       </div>
-        
+
       <div className="status-text">
-        LOADING REGIONAL HUB...
+        CONNECTING TO REGIONAL HUB...
       </div>
     </div>
   );

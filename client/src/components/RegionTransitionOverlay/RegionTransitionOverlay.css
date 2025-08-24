@@ -1,178 +1,185 @@
+/* --- Base Overlay Style --- */
 .transition-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    /* Darker, more industrial feel */
-    background-color: rgba(17, 24, 39, 0.9); /* Equivalent to bg-gray-900 */
-    backdrop-filter: blur(5px);
-    -webkit-backdrop-filter: blur(5px);
-    z-index: 99999;
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.3s ease, visibility 0.3s ease;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    /* This is crucial for the 3D door effect */
-    perspective: 1200px;
-  }
-  
-  .transition-overlay.visible {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  /* Light, clean background with MORE transparency */
+  background-color: rgba(243, 244, 246, 0.6); /* ADJUST THIS VALUE (0.0 to 1.0) for transparency */
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 99999;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.4s ease-out, visibility 0.4s ease-out;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden; /* Hide panels as they slide out */
+}
+
+.transition-overlay.visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* --- Animated Blueprint Background --- */
+.blueprint-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  /* Create a grid with CSS gradients */
+  background-image:
+    linear-gradient(rgba(0, 119, 255, 0.15) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 119, 255, 0.15) 1px, transparent 1px);
+  background-size: 30px 30px;
+  opacity: 0;
+  animation: fadeInGrid 1s ease-out forwards, scrollGrid 20s linear infinite;
+}
+
+@keyframes fadeInGrid {
+  to { opacity: 1; }
+}
+
+@keyframes scrollGrid {
+  from { background-position: 0 0; }
+  to { background-position: 60px 60px; }
+}
+
+
+/* --- Main Container & Content --- */
+.transition-container {
+  position: relative;
+  width: 500px;
+  height: 300px;
+}
+
+.transition-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  /* Animate content sliding up as it appears */
+  opacity: 0;
+  transform: translateY(20px);
+  animation: revealContent 0.8s cubic-bezier(0.25, 1, 0.5, 1) 0.5s forwards;
+}
+
+@keyframes revealContent {
+  to {
     opacity: 1;
-    visibility: visible;
+    transform: translateY(0);
   }
-  
-  /* New background with a map and animated routes */
-  .map-background {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-image: url('https://www.transparenttextures.com/patterns/cubes.png'), 
-                      radial-gradient(ellipse at center, rgba(107, 114, 128, 0.2) 0%, rgba(17, 24, 39, 0) 70%);
-    background-repeat: repeat, no-repeat;
-    background-position: center;
-    opacity: 0.3;
-    animation: pulseMap 15s infinite ease-in-out;
+}
+
+/* --- Sliding Panels --- */
+.panel {
+  position: absolute;
+  top: 0;
+  width: 51%; /* Slight overlap to avoid gaps */
+  height: 100%;
+  background-color: #ffffff;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.panel-left {
+  left: 0;
+}
+.panel-right {
+  right: 0;
+}
+
+/* Trigger panel animations */
+.transition-overlay.visible .panel-left {
+  animation: slide-out-left 1.2s cubic-bezier(0.76, 0, 0.24, 1) 0.2s forwards;
+}
+.transition-overlay.visible .panel-right {
+  animation: slide-out-right 1.2s cubic-bezier(0.76, 0, 0.24, 1) 0.2s forwards;
+}
+
+@keyframes slide-out-left {
+  to { transform: translateX(-100%); }
+}
+@keyframes slide-out-right {
+  to { transform: translateX(100%); }
+}
+
+/* --- Accent Lines --- */
+.accent-line {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background-color: #0077ff; /* A vibrant, professional blue */
+  transform: scaleX(0);
+}
+
+.line-top { top: 0; transform-origin: left; }
+.line-bottom { bottom: 0; transform-origin: right; }
+
+/* Trigger accent line animations */
+.transition-overlay.visible .line-top {
+  animation: draw-line 0.8s cubic-bezier(0.76, 0, 0.24, 1) forwards;
+}
+.transition-overlay.visible .line-bottom {
+  animation: draw-line 0.8s cubic-bezier(0.76, 0, 0.24, 1) 0.1s forwards; /* Slight delay */
+}
+
+@keyframes draw-line {
+  50% { transform: scaleX(1); }
+  100% { transform: scaleX(0); }
+}
+
+/* --- Flag & Region Name Styling --- */
+.flag-container {
+  font-size: 6rem;
+  line-height: 1;
+  /* Subtle glow effect */
+  filter: drop-shadow(0 0 15px rgba(0, 119, 255, 0.3));
+}
+
+.name-container {
+  font-family: 'Inter', 'Roboto', sans-serif; /* A modern, clean font */
+  color: #1f2937; /* Dark Gray for contrast */
+  font-size: 2.5rem;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-top: 20px;
+}
+
+.name-container span {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(10px);
+  animation: typeInChar 0.4s ease-out forwards;
+}
+
+@keyframes typeInChar {
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
-  
-  @keyframes pulseMap {
-    0% { transform: scale(1); opacity: 0.1; }
-    50% { transform: scale(1.05); opacity: 0.3; }
-    100% { transform: scale(1); opacity: 0.1; }
-  }
-  
-  
-  /* Main container element */
-  .cargo-container {
-    position: relative;
-    width: 400px;
-    height: 250px;
-    /* Allows child elements to be positioned in 3D space */
-    transform-style: preserve-3d;
-    animation: dropInContainer 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-    transform: translateY(-50px);
-    opacity: 0;
-  }
-  
-  @keyframes dropInContainer {
-    to {
-      transform: translateY(0);
-      opacity: 1;
-    }
-  }
-  
-  /* Styling for both container doors */
-  .container-door {
-    position: absolute;
-    width: 50%;
-    height: 100%;
-    top: 0;
-    background-color: #374151; /* gray-700 */
-    border: 4px solid #4b5563; /* gray-600 */
-    background-image: linear-gradient(45deg, rgba(255, 255, 255, 0.05) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.05) 50%, rgba(255, 255, 255, 0.05) 75%, transparent 75%, transparent);
-    background-size: 30px 30px;
-    /* This ensures the door rotates from its edge */
-    transform-origin: left;
-    transition: transform 1s ease-in-out;
-  }
-  
-  /* Position and set transform origin for the right door */
-  .door-right {
-    left: 50%;
-    transform-origin: right;
-  }
-  
-  /* Animation for opening the doors when the overlay is visible */
-  .transition-overlay.visible .door-left {
-    animation: open-left-door 1.2s cubic-bezier(0.65, 0, 0.35, 1) 0.5s forwards;
-  }
-  
-  .transition-overlay.visible .door-right {
-    animation: open-right-door 1.2s cubic-bezier(0.65, 0, 0.35, 1) 0.5s forwards;
-  }
-  
-  @keyframes open-left-door {
-    from { transform: rotateY(0deg); }
-    to { transform: rotateY(-140deg); }
-  }
-  
-  @keyframes open-right-door {
-    from { transform: rotateY(0deg); }
-    to { transform: rotateY(140deg); }
-  }
-  
-  
-  /* Content that is inside the container */
-  .container-content {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.4);
-    /* Initially hidden, fades in after doors open */
-    opacity: 0;
-    animation: fadeInContent 0.5s ease-out 1.2s forwards;
-  }
-  
-  @keyframes fadeInContent {
-    to {
-      opacity: 1;
-    }
-  }
-  
-  
-  /* Flag styling */
-  .flag-container {
-    font-size: 5rem; /* Slightly smaller to fit better */
-    line-height: 1;
-    text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
-  }
-  
-  /* Name styling */
-  .name-container {
-    font-family: 'Roboto', 'Arial', sans-serif; /* A more standard, industrial font */
-    color: #fff;
-    font-size: 2rem;
-    font-weight: 700;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    margin-top: 15px;
-    text-shadow: 0 0 10px rgba(0, 0, 0, 0.7);
-  }
-  
-  .name-container span {
-    opacity: 0;
-    display: inline-block;
-    animation: typeInChar 0.5s ease-out forwards;
-  }
-  
-  @keyframes typeInChar {
-    to {
-      opacity: 1;
-    }
-  }
-  
-  
-  /* Status text styling */
-  .status-text {
-    position: absolute;
-    bottom: 25px;
-    font-family: 'Courier New', Courier, monospace;
-    color: #f59e0b; /* GVS Gold */
-    font-size: 0.8rem;
-    letter-spacing: 3px;
-    text-transform: uppercase;
-    text-shadow: 0 0 5px #f59e0b;
-    animation: blinkStatus 1.5s infinite;
-  }
-  
-  @keyframes blinkStatus {
-    0%, 100% { opacity: 0.6; }
-    50% { opacity: 1; }
-  }
+}
+
+/* --- Status Text --- */
+.status-text {
+  position: absolute;
+  bottom: 30px;
+  font-family: 'Roboto Mono', 'Courier New', monospace;
+  color: #0052b3; /* A darker, more readable blue */
+  font-size: 0.8rem;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  animation: pulseStatus 2s infinite ease-in-out;
+}
+
+@keyframes pulseStatus {
+  0%, 100% { opacity: 0.7; }
+  50% { opacity: 1; }
+}

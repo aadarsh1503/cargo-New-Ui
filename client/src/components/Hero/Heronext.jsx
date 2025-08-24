@@ -4,12 +4,14 @@ const Heronext = () => {
   return (
     // Section container with padding for spacing
     <div id='next-section' className="bg-white p-4 mt-8 sm:p-8">
-          <p className="text-4xl sm:text-5xl font-bold mx-auto items-center justify-center flex  text-black mb-4">
-                Your Logistics Partner 
-              </p>
-              <p className="text-4xl sm:text-5xl mb-8 font-bold mx-auto items-center justify-center flex  text-black ">
-              For The Future
-              </p>
+         <div className="flex flex-col mb-8 items-center justify-center text-center">
+  <p className="text-3xl sm:text-5xl font-bold text-black mb-0 lg:mb-4">
+    Your Logistics Partner
+  </p>
+  <p className="text-3xl sm:text-5xl font-bold text-black">
+    For The Future
+  </p>
+</div>
       {/* Main content container with rounded corners and background image */}
       <div
         className="relative w-full overflow-hidden rounded-[40px] bg-cover bg-center text-white"

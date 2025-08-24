@@ -3,10 +3,10 @@ import Lenis from '@studio-freight/lenis';
 
 const useLenis = () => {
   useEffect(() => {
-    // Lenis ko initialize karein
+  
     const lenis = new Lenis({
-      duration: 1.2, // Scroll ki speed
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), // Easing function for a smooth effect
+      duration: 1.2, 
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       direction: 'vertical',
       gestureDirection: 'vertical',
       smooth: true,

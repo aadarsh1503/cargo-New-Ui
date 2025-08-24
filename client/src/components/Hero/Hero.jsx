@@ -196,7 +196,7 @@ const Hero = () => {
           </div>
           </a>
           {/* === SCROLL DOWN BUTTON (NEW) === */}
-          <a href="#next-section" className="scroll-down-button" aria-label="Scroll down">
+          <a href="#next-section" className="scroll-down-button lg:flex hidden" aria-label="Scroll down">
             ↓
           </a>
         </div>
