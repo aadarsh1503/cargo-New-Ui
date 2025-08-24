@@ -1,0 +1,39 @@
+.success-message {
+    display: flex;
+    align-items: center;
+
+    color: white;
+    padding: 16px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .success-message .checkmark {
+    font-size: 3rem; /* Larger tick icon */
+    animation: pulse 1s infinite; /* Pulse animation */
+  }
+  
+  @keyframes pulse {
+    0% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.2);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+  
+  .success-message span {
+    font-size: 1.125rem; /* Slightly larger text */
+    font-weight: 600;
+  }
+  .success-message {
+    transition: opacity 0.3s ease-in-out;
+  }
+  
+  .checkmark {
+    animation: pulse 1.5s infinite;
+  }
+  

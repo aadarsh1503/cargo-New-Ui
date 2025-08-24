@@ -1,0 +1,88 @@
+/* src/components/o.css */
+
+/* --- Global & Fonts --- */
+@import url('https://fonts.googleapis.com/css2?family=Arial&display=swap');
+
+:root {
+  --light-bg: #f8f9fe;
+  --header-yellow: #fec92c;
+  --text-dark: #000000;
+  --border-color: #000000;
+}
+
+.offers-page-container {
+  font-family: 'Arial', sans-serif;
+  background-color: var(--light-bg);
+  color: var(--text-dark);
+  min-height: 100vh;
+  padding: 3rem 1.5rem;
+}
+
+.page-heading {
+  font-size: 2.5rem;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 2.5rem;
+  color: #111;
+}
+
+/* --- Wrapper for each Sheet --- */
+.sheet-wrapper {
+  background: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1);
+  margin: 0 auto 3rem auto;
+  max-width: 1200px; 
+  overflow: hidden; /* This is key to making the image and table share the rounded border */
+  border: 2px solid var(--border-color); /* The main frame */
+}
+
+/* ✨ NEW: Styling for the image container above the table */
+.sheet-image-container {
+  /* No flex properties needed. It's a standard block element. */
+  height: 250px; /* Give the image a fixed height. Adjust as needed. */
+  width: 100%;
+}
+
+.sheet-image-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Ensures image covers the area without distortion */
+  display: block; 
+}
+
+/* ✨ MODIFIED: Table container now sits below the image */
+.classic-table-container {
+  overflow-x: auto;
+  /* This border now separates the image from the table */
+  border-top: 2px solid var(--border-color); 
+}
+
+/* --- The Classic Excel Table Styling --- */
+.classic-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 1rem;
+}
+
+.classic-table th, .classic-table td {
+  padding: 0.75rem 1rem;
+  text-align: center;
+  border: 1px solid var(--border-color);
+  vertical-align: middle;
+}
+
+.classic-table th {
+  background-color: var(--header-yellow);
+  font-weight: bold;
+  color: var(--text-dark);
+}
+
+.classic-table td {
+  background-color: white;
+}
+
+/* --- Status Containers (Loading/Error) --- */
+.status-container { /* ... same as before ... */ }
+.animate-spin-fast { /* ... same as before ... */ }
+@keyframes spin { /* ... same as before ... */ }

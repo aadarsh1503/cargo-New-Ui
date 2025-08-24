@@ -1,0 +1,87 @@
+/* AboutSection.css */
+
+/*
+  The animated, glowing dot-grid background.
+  This is the foundation of our futuristic theme.
+*/
+.genesis-background {
+    position: relative;
+    background-color: #f1f5f9; /* This is bg-slate-100 */
+  }
+  
+  .genesis-background::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      radial-gradient(ellipse at center, rgba(250, 204, 21, 0.1), transparent 60%),
+      /* The dot grid */
+      radial-gradient(circle at center, rgba(203, 213, 225, 0.4) 1px, transparent 1px);
+    background-size: 100% 100%, 2rem 2rem;
+    animation: pulse-light 8s infinite ease-in-out;
+  }
+  
+  @keyframes pulse-light {
+    0%, 100% { transform: scale(1); opacity: 0.8; }
+    50% { transform: scale(1.2); opacity: 1; }
+  }
+  
+  /*
+    The central, animated "DNA Helix" effect.
+    We create three rotating elements to form a complex, beautiful animation.
+  */
+  .dna-helix {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 150px;
+    height: 400px;
+    filter: blur(8px) brightness(1.2);
+    transform-style: preserve-3d;
+  }
+  
+  .dna-helix div {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, transparent, #f59e0b, #fbbf24, transparent);
+    border-radius: 50%;
+    opacity: 0.5;
+  }
+  
+  /* Each div is rotated and animated differently to create the helix effect */
+  .dna-helix div:nth-child(1) {
+    transform: rotateY(0deg) rotateX(65deg);
+    animation: rotate-helix 5s infinite linear;
+  }
+  .dna-helix div:nth-child(2) {
+    transform: rotateY(60deg) rotateX(65deg);
+    animation: rotate-helix 5s infinite linear -1.67s;
+  }
+  .dna-helix div:nth-child(3) {
+    transform: rotateY(120deg) rotateX(65deg);
+    animation: rotate-helix 5s infinite linear -3.33s;
+  }
+  
+  @keyframes rotate-helix {
+    from { transform: rotateY(0deg) rotateX(65deg) rotate(0deg); }
+    to { transform: rotateY(360deg) rotateX(65deg) rotate(360deg); }
+  }
+  
+  /*
+    This adds a glowing, sharp border to the crystalline slabs.
+  */
+  .crystalline-slab {
+    position: relative;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px); /* For Safari */
+    clip-path: polygon(0 5%, 100% 0, 100% 95%, 0 100%);
+    transition: all 0.3s ease-in-out;
+  }
+  
+  .crystalline-slab:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 25px 50px -12px rgba(234, 179, 8, 0.15);
+  }
