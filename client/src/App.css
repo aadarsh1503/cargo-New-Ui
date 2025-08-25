@@ -1,3 +1,6 @@
 body {
-    overflow-x: hidden; /* Prevent horizontal scrolling */
+    overflow-x: hidden; 
 }
+.font-noto-serif {
+    font-family: 'Noto Serif', serif;
+  }

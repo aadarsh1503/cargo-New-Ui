@@ -97,8 +97,8 @@ const Slide = () => {
                     {isLoaded ? (
                         <Slider ref={sliderRef} {...settings}>
                             {images.map((src, index) => (
-                                // Har slide item ko style kiya gaya hai
-                                <div key={index} className="px-4">
+                                
+                                <div key={index} className="px-4 will-change-transform">
                                     <a 
                                         href={imageLinks[index]} 
                                         target="_blank" 

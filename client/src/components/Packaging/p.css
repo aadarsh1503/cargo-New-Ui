@@ -1,0 +1,21 @@
+/* Custom styles for Swiper navigation arrows */
+.mySwiper .swiper-button-next,
+.mySwiper .swiper-button-prev {
+  background-color: white;
+  color: #1f2937; /* Tailwind gray-800 */
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+}
+
+.mySwiper .swiper-button-next::after,
+.mySwiper .swiper-button-prev::after {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+/* Custom styles for Swiper pagination bullets */
+.mySwiper .swiper-pagination-bullet-active {
+  background-color: #f59e0b; /* Tailwind yellow-500 */
+}

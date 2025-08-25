@@ -1,159 +1,161 @@
 import React, { useState } from 'react';
-import Bounce from '../Bounce/Bounce';
-import Slide from '../Slide/Slide';
-import ColorBar from '../Colorbar/Colorbar';
-import i69 from "./i69.jpg";
+import i69 from "./i69.jpeg";
 import i2 from "./i2.jpg";
 import i3 from "./i3.avif";
 import i4 from "./i4.jpg";
-import Slide1 from '../Slide1/Slide1';
+import Bounce from '../Bounce/Bounce';
+import Slide from '../Slide/Slide';
+const testimonialsData = [
+  {
+    name: 'Jose Rizal',
+    title: 'Supply Chain Manager',
+    quote: "Reliable and Efficient Partner Their team was incredibly responsive and efficient. They handled our complex international shipment with ease, ensuring timely delivery to our clients. We're impressed with their commitment to customer satisfaction and their ability to navigate global logistics challenges.",
+    image: i3,
+  },
+  {
+    name: 'Rohan Verma',
+    title: 'E-commerce Founder',
+    quote: 'Seamless Global Shipping We have been using their services for years, and they consistently exceed our expectations. Their seamless global shipping solutions have streamlined our supply chain and reduced costs. We highly recommend them to businesses of all sizes.',
+    image: i2,
+  },
+  {
+    name: 'Abdul-Raouf',
+    title: 'Operations Director',
+    quote: 'Personalized Service and Expertise Their personalized service and expertise in international logistics are second to none. They took the time to understand our unique needs and provided tailored solutions. Their team is always available to answer our questions and provide updates, giving us peace of mind.',
+    image: i69,
+  },
+  {
+    name: 'Ali Al-Fahim',
+    title: 'Import/Export Specialist',
+    quote: "Efficient and Transparent Logistics Solutions Their efficiency and transparency have set a new standard for us. From managing documents to on-time deliveries, they’ve ensured a smooth experience every step of the way. Their proactive approach has significantly improved our operations.",
+    image: i4,
+  },
+];
+
+
 
 const Testimonials = () => {
-  const testimonials = [
-    {
-      id: 1,
-      name: "Jose Rizal",
-      text: "Reliable and Efficient Partner Their team was incredibly responsive and efficient. They handled our complex international shipment with ease, ensuring timely delivery to our clients. We're impressed with their commitment to customer satisfaction and their ability to navigate global logistics challenges",
-      address: "Cebu City, Cebu",
-      image: i3,
-    },
-    {
-      id: 2,
-      name: "Rohan Verma",
-      text: "Seamless Global Shipping We've been using their services for years, and they consistently exceed our expectations. Their seamless global shipping solutions have streamlined our supply chain and reduced costs. We highly recommend them to businesses of all sizes",
-      address: "Bangalore, Karnataka",
-      image: i2,
-    },
-    {
-      id: 3,
-      name: "Abdul-Raouf",
-      text: "Personalized Service and Expertise Their personalized service and expertise in international logistics are second to none. They took the time to understand our unique needs and provided tailored solutions. Their team is always available to answer our questions and provide updates, giving us peace of mind",
-      address: "Dubai Marina, Dubai",
-      image: i69,
-    },
-    {
-      id: 4,
-      name: "Ali Al-Fahim",
-      text: "Efficient and Transparent Logistics Solutions Their efficiency and transparency have set a new standard for us. From managing documents to on-time deliveries, they’ve ensured a smooth experience every step of the way. Their proactive approach has significantly improved our operations.",
-      address: "Al Rayyan, Qatar",
-      image: i4,
-    },
-  ];
-
-  const [current, setCurrent] = useState(0);
-  const [expandedIndex, setExpandedIndex] = useState(null); // Track expanded testimonial
-
-  const handleNext = () => {
-    setCurrent((prev) => (prev - 1 + testimonials.length) % testimonials.length);
-  };
+  const [activeIndex, setActiveIndex] = useState(0);
 
   const handlePrev = () => {
-    setCurrent((prev) => (prev + 1) % testimonials.length);
+    setActiveIndex((prevIndex) =>
+      prevIndex === 0 ? testimonialsData.length - 1 : prevIndex - 1
+    );
   };
 
-  const reorderedTestimonials = [
-    testimonials[(current + 0) % testimonials.length],
-    testimonials[(current + 1) % testimonials.length],
-    testimonials[(current + 2) % testimonials.length],
-  ];
-
-  const truncateText = (text, lines) => {
-    const maxChars = lines * 50; // Approximate character count for 3 lines
-    return text.length > maxChars ? text.substring(0, maxChars) + "..." : text;
+  const handleNext = () => {
+    setActiveIndex((prevIndex) =>
+      prevIndex === testimonialsData.length - 1 ? 0 : prevIndex + 1
+    );
   };
 
   return (
-    <div className=" space-y-8 ">
-      <div className="lg:text-3xl mt-9 -mb-9 text-2xl ml-4 text-lightblue text-center font-bold  ">
-        OUR TESTIMONIALS
-      </div>
-
-      {/* Desktop View */}
-      <div className="hidden lg:flex justify-center items-center">
-        {/* Left Arrow */}
-        <button
-          onClick={handlePrev}
-          className="text-gray-600 hover:text-gray-800 p-4 bg-gray-200 rounded-full focus:outline-none mx-4"
-        >
-          &#8592;
-        </button>
-
-        <div className="flex items-center gap-12 mt-32">
-          {reorderedTestimonials.map((testimonial, index) => (
-            <div
-              key={testimonial.id}
-              className={`relative transition-all duration-1000 ease-in-out flex flex-col items-center bg-white shadow-md p-6 rounded-lg
-                ${index === 1
-                  ? "scale-110 opacity-100 h-[456px] w-72 transform shadow-xl transition-transform"
-                  : "scale-90 opacity-60 w-72 transform transition-transform"}`}
-            >
-              <div
-                className={`absolute -top-10 flex justify-center items-center w-24 h-24 rounded-md overflow-hidden border-4 ${index === 1 ? "border-DarkBlue" : "border-gray-200"}`}
-              >
-                <img
-                  src={testimonial.image}
-                  alt={testimonial.name}
-                  className={`object-cover w-full h-full ${index === 1 ? "scale-110" : "scale-100"}`}
-                />
+    <>
+    <section id='testimonials' className="bg-slate-50 py-16 mb-10 mt-8 sm:py-2">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        {/* Header */}
+        <div className="flex flex-col items-center justify-between gap-8 md:flex-row">
+          <div className="max-w-7xl text-center md:text-left">
+            <h2 className="text-4xl mt-6 font-bold tracking-tight text-gray-900  sm:text-5xl">
+              What our clients say about us !
+            </h2>
+          </div>
+          <div className="flex items-center">
+            <div className="flex -space-x-4">
+              <img className="h-12 w-12 rounded-full border-2 border-white object-cover" src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40" alt="Client 1" />
+              <img className="h-12 w-12 rounded-full border-2 border-white object-cover" src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=40" alt="Client 2" />
+              <img className="h-12 w-12 rounded-full border-2 border-white object-cover" src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=40" alt="Client 3" />
+              <div className="flex h-12 w-12 items-center justify-center rounded-full border-2 border-white bg-orange-500 text-sm font-semibold text-white">
+                5k+
               </div>
-              <div className="text-5xl text-DarkYellow mt-4 lg:mt-10 ml-0 lg:-ml-56">“</div>
-              <p className="text-DarkBlue font-bold mb-1">{testimonial.name}</p>
-              <p className="text-gray-600 max-w-7xl text-center">
-                {index === 1 ? testimonial.text : truncateText(testimonial.text, 3)}
-              </p>
-              <p className="text-gray-500 mt-2">{testimonial.address}</p>
-              <div className="text-5xl text-DarkYellow ml-0 lg:ml-56 mt-2">”</div>
             </div>
-          ))}
-        </div>
-
-        {/* Right Arrow */}
-        <button
-          onClick={handleNext}
-          className="text-gray-600 hover:text-gray-800 p-4 bg-gray-200 rounded-full focus:outline-none mx-4"
-        >
-          &#8594;
-        </button>
-      </div>
-
-      {/* Mobile View */}
-      <div className="grid grid-cols-1 sm:grid-cols-1 gap-8 lg:hidden mt-10 px-4">
-        {testimonials.map((testimonial, index) => (
-          <div
-            key={testimonial.id}
-            className="flex flex-col items-center bg-white shadow-md p-6 rounded-lg"
-          >
-            <div
-              className="w-24 h-24 rounded-full overflow-hidden border-4 border-gray-200 mb-4"
-            >
-              <img
-                src={testimonial.image}
-                alt={testimonial.name}
-                className="object-cover w-full h-full"
-              />
-            </div>
-            <div className="text-lightblue font-bold mb-1">{testimonial.name}</div>
-            <p className="text-gray-500 mt-2">{testimonial.address}</p>
-            
-            <p className="text-gray-600 max-w-7xl text-center">
-              {expandedIndex === index ? testimonial.text : truncateText(testimonial.text, 3)}
-            </p>
-
-            <div className="flex justify-center space-x-2 mt-4">
-              <button
-                className={`h-2 w-2 rounded-full ${expandedIndex === index ? 'bg-lightblue' : 'bg-gray-300'}`}
-                onClick={() => setExpandedIndex(expandedIndex === index ? null : index)} // Toggle expanded state
-              ></button>
+            <div className="ml-4 text-sm">
+              <p className="font-semibold text-gray-800">Trusted By</p>
+              <p className="text-gray-600">Happy Customers</p>
             </div>
           </div>
-        ))}
+        </div>
+
+        {/* --- MODIFIED SLIDER CONTAINER --- */}
+        {/* This wrapper constrains the width and centers the slider */}
+        <div className="relative mx-auto mt-16 max-w-6xl">
+          <div className="overflow-hidden rounded-2xl">
+            <div
+              className="flex transition-transform duration-500 ease-in-out"
+              style={{ transform: `translateX(-${activeIndex * 100}%)` }}
+            >
+              {testimonialsData.map((testimonial, index) => (
+                <div key={index} className="w-full flex-shrink-0">
+                  <div className="grid grid-cols-1 items-center gap-8 bg-white shadow-lg lg:grid-cols-2 lg:gap-0">
+                    {/* Image */}
+                    <div className="order-last h-full w-full lg:order-first">
+                      <img
+                        src={testimonial.image}
+                        alt={testimonial.name}
+                        className="h-full w-full object-cover lg:rounded-l-2xl"
+                      />
+                    </div>
+                    {/* Testimonial Text */}
+                    <div className="p-8 sm:p-12">
+                      <svg
+                        className="h-10 w-10 text-orange-500"
+                        viewBox="0 0 44 34"
+                        fill="currentColor"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path d="M14.6433 33.9113H0.916992L11.5162 0.818359H20.4033L14.6433 33.9113ZM38.4526 33.9113H24.7262L35.3255 0.818359H44L38.4526 33.9113Z" />
+                      </svg>
+                      <p className="mt-6 text-lg text-gray-700">
+                        "{testimonial.quote}"
+                      </p>
+                      <div className="mt-8">
+                        <p className="font-bold text-gray-900">{testimonial.name}</p>
+                        <p className="text-sm text-gray-500">{testimonial.title}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Navigation Arrows */}
+          <button
+            onClick={handlePrev}
+            className="absolute top-1/2 z-10 -translate-y-1/2 rounded-full border border-gray-300 bg-white p-2 shadow-md transition hover:bg-gray-100 hidden lg:flex lg:items-center lg:justify-center lg:left-[-60px]"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+          <button
+            onClick={handleNext}
+            className="absolute top-1/2 z-10 -translate-y-1/2 rounded-full border border-gray-300 bg-white p-2 shadow-md transition hover:bg-gray-100 hidden lg:flex lg:items-center lg:justify-center lg:right-[-60px]"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+        </div>
+        
+        {/* Pagination Dots */}
+        <div className="mt-8 flex justify-center space-x-3">
+          {testimonialsData.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => setActiveIndex(index)}
+              className={`h-2 rounded-full transition-all duration-300 ${
+                activeIndex === index ? 'w-6 bg-orange-500' : 'w-2 bg-gray-300'
+              }`}
+            />
+          ))}
+        </div>
       </div>
-
-    <Bounce />
-    <Slide />
-    <ColorBar />
-
-    </div>
+    </section>
+        <Bounce />
+        <Slide />
+     
+    </>
   );
 };
 

@@ -1,31 +1,36 @@
 import React, { useState } from 'react';
-
+import i69 from "./i69.jpeg";
+import i22 from "./i22.jpg";
+import i3 from "./i3.avif";
+import i4 from "./i4.jpg";
 const testimonialsData = [
   {
-    name: 'Jane David',
+    name: 'Jose Rizal',
     title: 'Supply Chain Manager',
-    quote: "We've been working with this logistics company for over five years, and their service has been nothing short of exceptional. They consistently deliver our shipments on time, even under tight deadlines and complex routing.",
-    image: 'https://t3.ftcdn.net/jpg/03/02/88/46/360_F_302884605_actpipOdPOQHDTnFtp4zg4RtlWzhOASp.jpg',
+    quote: "Reliable and Efficient Partner Their team was incredibly responsive and efficient. They handled our complex international shipment with ease, ensuring timely delivery to our clients. We're impressed with their commitment to customer satisfaction and their ability to navigate global logistics challenges.",
+    image: i3,
   },
   {
-    name: 'John Smith',
+    name: 'Rohan Verma',
     title: 'E-commerce Founder',
-    quote: 'Their e-commerce logistics solutions have been a game-changer for our online store. Order fulfillment is faster, and our customers are happier. Highly recommend their services for any growing business.',
-    image: 'https://img.huffingtonpost.com/asset/5925abd12000004700cb26e8.jpeg?ops=1200_630',
+    quote: 'Seamless Global Shipping We have been using their services for years, and they consistently exceed our expectations. Their seamless global shipping solutions have streamlined our supply chain and reduced costs. We highly recommend them to businesses of all sizes.',
+    image: i22,
   },
   {
-    name: 'Sarah Lee',
+    name: 'Abdul-Raouf',
     title: 'Operations Director',
-    quote: 'The level of professionalism and the detailed supply chain management they provide is top-notch. They helped us optimize our entire process, saving us time and money. A truly reliable partner.',
-    image: 'https://static.toiimg.com/photo/116819151.cms',
+    quote: 'Personalized Service and Expertise Their personalized service and expertise in international logistics are second to none. They took the time to understand our unique needs and provided tailored solutions. Their team is always available to answer our questions and provide updates, giving us peace of mind.',
+    image: i69,
   },
   {
-    name: 'Michael Chen',
+    name: 'Ali Al-Fahim',
     title: 'Import/Export Specialist',
-    quote: "Navigating international freight and customs can be a nightmare, but this team makes it seamless. Their expertise in both sea and air freight is evident in their efficient and secure handling of our goods.",
-    image: 'https://miro.medium.com/v2/resize:fit:1358/0*1m5pOg8s3rt4hYI_',
+    quote: "Efficient and Transparent Logistics Solutions Their efficiency and transparency have set a new standard for us. From managing documents to on-time deliveries, they’ve ensured a smooth experience every step of the way. Their proactive approach has significantly improved our operations.",
+    image: i4,
   },
 ];
+
+
 
 const TestimonialsSection = () => {
   const [activeIndex, setActiveIndex] = useState(0);

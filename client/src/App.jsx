@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react'; // Import useEffect
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+// <<< STEP 1: Import useLocation from react-router-dom >>>
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 
 // ========= YOUR EXISTING COMPONENT IMPORTS =========
 import GlobalLoader from "./components/GlobalLoader/GlobalLoader";
@@ -48,14 +49,19 @@ const API_URL = 'https://gvs-cargo-dynamic.onrender.com/api';
 
 const MainLayout = () => {
   const { isInitializing, isChangingRegion, region, availableRegions } = useRegion();
-
   const [regionContent, setRegionContent] = useState(null);
+
+  // <<< STEP 2: Get the current location inside the component >>>
+  const location = useLocation();
+  const isHomePage = location.pathname === '/';
+
+  // <<< STEP 3: Determine the class to apply based on the path >>>
+  // Your navbar is about 96px tall. pt-28 (7rem/112px) gives enough space. Adjust if needed.
+  const mainContentClass = isHomePage ? '' : 'pt-28';
 
 
   useEffect(() => {
-  
     if (!region) return;
-
     const fetchRegionContent = async () => {
       try {
         const response = await fetch(`${API_URL}/content/${region}`);
@@ -69,11 +75,8 @@ const MainLayout = () => {
         setRegionContent(null); 
       }
     };
-
     fetchRegionContent();
   }, [region]); 
-
-
 
   if (isInitializing) {
     return <GlobalLoader />;
@@ -95,13 +98,14 @@ const MainLayout = () => {
 
       <Navbar />
       
-
       <ChatWidget 
         salesNumber={regionContent?.whatsapp_sales}
         supportNumber={regionContent?.whatsapp_support}
       />
       
-      <main>
+      {/* <<< STEP 4: Apply the conditional class to the <main> element >>> */}
+      <main className={mainContentClass}>
+        {/* The nested Routes will render inside this main tag */}
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/whoWeAre" element={<AboutSection />} />
@@ -135,13 +139,13 @@ const MainLayout = () => {
 };
 
 function App() {
+  useLenis()
   return (
     <Router>
       <Toaster 
         position="top-center"
         reverseOrder={false}
         toastOptions={{
-          // Default options for all toasts
           duration: 5000,
         }}
       />
@@ -158,7 +162,8 @@ function App() {
           </Route>
 
           {/* Public-Facing Site Routes */}
-          <Route path="/*" element={<MainLayout />} />
+          {/* This part remains exactly the same */}
+          <Route path="/*" element={<MainLayout />} /> 
         </Routes>
       </RegionProvider>
     </Router>

@@ -337,7 +337,7 @@ const handleConfirmCreation = async () => {
                   </div>
                   <div>
                     <label className="block text-sm font-semibold text-gray-600 mb-2">
-                      Customer Care Email
+                      Customer Care Email <span className="font-extrabold text=black">(Also for Req a Quote Form)</span>
                     </label>
                     <input
                       type="email"

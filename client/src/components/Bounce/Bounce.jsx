@@ -43,7 +43,6 @@ const Bounce = () => {
         {/* The futuristic grid of holographic service pods */}
         <div className="mt-16 grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-4 lg:gap-8">
           {services.map((service, index) => (
-            // The "Holographic Pod" - uses `group` for powerful hover effects
             <div
               key={index}
               className="
@@ -53,6 +52,8 @@ const Bounce = () => {
                 hover:bg-white/80 hover:border-yellow-400/80
                 hover:shadow-2xl hover:shadow-yellow-500/20
                 hover:-translate-y-2
+
+                will-change-transform
               "
             >
               {/* Data-grid overlay that appears on hover for a futuristic feel */}

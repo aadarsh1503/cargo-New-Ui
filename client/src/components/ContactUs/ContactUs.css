@@ -1,39 +1,40 @@
-.success-message {
-    display: flex;
-    align-items: center;
+/* --- NEW STYLES FOR REDESIGNED MULTI-STEP FORM --- */
 
-    color: white;
-    padding: 16px;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+/* Input & Label Styling */
+.input-label {
+  @apply block text-sm font-medium text-gray-600 mb-1;
+}
+
+.form-input {
+  @apply w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent transition duration-300 placeholder-gray-400;
+}
+
+/* Override for react-phone-input-2 to match our new style */
+.react-tel-input .form-control {
+  @apply w-[200px] h-auto p-3 border ml-12 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent transition duration-300 !important;
+}
+
+/* Button Styling */
+.btn-primary {
+  @apply flex items-center justify-center px-6 py-3 bg-yellow-500 text-white font-semibold rounded-lg shadow-md hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 transition-all duration-300 transform hover:scale-105 disabled:bg-gray-400 disabled:cursor-not-allowed;
+}
+
+.btn-secondary {
+  @apply flex items-center justify-center px-6 py-3 bg-gray-200 text-gray-700 font-semibold rounded-lg hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 transition-all duration-300;
+}
+
+/* Success Message Checkmark Animation */
+.checkmark {
+  animation: scale-in 0.5s ease-out;
+}
+
+@keyframes scale-in {
+  from {
+      transform: scale(0.5);
+      opacity: 0;
   }
-  
-  .success-message .checkmark {
-    font-size: 3rem; /* Larger tick icon */
-    animation: pulse 1s infinite; /* Pulse animation */
-  }
-  
-  @keyframes pulse {
-    0% {
+  to {
       transform: scale(1);
-    }
-    50% {
-      transform: scale(1.2);
-    }
-    100% {
-      transform: scale(1);
-    }
+      opacity: 1;
   }
-  
-  .success-message span {
-    font-size: 1.125rem; /* Slightly larger text */
-    font-weight: 600;
-  }
-  .success-message {
-    transition: opacity 0.3s ease-in-out;
-  }
-  
-  .checkmark {
-    animation: pulse 1.5s infinite;
-  }
-  
+}
