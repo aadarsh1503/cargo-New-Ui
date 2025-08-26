@@ -14,7 +14,7 @@ const useLenis = () => {
 
     // 3. If no instance exists, create one with your desired settings.
     lenisInstance = new Lenis({
-      duration: 1.9,
+      duration: 1.2,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       direction: 'vertical',
       gestureDirection: 'vertical',

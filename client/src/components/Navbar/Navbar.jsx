@@ -251,7 +251,7 @@ const Navbar = () => {
                 onMouseLeave={() => item.dropdown && handleDropdownLeave()}
               >
                 <Link to={item.link || '#'}
-                  className={`px-5 py-2 font-bold whitespace-nowrap text-sm rounded-full border-2 transition-colors duration-300 flex items-center gap-1.5 ${
+                  className={`px-3 py-2 font-bold whitespace-nowrap text-sm rounded-full border-2 transition-colors duration-300 flex items-center gap-1.5 ${
                     isTransparent
                       ? 'text-white border-white/40 hover:bg-white/20'
                       : 'text-gray-700 border-gray-200 hover:bg-gray-100'

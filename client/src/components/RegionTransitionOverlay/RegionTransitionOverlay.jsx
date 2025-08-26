@@ -1,32 +1,37 @@
 import React from 'react';
 import './RegionTransitionOverlay.css';
 
+// <<< 1. Define the logo URL as a constant >>>
+const logoUrl = 'https://cargo-new-ui.vercel.app/assets/GVS-Yttnar72.png';
+
 const RegionTransitionOverlay = ({ isVisible, regionName, regionFlag }) => {
-  // We don't render anything if it's not visible to keep the DOM clean.
   if (!isVisible) return null;
 
   const nameChars = regionName ? regionName.split('') : [];
 
   return (
-    // The 'visible' class will trigger all the animations.
     <div className={`transition-overlay ${isVisible ? 'visible' : ''}`}>
-      {/* A new background with an animated blueprint grid */}
       <div className="blueprint-background"></div>
 
-      {/* The main container for the content and sliding panels */}
       <div className="transition-container">
         
-        {/* The content appears from behind the panels */}
         <div className="transition-content">
-          <div className="flag-container">
+          {/* <<< 2. Add the logo image here >>> */}
+          <img 
+            src={logoUrl} 
+            alt="GVS Logo" 
+            className="transition-logo" 
+          />
+          
+          <div className="flag-container font-noto-serif">
             {regionFlag}
           </div>
-          <h1 className="name-container">
+          <h1 className="name-container text-white">
             {nameChars.map((char, index) => (
               <span
                 key={index}
-                // Staggered animation for each character
                 style={{ animationDelay: `${0.8 + index * 0.05}s` }}
+                className='font-noto-serif'
               >
                 {char === ' ' ? '\u00A0' : char}
               </span>
@@ -34,11 +39,8 @@ const RegionTransitionOverlay = ({ isVisible, regionName, regionFlag }) => {
           </h1>
         </div>
 
-        {/* The two main sliding panels */}
         <div className="panel panel-left"></div>
         <div className="panel panel-right"></div>
-
-        {/* Thin accent lines for a touch of modern flair */}
         <div className="accent-line line-top"></div>
         <div className="accent-line line-bottom"></div>
       </div>

@@ -2,16 +2,14 @@ import React from 'react';
 import { motion } from 'framer-motion';
 // Icons to visually represent the benefits
 import { ShieldCheckIcon, GlobeAmericasIcon, ClipboardDocumentCheckIcon } from '@heroicons/react/24/outline';
-
+import i1 from "./i1.png"
 import Bounce from '../Bounce/Bounce';
 import Slide from '../Slide/Slide';
 import ColorBar from '../Colorbar/Colorbar';
 
-// ---===[ YOU CAN REPLACE THIS IMAGE PATH ]===---
-const insuranceImageUrl = "https://sun9-29.userapi.com/impg/kQRXWDzDvE2XIMxcMDDRAApX2pM6iuMs8l6Icg/R8KkDoBEkOo.jpg?size=1000x500&quality=95&sign=3b0b953ab240f97d8aa2191a0b37643f&c_uniq_tag=y6xgJNyhBDhOcFkk3eu6zwBdPbrlbhbhoz7K3Dpoj7E&type=album";
-// ---===========================================---
 
-// Let's break down the benefits of your insurance into a clear, scannable list.
+const insuranceImageUrl = i1;
+
 const insuranceFeatures = [
   {
     icon: GlobeAmericasIcon,

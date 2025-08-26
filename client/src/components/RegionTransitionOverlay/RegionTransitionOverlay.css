@@ -1,12 +1,22 @@
-/* --- Base Overlay Style --- */
+
+
+.transition-logo {
+  height: 90px; 
+  width: auto;
+  margin-bottom: 20px; 
+
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
+}
+
+
 .transition-overlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100vw;
   height: 100vh;
-  /* Light, clean background with MORE transparency */
-  background-color: rgba(243, 244, 246, 0.6); /* ADJUST THIS VALUE (0.0 to 1.0) for transparency */
+ 
+  background-color: rgba(243, 244, 246, 0.6); 
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   z-index: 99999;
@@ -16,7 +26,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  overflow: hidden; /* Hide panels as they slide out */
+  overflow: hidden; 
 }
 
 .transition-overlay.visible {
@@ -24,14 +34,14 @@
   visibility: visible;
 }
 
-/* --- Animated Blueprint Background --- */
+
 .blueprint-background {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  /* Create a grid with CSS gradients */
+
   background-image:
     linear-gradient(rgba(0, 119, 255, 0.15) 1px, transparent 1px),
     linear-gradient(90deg, rgba(0, 119, 255, 0.15) 1px, transparent 1px);
@@ -50,7 +60,7 @@
 }
 
 
-/* --- Main Container & Content --- */
+
 .transition-container {
   position: relative;
   width: 500px;
@@ -64,7 +74,7 @@
   align-items: center;
   width: 100%;
   height: 100%;
-  /* Animate content sliding up as it appears */
+
   opacity: 0;
   transform: translateY(20px);
   animation: revealContent 0.8s cubic-bezier(0.25, 1, 0.5, 1) 0.5s forwards;
@@ -77,11 +87,11 @@
   }
 }
 
-/* --- Sliding Panels --- */
+
 .panel {
   position: absolute;
   top: 0;
-  width: 51%; /* Slight overlap to avoid gaps */
+  width: 51%;
   height: 100%;
   background-color: #ffffff;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
