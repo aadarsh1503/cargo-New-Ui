@@ -139,7 +139,7 @@ const MainLayout = () => {
 };
 
 function App() {
-  useLenis()
+
   return (
     <Router>
       <Toaster 
