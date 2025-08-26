@@ -202,38 +202,8 @@ const Hero = () => {
         </div>
       </div>
 
-      {/* === ANIMATED INFO SECTION (CONTENT FROM YOUR OTHER FILE) === */}
-      {/* <section id="next-section" className="info-section-bg">
-        <div className="animated-logistics-bg">
-            <FaPlane className="floating-icon" style={{ fontSize: '6rem', top: '5%', left: '5%', animationDelay: '-2s', animationDuration: '12s' }} />
-            <FaAnchor className="floating-icon" style={{ fontSize: '7rem', top: '50%', right: '5%', animationDelay: '-5s', animationDuration: '18s' }} />
-            <FaShippingFast className="floating-icon" style={{ fontSize: '4rem', top: '20%', right: '25%', animationDelay: '-8s', animationDuration: '10s' }} />
-        </div>
 
-        <div className="info-grid-container">
-          <div className="info-text-container">
-            <h2 className="info-heading">
-              GVS Cargo, <br/> Perfected by <span>Experience</span>.
-            </h2>
-            <p className="info-paragraph">
-              Founded by professionals with extensive experience, GVS Cargo & Logistics operates in all segments of foreign trade, executing each stage of the logistics process with unparalleled professionalism and competence on all continents.
-            </p>
-            <Link to='/contactUs'>
-              <button className="info-contact-btn">
-                Connect With Us
-              </button>
-            </Link>
-          </div>
-          
-          <div className="info-image-wrapper">
-            <div className="info-image-container">
-              <img src="https://avatars.mds.yandex.net/i?id=5dd83667a01e12c7c3b4639b0b93ad77_l-5869613-images-thumbs&ref=rim&n=13&w=1280&h=800" alt="Shipping Illustration" className="info-image" />
-            </div>
-          </div>
-        </div>
-      </section> */}
-      
-      {/* === OTHER COMPONENTS (FROM YOUR OTHER FILE) === */}
+
       <Heronext />
       <ServicesSection />
       <TestimonialsSection />

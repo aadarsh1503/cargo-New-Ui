@@ -3,7 +3,7 @@ import React from 'react';
 // Data for the service cards - no changes here
 const servicesData = [
   {
-    title: 'Sea & Air Freight',
+    title: 'Sea , Air & Road Freight',
     description: 'Fast, Secure, And Dependable Transportation Options.',
     imageUrl: 'https://www.trade.gov/sites/default/files/2020-04/EC%20Ship%20with%20Plane%20Resized%20%28Small%29_0.jpg',
   },
