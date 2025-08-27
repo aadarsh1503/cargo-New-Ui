@@ -25,6 +25,7 @@ app.use(cors({
     'http://localhost:5173',
     'https://gvs-cargo-dynamic.vercel.app',
     'https://gvscargo.com',
+    'https://cargo-new-ui.vercel.app',
     'https://cargo-backend-black.vercel.app',
     'https://gvs-bahrain-pa25.vercel.app'
   ],
