@@ -18,7 +18,7 @@ function AirFreightSection() {
   return (
     // THEME CHANGE: Main background changed from dark to a light, premium off-white.
     // 'overflow-hidden' is kept as it's key for the visual effects.
-    <div className="relative z-0 mt-4 overflow-hidden">
+    <div className="relative  z-0 mt-4 overflow-hidden">
       <div className="relative max-w-7xl mx-auto py-16 lg:py-24 px-4 sm:px-6 lg:px-8">
         
         {/*
@@ -30,7 +30,7 @@ function AirFreightSection() {
         
         {/* The corner borders are kept, their opacity works great on a light theme. */}
         <div className="absolute top-0 left-0 w-1/3 h-1/3 border-t-4 border-l-4 border-yellow-500/30 rounded-tl-3xl opacity-50" />
-        <div className="absolute bottom-0 right-0 w-1/3 h-1/3 border-b-4 border-r-4 border-yellow-500/30 rounded-br-3xl opacity-50" />
+        <div className="absolute bottom-4 right-0 w-1/3 h-1/3 border-b-4 border-r-4 border-yellow-500/30 rounded-br-3xl opacity-50" />
 
 
         <div className="relative lg:grid lg:grid-cols-2 lg:gap-8 lg:items-center">
@@ -56,8 +56,8 @@ function AirFreightSection() {
 
           {/* == IMAGE SECTION == */}
           {/* Structure, transforms, and hover effects are all identical. */}
-          <div className="mt-10 mr-10 lg:mt-0" aria-hidden="true">
-            <div className="relative mx-auto w-[520px] rounded-lg">
+          <div className="mt-10 mr-0 lg:mr-10 lg:mt-0" aria-hidden="true">
+            <div className="relative mx-auto w-full lg:w-[520px] rounded-lg">
               <div
                 className="
                   relative block w-full bg-gray-200 rounded-lg overflow-hidden 

@@ -23,7 +23,7 @@ function SeaFreight() {
           {/* Decorative elements are identical to the reference */}
           <div className="hidden lg:block bg-white absolute top-0 bottom-0 left-3/4 w-screen" />
           <div className="absolute top-0 left-0 w-1/3 h-1/3 border-t-4 border-l-4 border-yellow-500/30 rounded-tl-3xl opacity-50" />
-          <div className="absolute bottom-0 right-0 w-1/3 h-1/3 border-b-4 border-r-4 border-yellow-500/30 rounded-br-3xl opacity-50" />
+          <div className="absolute bottom-4 right-0 w-1/3 h-1/3 border-b-4 border-r-4 border-yellow-500/30 rounded-br-3xl opacity-50" />
 
           <div className="relative lg:grid lg:grid-cols-2 lg:gap-16 lg:items-center">
             
@@ -46,8 +46,8 @@ function SeaFreight() {
             </div>
 
             {/* == IMAGE SECTION == */}
-            <div className="mt-10 mr-10 lg:mt-0" aria-hidden="true">
-              <div className="relative mx-auto w-[520px] rounded-lg">
+            <div className="mt-10 mr-0 lg:mr-10 lg:mt-0" aria-hidden="true">
+              <div className="relative mx-auto w-full lg:w-[520px] rounded-lg">
                 {/* The dynamic image container is identical to the reference */}
                 <div
                   className="

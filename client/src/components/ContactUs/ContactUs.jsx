@@ -64,7 +64,7 @@ const Stepper = ({ currentStep }) => {
     const steps = ['Contact Info', 'Shipment Route', 'Cargo Details'];
 
     return (
-        <div className="mb-8 w-full ml-16">
+        <div className="mb-8 w-full ml-0 lg:ml-16">
             <div className="flex items-center justify-between">
                 {steps.map((step, index) => {
                     const stepNumber = index + 1;
@@ -76,7 +76,7 @@ const Stepper = ({ currentStep }) => {
                             <div className="flex flex-col items-center">
                                 <div
                                     className={`
-                                        w-10 h-10 rounded-full flex items-center justify-center text-lg font-bold transition-all duration-300
+                                        w-10 h-10 rounded-full  flex items-center justify-center text-lg font-bold transition-all duration-300
                                         ${isCompleted ? 'bg-green-500 text-white' : ''}
                                         ${isActive ? 'bg-yellow-500 text-white scale-110' : ''}
                                         ${!isActive && !isCompleted ? 'bg-gray-200 text-gray-500' : ''}
@@ -84,7 +84,7 @@ const Stepper = ({ currentStep }) => {
                                 >
                                     {isCompleted ? <FaCheck /> : stepNumber}
                                 </div>
-                                <p className={`mt-2 text-center text-sm font-medium ${isActive ? 'text-gray-800' : 'text-gray-500'}`}>
+                                <p className={`mt-2 text-center lg:whitespace-normal whitespace-nowrap text-sm font-medium ${isActive ? 'text-gray-800' : 'text-gray-500'}`}>
                                     {step}
                                 </p>
                             </div>

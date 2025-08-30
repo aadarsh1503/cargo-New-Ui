@@ -141,6 +141,12 @@ html {
   background-color: white;
   color: #333;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  display: inline-block;
+  text-align: center;
+  transition: all 0.3s ease;
 }
 
 .hero-quote-btn:hover {
@@ -152,6 +158,12 @@ html {
   background-color: transparent;
   color: white;
   border: 2px solid white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  display: inline-block;
+  text-align: center;
+  transition: all 0.3s ease;
 }
 
 .hero-learn-more-btn:hover {
@@ -188,6 +200,20 @@ html {
     .hero-nav {
         /* Hides the main navigation on small screens for simplicity */
         display: none; 
+    }
+    .hero-quote-btn {
+      font-size: 0.95rem;       /* slightly smaller text */
+      padding: 0.8rem 2rem;     /* more padding to look bigger */
+      min-width: 180px;         /* prevents button from looking too short */
+      margin: 0 auto;           /* centers on screen */
+      display: block;
+    }
+    .hero-learn-more-btn {
+      font-size: 0.95rem;       /* slightly smaller font for mobile */
+      padding: 0.8rem 2rem;     /* extra horizontal padding */
+      min-width: 180px;         /* ensures it doesn’t look short */
+      margin: 0 auto;           /* centers it */
+      display: block;
     }
     .hero-header {
         justify-content: flex-end; /* Pushes Get Started button to the right */
@@ -253,12 +279,11 @@ html {
 .scroll-down-button {
   position: absolute;
   bottom: 6rem;
-  right: 7rem; /* instead of left: 50% */
+  right: 7rem;
   width: 50px;
   height: 50px;
   border: 1px solid white;
   border-radius: 50%;
-  display: flex;
   align-items: center;
   justify-content: center;
   color: white;
@@ -268,6 +293,7 @@ html {
   animation: bounce 2.5s infinite;
   transition: background-color 0.3s;
 }
+
 
 
 .scroll-down-button:hover {

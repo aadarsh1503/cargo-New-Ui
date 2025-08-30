@@ -173,7 +173,7 @@ const Hero = () => {
               <p className="hero-description ">
               Connecting the World: Your Trusted Shipping Partner by Air, Road & Sea.
               </p>
-              <div className="hero-buttons">
+              <div className="hero-buttons ">
                 <a href='/ContactUs'>
                 <button className="hero-quote-btn">Get A Quote</button>
                 </a>
@@ -196,9 +196,14 @@ const Hero = () => {
           </div>
           </a>
           {/* === SCROLL DOWN BUTTON (NEW) === */}
-          <a href="#next-section" className="scroll-down-button lg:flex hidden" aria-label="Scroll down">
-            ↓
-          </a>
+          <a
+  href="#next-section"
+  className="hidden lg:flex scroll-down-button"
+  aria-label="Scroll down"
+>
+  ↓
+</a>
+
         </div>
       </div>
 

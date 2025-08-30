@@ -43,6 +43,7 @@ import ExcelUploadPanel from './components/ExcelUploadPanel/ExcelUploadPanel';
 import { RegionProvider, useRegion } from "./context/RegionContext";
 import { Toaster } from 'react-hot-toast';
 import useLenis from './hooks/useLenis';
+import MobileNavbar from './components/Navbar/MobileNavbar';
 
 // The API URL, make sure this is correct
 const API_URL = 'https://gvs-cargo-dynamic.onrender.com/api';
@@ -50,7 +51,7 @@ const API_URL = 'https://gvs-cargo-dynamic.onrender.com/api';
 const MainLayout = () => {
   const { isInitializing, isChangingRegion, region, availableRegions } = useRegion();
   const [regionContent, setRegionContent] = useState(null);
-
+const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   // <<< STEP 2: Get the current location inside the component >>>
   const location = useLocation();
   const isHomePage = location.pathname === '/';
@@ -97,7 +98,7 @@ const MainLayout = () => {
       />
 
       <Navbar />
-      
+      <MobileNavbar isOpen={isMobileMenuOpen} setIsOpen={setIsMobileMenuOpen} />
       <ChatWidget 
         salesNumber={regionContent?.whatsapp_sales}
         supportNumber={regionContent?.whatsapp_support}

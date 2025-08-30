@@ -7,6 +7,7 @@ import { useRegion } from "../../context/RegionContext";
 import FuturisticLoader from "./Loader";
 import g121 from "./g121.png";
 import GVS from "./GVS.png";
+import MobileNavbar from "./MobileNavbar";
 
 
 // Helper component for dropdown items
@@ -301,48 +302,11 @@ const Navbar = () => {
         </div>
       </div>
 
-      <div className={`fixed inset-0 bg-black bg-opacity-80 backdrop-blur-lg z-50 transform ${isOpen ? "translate-x-0" : "-translate-x-full"} transition-transform duration-300 ease-in-out lg:hidden`}>
-        {/* ... Mobile menu content remains the same */}
-        <div className="flex justify-end p-4">
-            <button onClick={() => setIsOpen(false)} className="text-white">
-                <FaTimes size={28} />
-            </button>
-        </div>
-        <nav className="flex flex-col items-center mt-8">
-          {navItems.map((item, index) => (
-            <div key={item.name} className="w-full text-center border-b border-gray-700">
-              {item.dropdown ? (
-                <button onClick={() => handleMobileDropdownToggle(index)} className="w-full py-4 text-white text-lg flex justify-center items-center gap-2">
-                  {item.name}
-                  <FaChevronDown className={`transition-transform duration-300 ${openMobileDropdown === index ? 'rotate-180' : ''}`} size={14} />
-                </button>
-              ) : (
-                <Link to={item.link} className="block w-full py-4 text-white text-lg">
-                  {item.name}
-                </Link>
-              )}
-              {item.dropdown && openMobileDropdown === index && (
-                <div className="bg-white/10 pb-2">
-                  {item.dropdown.map((subItem) => (
-                    item.isExternal ? (
-                      <a key={subItem.name} href={subItem.link} className="block py-3 text-white/80 hover:text-white">
-                        {subItem.name}
-                      </a>
-                    ) : (
-                      <Link key={subItem.name} to={subItem.link} className="block py-3 text-white/80 hover:text-white">
-                        {subItem.name}
-                      </Link>
-                    )
-                  ))}
-                </div>
-              )}
-            </div>
-          ))}
-          <Link to="/ContactUs" className="mt-8 px-8 py-3 bg-white text-gray-800 font-semibold rounded-full">
-            Request a Quote
-          </Link>
-        </nav>
-      </div>
+      <MobileNavbar
+        isOpen={isOpen}
+        setIsOpen={setIsOpen}
+        navItems={navItems}
+      />
     </header>
   );
 };
