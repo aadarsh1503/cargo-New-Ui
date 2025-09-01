@@ -57,6 +57,7 @@ const SlideContent = ({ title, subtitle, description }) => (
           </div>
         </div>
       </main>
+      <a href='#testimonials'>
       <div className="satisfied-clients-container">
         <div className="client-avatars">
           <img src="https://i.pravatar.cc/50?img=1" alt="Client 1" className="client-avatar" />
@@ -65,6 +66,7 @@ const SlideContent = ({ title, subtitle, description }) => (
         </div>
         <p className="clients-text">1.5k+ Satisfied Clients</p>
       </div>
+      </a>
       <a href="#next-section" className="scroll-down-button" aria-label="Scroll down">↓</a>
     </div>
 );
