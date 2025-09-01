@@ -215,4 +215,5 @@ html {
   .hero-buttons { flex-direction: column; align-items: center; width: 100%; }
   .hero-buttons a { width: 80%; max-width: 300px; }
   .hero-buttons button { width: 100%; }
+  .scroll-down-button{display: none;}
 }
