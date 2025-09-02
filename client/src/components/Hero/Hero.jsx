@@ -25,24 +25,24 @@ const SLIDES = [
     subtitle: 'Air » Road » Sea',
     description: 'Connecting the World: Your Trusted Shipping Partner by Air, Road & Sea.',
   },
-  // {
-  //   image: 'https://rykalogistics.com/content/media/2023/12/Air-transport-web-low.jpg',
-  //   title: <>Air Freight<br />Excellence</>,
-  //   subtitle: 'Speed » Precision » Reliability',
-  //   description: 'Delivering your cargo at the speed of flight with unparalleled precision and care.',
-  // },
-  // {
-  //   image: 'https://beehiiv-images-production.s3.amazonaws.com/uploads/asset/file/c139e571-9cc8-4c8a-a6ac-80c358b56e3f/International_Container_Cargo_Ship_Deliver_Freight_Shipment_Across_The_Ocean_original_2798000.jpg?t=1744528318',
-  //   title: <>Ocean Voyage<br />Solutions</>,
-  //   subtitle: 'Vast » Economical » Secure',
-  //   description: 'Navigate the global market with our comprehensive and cost-effective sea freight services.',
-  // },
-  // {
-  //   image: 'https://i.ytimg.com/vi/WK84ag8o6rI/maxresdefault.jpg?sqp=-oaymwEmCIAKENAF8quKqQMa8AEB-AH-CYAC0AWKAgwIABABGEMgVShlMA8=&rs=AOn4CLCM_3_yzLbCFFQx-XOqQfWNsYvOPA',
-  //   title: <>Ground Logistics<br />Network</>,
-  //   subtitle: 'Efficient » Direct » On-Time',
-  //   description: 'Our extensive road network ensures your goods arrive on schedule, every time.',
-  // },
+  {
+    image: 'https://rykalogistics.com/content/media/2023/12/Air-transport-web-low.jpg',
+    title: <>Air Freight<br />Excellence</>,
+    subtitle: 'Speed » Precision » Reliability',
+    description: 'Delivering your cargo at the speed of flight with unparalleled precision and care.',
+  },
+  {
+    image: 'https://beehiiv-images-production.s3.amazonaws.com/uploads/asset/file/c139e571-9cc8-4c8a-a6ac-80c358b56e3f/International_Container_Cargo_Ship_Deliver_Freight_Shipment_Across_The_Ocean_original_2798000.jpg?t=1744528318',
+    title: <>Ocean Voyage<br />Solutions</>,
+    subtitle: 'Vast » Economical » Secure',
+    description: 'Navigate the global market with our comprehensive and cost-effective sea freight services.',
+  },
+  {
+    image: 'https://i.ytimg.com/vi/WK84ag8o6rI/maxresdefault.jpg?sqp=-oaymwEmCIAKENAF8quKqQMa8AEB-AH-CYAC0AWKAgwIABABGEMgVShlMA8=&rs=AOn4CLCM_3_yzLbCFFQx-XOqQfWNsYvOPA',
+    title: <>Ground Logistics<br />Network</>,
+    subtitle: 'Efficient » Direct » On-Time',
+    description: 'Our extensive road network ensures your goods arrive on schedule, every time.',
+  },
 ];
 
 // SlideContent component remains the same...
