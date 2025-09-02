@@ -1,40 +1,49 @@
 import React, { useState } from 'react';
-import i69 from "./i69.jpeg";
-import i2 from "./i2.jpg";
-import i3 from "./i3.avif";
-import i4 from "./i4.jpg";
-import Bounce from '../Bounce/Bounce';
-import Slide from '../Slide/Slide';
+
+import logo2 from "./logo2.png"
+import logo3 from "./logo3.png"
+import logo33 from "./logo33.png"
+import logo4 from "./logo4.png"
+import logo55 from "./logo55.png"
+
+
+
 const testimonialsData = [
   {
-    name: 'Jose Rizal',
+    name: 'Silver Star Trading',
     title: 'Supply Chain Manager',
-    quote: "Reliable and Efficient Partner Their team was incredibly responsive and efficient. They handled our complex international shipment with ease, ensuring timely delivery to our clients. We're impressed with their commitment to customer satisfaction and their ability to navigate global logistics challenges.",
-    image: i3,
+    quote: "We’ve worked with many logistics providers over the years, but GVS cargo & logistics stands out for their precision, communication, and attention to detail. Their team’s coordination with our air freight operations has helped streamline several large-scale shipments.",
+    image: logo2,
   },
   {
-    name: 'Rohan Verma',
+    name: 'Bahwan Motors Auto Accessories',
     title: 'E-commerce Founder',
-    quote: 'Seamless Global Shipping We have been using their services for years, and they consistently exceed our expectations. Their seamless global shipping solutions have streamlined our supply chain and reduced costs. We highly recommend them to businesses of all sizes.',
-    image: i2,
+    quote: 'Partnering with GVS cargo & logistics has significantly optimized our freight handling and distribution timelines. Their team is proactive, professional, and always delivers beyond expectations. It is rare to find a logistics partner that understands both speed and reliability as they do.',
+    image: logo3,
   },
   {
-    name: 'Abdul-Raouf',
+    name: 'The BeautyCO',
     title: 'Operations Director',
     quote: 'Personalized Service and Expertise Their personalized service and expertise in international logistics are second to none. They took the time to understand our unique needs and provided tailored solutions. Their team is always available to answer our questions and provide updates, giving us peace of mind.',
-    image: i69,
+    image: logo33,
   },
   {
-    name: 'Ali Al-Fahim',
+    name: 'Silver Star Printing Material Trading LLC',
     title: 'Import/Export Specialist',
     quote: "Efficient and Transparent Logistics Solutions Their efficiency and transparency have set a new standard for us. From managing documents to on-time deliveries, they’ve ensured a smooth experience every step of the way. Their proactive approach has significantly improved our operations.",
-    image: i4,
+    image: logo4,
+  },
+  {
+    name: 'Emirates For Universal Tyres',
+    title: 'Import/Export Specialist',
+    quote: "GVS cargo & logistics has been instrumental in supporting our regional supply chain across the GCC. Their warehousing, last-mile delivery, and customs clearance services are efficient and trustworthy. We consider them a strategic extension of our own logistics team.",
+    image: logo55,
   },
 ];
 
 
 
-const Testimonials = () => {
+const TestimonialsSection = () => {
   const [activeIndex, setActiveIndex] = useState(0);
 
   const handlePrev = () => {
@@ -50,25 +59,37 @@ const Testimonials = () => {
   };
 
   return (
-    <>
     <section id='testimonials' className="bg-slate-50 py-16 mb-10 mt-8 sm:py-2">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="flex flex-col items-center justify-between gap-8 md:flex-row">
-          <div className="max-w-7xl text-center md:text-left">
-            <h2 className="text-4xl mt-6 font-bold tracking-tight text-gray-900  sm:text-5xl">
-              What our clients say about us !
-            </h2>
-          </div>
+    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      {/* Header */}
+      <div className="flex flex-col items-center justify-between gap-8 md:flex-row">
+        <div className="max-w-7xl text-center md:text-left">
+          <h2 className="text-4xl mt-6 font-bold tracking-tight text-gray-900  sm:text-5xl">
+            What our clients say about us !
+          </h2>
+        </div>
           <div className="flex items-center">
-            <div className="flex -space-x-4">
-              <img className="h-12 w-12 rounded-full border-2 border-white object-cover" src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40" alt="Client 1" />
-              <img className="h-12 w-12 rounded-full border-2 border-white object-cover" src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=40" alt="Client 2" />
-              <img className="h-12 w-12 rounded-full border-2 border-white object-cover" src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=40" alt="Client 3" />
-              <div className="flex h-12 w-12 items-center justify-center rounded-full border-2 border-white bg-orange-500 text-sm font-semibold text-white">
-                5k+
-              </div>
-            </div>
+          <div className="flex -space-x-4">
+  <img
+    className="h-12 w-12 rounded-full border-2 border-black object-contain bg-white p-1"
+    src={logo33}
+    alt="Client 1"
+  />
+  <img
+    className="h-12 w-12 rounded-full border-2 border-black object-contain bg-white p-1"
+    src={logo55}
+    alt="Client 2"
+  />
+  <img
+    className="h-12 w-12 rounded-full border-2 border-black object-contain bg-white p-1"
+    src={logo2}
+    alt="Client 3"
+  />
+  <div className="flex h-12 w-12 items-center justify-center rounded-full border-2 border-white bg-orange-500 text-sm font-semibold text-white">
+    5k+
+  </div>
+</div>
+
             <div className="ml-4 text-sm">
               <p className="font-semibold text-gray-800">Trusted By</p>
               <p className="text-gray-600">Happy Customers</p>
@@ -88,13 +109,14 @@ const Testimonials = () => {
                 <div key={index} className="w-full flex-shrink-0">
                   <div className="grid grid-cols-1 items-center gap-8 bg-white shadow-lg lg:grid-cols-2 lg:gap-0">
                     {/* Image */}
-                    <div className="order-last h-full w-full lg:order-first">
-                      <img
-                        src={testimonial.image}
-                        alt={testimonial.name}
-                        className="h-full w-full object-cover lg:rounded-l-2xl"
-                      />
-                    </div>
+                    <div className="order-last bg-white flex items-center justify-center h-full w-full lg:order-first  p-6">
+  <img
+    src={testimonial.image}
+    alt={testimonial.name}
+    className="max-h-32 w-auto object-contain lg:max-h-40"
+  />
+</div>
+
                     {/* Testimonial Text */}
                     <div className="p-8 sm:p-12">
                       <svg
@@ -110,7 +132,7 @@ const Testimonials = () => {
                       </p>
                       <div className="mt-8">
                         <p className="font-bold text-gray-900">{testimonial.name}</p>
-                        <p className="text-sm text-gray-500">{testimonial.title}</p>
+                        {/* <p className="text-sm text-gray-500">{testimonial.title}</p> */}
                       </div>
                     </div>
                   </div>
@@ -152,11 +174,7 @@ const Testimonials = () => {
         </div>
       </div>
     </section>
-        <Bounce />
-        <Slide />
-     
-    </>
   );
 };
 
-export default Testimonials;
+export default TestimonialsSection;

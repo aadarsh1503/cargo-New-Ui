@@ -8,7 +8,13 @@ import ServicesSection from './ServicesSection';
 import TestimonialsSection from './TestimonialsSection';
 import Weperate from '../Weperate/Weperate';
 import AchievementsSection from './AchievementsSection';
+import logo2 from "./logo2.png"
+import logo3 from "./logo3.png"
 
+
+import logo33 from "./logo33.png"
+
+import logo55 from "./logo55.png"
 import './Hero.css';
 
 // SLIDES data remains the same...
@@ -59,11 +65,27 @@ const SlideContent = ({ title, subtitle, description }) => (
       </main>
       <a href='#testimonials'>
       <div className="satisfied-clients-container">
-        <div className="client-avatars">
-          <img src="https://i.pravatar.cc/50?img=1" alt="Client 1" className="client-avatar" />
-          <img src="https://i.pravatar.cc/50?img=3" alt="Client 2" className="client-avatar" />
-          <img src="https://i.pravatar.cc/50?img=5" alt="Client 3" className="client-avatar" />
-        </div>
+      <div className="flex -space-x-4">
+  <img
+    className="h-12 w-12 rounded-full border-2 border-black object-contain bg-white p-1"
+    src={logo33}
+    alt="Client 1"
+  />
+  <img
+    className="h-12 w-12 rounded-full border-2 border-black object-contain bg-white p-1"
+    src={logo55}
+    alt="Client 2"
+  />
+  <img
+    className="h-12 w-12 rounded-full border-2 border-black object-contain bg-white p-1"
+    src={logo2}
+    alt="Client 3"
+  />
+  <div className="flex h-12 w-12 items-center justify-center rounded-full border-2 border-white bg-orange-500 text-sm font-semibold text-white">
+    5k+
+  </div>
+</div>
+
         <p className="clients-text">1.5k+ Satisfied Clients</p>
       </div>
       </a>
