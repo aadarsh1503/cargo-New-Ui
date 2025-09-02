@@ -1,33 +1,33 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 
 const RegionContext = createContext();
-const API_URL = 'https://gvs-cargo-dynamic.onrender.com/api';
+// Make sure this URL is correct for your environment
+const API_URL = 'http://localhost:5000/api'; 
 
 export const RegionProvider = ({ children }) => {
   const [region, setRegion] = useState(null);
   const [content, setContent] = useState(null);
   const [availableRegions, setAvailableRegions] = useState([]);
 
-  // --- KEY CHANGE: Two separate loading states ---
-  const [isInitializing, setIsInitializing] = useState(true); // For the very first page load
-  const [isChangingRegion, setIsChangingRegion] = useState(false); // For subsequent region switches
+  const [isInitializing, setIsInitializing] = useState(true);
+  const [isChangingRegion, setIsChangingRegion] = useState(false);
 
   // This function fetches data and updates state.
   const fetchContentForRegion = async (regionCode) => {
     try {
       const response = await fetch(`${API_URL}/content/${regionCode}`);
+
       if (!response.ok) {
-        console.warn(`Content for '${regionCode}' not found. Falling back to Bahrain.`);
         if (regionCode !== 'bahrain') {
           return fetchContentForRegion('bahrain');
         }
         throw new Error('Fallback content (Bahrain) also not found.');
       }
+
       const data = await response.json();
       setContent(data);
       setRegion(data.code);
     } catch (error) {
-      console.error("Failed to fetch content:", error);
       setContent(null);
     }
   };
@@ -35,15 +35,15 @@ export const RegionProvider = ({ children }) => {
   // Effect for initial load (only runs once)
   useEffect(() => {
     const initializeRegion = async () => {
-      setIsInitializing(true); // Start initial load
+      setIsInitializing(true);
 
-      let regionsData = [];
+      // We still fetch regions for the dropdown menu
       try {
         const regionsResponse = await fetch(`${API_URL}/regions`);
-        regionsData = await regionsResponse.json();
+        const regionsData = await regionsResponse.json();
         setAvailableRegions(regionsData);
       } catch (error) {
-        console.error("Could not fetch available regions:", error);
+        // ignore error
       }
 
       const sessionRegion = sessionStorage.getItem('userSelectedRegion');
@@ -53,40 +53,33 @@ export const RegionProvider = ({ children }) => {
         try {
           const response = await fetch(`${API_URL}/detect-region`);
           const data = await response.json();
-          const countryToRegionCodeMap = {
-            'BH': 'bahrain', 'AE': 'uae', 'SA': 'ksa',
-            'IN': 'india', 'SG': 'singapore',
-          };
-          const potentialRegionCode = countryToRegionCodeMap[data.countryCode];
-          const isValidRegion = regionsData.find(r => r.code === potentialRegionCode);
-          await fetchContentForRegion(isValidRegion ? potentialRegionCode : 'bahrain');
+          const regionToLoad = data.matchedRegionCode;
+          await fetchContentForRegion(regionToLoad);
         } catch (error) {
-          console.error("IP detection failed, defaulting to Bahrain.", error);
-          await fetchContentForRegion('bahrain');
+          await fetchContentForRegion('bahrain'); // Fallback if the API call itself fails
         }
       }
 
-      setIsInitializing(false); // End initial load
+      setIsInitializing(false);
     };
     initializeRegion();
   }, []);
 
-  // Function for handling user-triggered region changes
+  // Function for handling user-triggered region changes (remains the same)
   const handleSetRegion = async (newRegion) => {
-    if (newRegion === region) return;
-
-    setIsChangingRegion(true); // Start the "sexy" loader
+    if (newRegion === region) {
+      return;
+    }
+    setIsChangingRegion(true);
     sessionStorage.setItem('userSelectedRegion', newRegion);
-
     const dataFetchPromise = fetchContentForRegion(newRegion);
     const timerPromise = new Promise(resolve => setTimeout(resolve, 1800));
-
     try {
       await Promise.all([dataFetchPromise, timerPromise]);
     } catch (error) {
-      console.error("Error during region change:", error);
+      // ignore error
     } finally {
-      setIsChangingRegion(false); // End the "sexy" loader
+      setIsChangingRegion(false);
     }
   };
 
@@ -94,7 +87,7 @@ export const RegionProvider = ({ children }) => {
     region,
     setRegion: handleSetRegion,
     isInitializing,
-    isChangingRegion, // Exporting the new state
+    isChangingRegion,
     content,
     availableRegions,
   };
