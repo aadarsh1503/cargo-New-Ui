@@ -2,7 +2,7 @@ import React, { createContext, useState, useContext, useEffect } from 'react';
 
 const RegionContext = createContext();
 // Make sure this URL is correct for your environment
-const API_URL = 'http://localhost:5000/api'; 
+const API_URL = 'https://gvs-cargo-dynamic.onrender.com/api'; 
 
 export const RegionProvider = ({ children }) => {
   const [region, setRegion] = useState(null);
