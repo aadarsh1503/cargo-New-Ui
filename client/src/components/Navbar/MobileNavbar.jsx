@@ -78,7 +78,7 @@ const MobileNavbar = ({
         </button>
       </div>
       <div
-          className={`mt- w-full flex justify-center transform transition-all duration-300 ${
+          className={`relative z-50 w-full flex justify-center transform transition-all duration-300 ${
             isOpen ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4"
           }`}
           style={{ transitionDelay: `${navItems.length * 50}ms` }}
