@@ -10,7 +10,7 @@ const RegionTransitionOverlay = ({ isVisible, regionName, regionFlag }) => {
   const nameChars = regionName ? regionName.split('') : [];
 
   return (
-    <div className={`transition-overlay ${isVisible ? 'visible' : ''}`}>
+    <div className={`region-transition-overlay ${isVisible ? 'visible' : ''}`}>
       <div className="blueprint-background"></div>
 
       <div className="transition-container">

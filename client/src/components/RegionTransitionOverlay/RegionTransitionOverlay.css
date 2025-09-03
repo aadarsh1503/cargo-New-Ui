@@ -9,7 +9,7 @@
 }
 
 
-.transition-overlay {
+.region-transition-overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -29,7 +29,7 @@
   overflow: hidden; 
 }
 
-.transition-overlay.visible {
+.region-transition-overlay.visible {
   opacity: 1;
   visibility: visible;
 }
@@ -105,10 +105,10 @@
 }
 
 /* Trigger panel animations */
-.transition-overlay.visible .panel-left {
+.region-transition-overlay.visible .panel-left {
   animation: slide-out-left 1.2s cubic-bezier(0.76, 0, 0.24, 1) 0.2s forwards;
 }
-.transition-overlay.visible .panel-right {
+.region-transition-overlay.visible .panel-right {
   animation: slide-out-right 1.2s cubic-bezier(0.76, 0, 0.24, 1) 0.2s forwards;
 }
 
@@ -133,10 +133,10 @@
 .line-bottom { bottom: 0; transform-origin: right; }
 
 /* Trigger accent line animations */
-.transition-overlay.visible .line-top {
+.region-transition-overlay.visible .line-top {
   animation: draw-line 0.8s cubic-bezier(0.76, 0, 0.24, 1) forwards;
 }
-.transition-overlay.visible .line-bottom {
+.region-transition-overlay.visible .line-bottom {
   animation: draw-line 0.8s cubic-bezier(0.76, 0, 0.24, 1) 0.1s forwards; /* Slight delay */
 }
 
