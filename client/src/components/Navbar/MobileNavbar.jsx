@@ -1,9 +1,18 @@
-// MobileNavbar.js
 import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { FaTimes, FaChevronDown } from "react-icons/fa";
+import Select from "react-select"; // Import Select component
 
-const MobileNavbar = ({ isOpen, setIsOpen, navItems = [] }) => {
+const MobileNavbar = ({
+  isOpen,
+  setIsOpen,
+  navItems = [],
+  // Accept the new props for the region selector
+  selectedRegionObject,
+  handleRegionChange,
+  regionOptions,
+  formatOptionLabel,
+}) => {
   const [openMobileDropdown, setOpenMobileDropdown] = useState(null);
   const location = useLocation();
 
@@ -28,6 +37,29 @@ const MobileNavbar = ({ isOpen, setIsOpen, navItems = [] }) => {
   const handleLinkClick = () => {
     setIsOpen(false);
   };
+  
+  // Custom styles for the Select component in mobile view
+  const mobileCustomSelectStyles = {
+    control: (base) => ({
+      ...base,
+      background: 'transparent',
+      border: '2px solid #e5e7eb', // A solid light gray border
+      borderRadius: '9999px',
+      boxShadow: 'none',
+      cursor: 'pointer',
+      width: '100%', 
+      maxWidth: '280px', // Set a max width for consistency
+      minHeight: '48px', // Taller for better touch interaction
+      height: '48px',
+    }),
+    singleValue: (base) => ({ ...base, color: '#1f2937' }),
+    dropdownIndicator: (base) => ({ ...base, color: '#6b7280' }),
+    valueContainer: (base) => ({ ...base, padding: '0 8px', height: '44px' }),
+    input: (base) => ({ ...base, margin: '0', padding: '0' }),
+    indicatorSeparator: () => ({ display: 'none' }),
+    menu: (base) => ({ ...base, borderRadius: '1rem', background: 'rgba(255, 255, 255, 0.98)', backdropFilter: 'blur(10px)', overflow: 'hidden', zIndex: 60 }),
+    option: (base, state) => ({ ...base, background: state.isFocused ? 'rgba(0, 0, 0, 0.05)' : 'transparent', color: '#333', cursor: 'pointer' }),
+  };
 
   return (
     // 👇 Main container with light glassmorphism effect
@@ -38,15 +70,31 @@ const MobileNavbar = ({ isOpen, setIsOpen, navItems = [] }) => {
     >
       <div className="flex justify-end p-5">
         {/* 👇 Updated close button style for light theme */}
-        <button onClick={() => setIsOpen(false)} className="text-gray-700 hover:text-black transition-colors">
+        <button
+          onClick={() => setIsOpen(false)}
+          className="text-gray-700 hover:text-black transition-colors"
+        >
           <FaTimes size={28} />
         </button>
       </div>
-
+      <div
+          className={`mt- w-full flex justify-center transform transition-all duration-300 ${
+            isOpen ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4"
+          }`}
+          style={{ transitionDelay: `${navItems.length * 50}ms` }}
+        >
+          <Select
+            value={selectedRegionObject}
+            onChange={handleRegionChange}
+            options={regionOptions}
+            formatOptionLabel={formatOptionLabel}
+            styles={mobileCustomSelectStyles}
+          />
+        </div>
       <nav className="flex flex-col bg-white z-50 items-center mt-8 px-4">
         {navItems.map((item, index) => (
-          <div 
-            key={item.name} 
+          <div
+            key={item.name}
             className="w-full text-center border-b border-gray-200"
             // 👇 Staggered animation for menu items
             style={{ transitionDelay: `${index * 50}ms` }}
@@ -54,7 +102,7 @@ const MobileNavbar = ({ isOpen, setIsOpen, navItems = [] }) => {
             {/* 👇 Item container with transition for fade-in/slide-up effect */}
             <div
               className={`transform transition-all duration-300 ${
-                isOpen ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'
+                isOpen ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4"
               }`}
             >
               {item.dropdown ? (
@@ -75,7 +123,7 @@ const MobileNavbar = ({ isOpen, setIsOpen, navItems = [] }) => {
                   {/* 👇 Wrapper for smooth dropdown animation */}
                   <div
                     className={`overflow-hidden transition-all duration-500 ease-in-out ${
-                      openMobileDropdown === index ? 'max-h-96' : 'max-h-0'
+                      openMobileDropdown === index ? "max-h-96" : "max-h-0"
                     }`}
                   >
                     <div className="bg-black/5 py-2 rounded-lg">
@@ -108,7 +156,7 @@ const MobileNavbar = ({ isOpen, setIsOpen, navItems = [] }) => {
                 <Link
                   to={item.link}
                   onClick={handleLinkClick}
-                   // 👇 Updated link style
+                  // 👇 Updated link style
                   className="block w-full py-4 text-gray-800 text-lg font-medium"
                 >
                   {item.name}
@@ -117,12 +165,16 @@ const MobileNavbar = ({ isOpen, setIsOpen, navItems = [] }) => {
             </div>
           </div>
         ))}
+
+        {/* 👇 Region Selector added here */}
+       
+
         {/* 👇 Enhanced CTA button with animation */}
         <div
           className={`mt-6 transform transition-all mb-6 duration-300 ${
-            isOpen ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'
+            isOpen ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4"
           }`}
-          style={{ transitionDelay: `${navItems.length * 50}ms` }}
+          style={{ transitionDelay: `${(navItems.length + 1) * 50}ms` }}
         >
           <Link
             to="/ContactUs"
