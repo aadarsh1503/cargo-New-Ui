@@ -1,8 +1,9 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
+import { API_BASE_URL } from '../config/apiConfig';
 
 const RegionContext = createContext();
 // Make sure this URL is correct for your environment
-const API_URL = 'https://gvs-cargo-dynamic.onrender.com/api'; 
+
 
 export const RegionProvider = ({ children }) => {
   const [region, setRegion] = useState(null);
@@ -15,7 +16,7 @@ export const RegionProvider = ({ children }) => {
   // This function fetches data and updates state.
   const fetchContentForRegion = async (regionCode) => {
     try {
-      const response = await fetch(`${API_URL}/content/${regionCode}`);
+      const response = await fetch(`${API_BASE_URL}/content/${regionCode}`);
 
       if (!response.ok) {
         if (regionCode !== 'bahrain') {
@@ -39,7 +40,7 @@ export const RegionProvider = ({ children }) => {
 
       // We still fetch regions for the dropdown menu
       try {
-        const regionsResponse = await fetch(`${API_URL}/regions`);
+        const regionsResponse = await fetch(`${API_BASE_URL}/regions`);
         const regionsData = await regionsResponse.json();
         setAvailableRegions(regionsData);
       } catch (error) {
@@ -51,7 +52,7 @@ export const RegionProvider = ({ children }) => {
         await fetchContentForRegion(sessionRegion);
       } else {
         try {
-          const response = await fetch(`${API_URL}/detect-region`);
+          const response = await fetch(`${API_BASE_URL}/detect-region`);
           const data = await response.json();
           const regionToLoad = data.matchedRegionCode;
           await fetchContentForRegion(regionToLoad);

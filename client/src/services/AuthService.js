@@ -1,10 +1,10 @@
 import axios from 'axios';
 
 // Ensure your backend is running on the correct port (e.g., 5000)
-const API_URL = 'http://localhosat:5000/api/admin';
+import { API_BASE_URL } from '../config/apiConfig';
 
 const api = axios.create({
-    baseURL: API_URL,
+    baseURL: API_BASE_URL,
 });
 
 /**

@@ -13,7 +13,7 @@ import logo3 from "./logo3.png"
 
 
 import logo33 from "./logo33.png"
-
+import iair from "./iair.jpg"
 import logo55 from "./logo55.png"
 import './Hero.css';
 
@@ -26,7 +26,7 @@ const SLIDES = [
     description: 'Connecting the World: Your Trusted Shipping Partner by Air, Road & Sea.',
   },
   {
-    image: 'https://rykalogistics.com/content/media/2023/12/Air-transport-web-low.jpg',
+    image: iair,
     title: <>Air Freight<br />Excellence</>,
     subtitle: 'Speed » Precision » Reliability',
     description: 'Delivering your cargo at the speed of flight with unparalleled precision and care.',

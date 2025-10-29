@@ -1,10 +1,11 @@
 import axios from 'axios';
+import { API_BASE_URL } from '../../config/apiConfig';
 
-const API_URL = 'https://gvs-cargo-dynamic.onrender.com/api/excels';
+
 
 // Create a new Axios instance
 const api = axios.create({
-    baseURL: API_URL,
+    baseURL: `${API_BASE_URL}/excels`,
 });
 
 // ===================================================================

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
-const API_URL = 'https://gvs-cargo-dynamic.onrender.com/api';
+import { API_BASE_URL } from '../../config/apiConfig';
 
 const AdminSignUp = () => {
     const [username, setUsername] = useState('');
@@ -20,7 +20,7 @@ const AdminSignUp = () => {
 
         try {
             // Update the body to send only username and password
-            const response = await fetch(`${API_URL}/admin/initiate-admin-creation`, {
+            const response = await fetch(`${API_BASE_URL}/admin/initiate-admin-creation`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username, password }),

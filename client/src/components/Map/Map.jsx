@@ -3,8 +3,9 @@ import { FaLinkedin, FaInstagram, FaFacebook } from 'react-icons/fa';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faXTwitter } from '@fortawesome/free-brands-svg-icons';
 import { faPhone } from '@fortawesome/free-solid-svg-icons';
+import { API_BASE_URL } from '../../config/apiConfig';
 
-const API_URL = 'https://gvs-cargo-dynamic.onrender.com/api';
+
 
 // A reusable card component for each location
 const LocationCard = ({ location }) => {
@@ -69,7 +70,7 @@ function LocationSection() {
     useEffect(() => {
         const fetchAllLocations = async () => {
             try {
-                const regionsResponse = await fetch(`${API_URL}/regions`);
+                const regionsResponse = await fetch(`${API_BASE_URL}/regions`);
                 if (!regionsResponse.ok) {
                     throw new Error(`Failed to fetch regions: ${regionsResponse.statusText}`);
                 }

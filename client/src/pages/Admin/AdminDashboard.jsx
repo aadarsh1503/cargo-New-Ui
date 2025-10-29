@@ -3,8 +3,8 @@ import { Link, useNavigate } from 'react-router-dom';
 // Import the icon for our new modal
 import { FiLogOut } from 'react-icons/fi';
 import DashboardToggle from '../../components/DashboardToggle/DashboardToggle';
+import { API_BASE_URL } from '../../config/apiConfig';
 
-const API_URL = 'https://gvs-cargo-dynamic.onrender.com/api';
 
 /**
  * A new StyleInjector to add our custom modal animations.
@@ -104,7 +104,7 @@ const AdminDashboard = () => {
     const fetchRegions = async () => {
         setIsLoading(true);
         try {
-            const response = await fetch(`${API_URL}/regions`);
+            const response = await fetch(`${API_BASE_URL}/regions`);
             if (!response.ok) throw new Error('Network response was not ok');
             const data = await response.json();
             setRegions(data);
@@ -144,7 +144,7 @@ const handleDeleteRegion = async (regionCode, regionName) => {
         const authHeader = token ? `Bearer ${token}` : '';
 
         // 3. Define the URL.
-        const url = `${API_URL}/regions/${regionCode}`;
+        const url = `${API_BASE_URL}/regions/${regionCode}`;
 
         // 4. Make the fetch call with the correct header.
         const response = await fetch(url, {

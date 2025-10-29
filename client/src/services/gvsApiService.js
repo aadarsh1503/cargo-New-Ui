@@ -3,10 +3,10 @@
 import axios from 'axios';
 
 // The API endpoint for your public offers list
-const API_URL = 'https://gvs-cargo-dynamic.onrender.com/api/excels'; // Or your production URL
+import { API_BASE_URL } from '../config/apiConfig';
 
 const api = axios.create({
-    baseURL: API_URL,
+    baseURL: `${API_BASE_URL}/excels`,
 });
 
 

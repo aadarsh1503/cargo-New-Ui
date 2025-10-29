@@ -9,7 +9,7 @@ import countryFlagEmoji from "country-flag-emoji";
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
 
-const API_URL = "https://gvs-cargo-dynamic.onrender.com/api";
+import { API_BASE_URL } from '../../config/apiConfig';
 
 // --- CONFIRMATION MODAL COMPONENT (Unchanged) ---
 const ConfirmationModal = ({
@@ -145,7 +145,7 @@ const handleConfirmCreation = async () => {
 
   try {
 
-    const url = `${API_URL}/regions`;
+    const url = `${API_BASE_URL}/regions`;
 
 
     const authHeader = token ? `Bearer ${token}` : '';

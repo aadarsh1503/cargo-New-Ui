@@ -1,10 +1,10 @@
 // src/services/apiService.js
 import axios from 'axios';
 
-const API_URL = 'http://localhost:5000/api'; // Or your production URL
+import { API_BASE_URL } from '../config/apiConfig';
 
 const apiService = axios.create({
-    baseURL: API_URL,
+    baseURL: API_BASE_URL,
 });
 
 // The magic interceptor that authenticates EVERY request made with this service

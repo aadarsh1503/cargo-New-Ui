@@ -44,9 +44,12 @@ import { RegionProvider, useRegion } from "./context/RegionContext";
 import { Toaster } from 'react-hot-toast';
 import useLenis from './hooks/useLenis';
 import MobileNavbar from './components/Navbar/MobileNavbar';
+import ForgotPassword from './pages/Admin/ForgotPassword';
+import ResetPassword from './pages/Admin/ResetPassword';
+import { API_BASE_URL } from './config/apiConfig';
 
 // The API URL, make sure this is correct
-const API_URL = 'https://gvs-cargo-dynamic.onrender.com/api';
+
 
 const MainLayout = () => {
   const { isInitializing, isChangingRegion, region, availableRegions } = useRegion();
@@ -65,7 +68,7 @@ const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     if (!region) return;
     const fetchRegionContent = async () => {
       try {
-        const response = await fetch(`${API_URL}/content/${region}`);
+        const response = await fetch(`${API_BASE_URL}/content/${region}`);
         if (!response.ok) {
           throw new Error('Failed to fetch region content');
         }
@@ -125,6 +128,8 @@ const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
           <Route path="/packaging" element={<Packaging />} />
           <Route path="/storage" element={<Storages />} />
           <Route path="/commercial" element={<Commercial />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password/:token" element={<ResetPassword />} />
           <Route path="/insurance" element={<Insurance />} />
           <Route path="/container" element={<Containers />} />
           <Route path="/incoTerms" element={<Incoterms />} />

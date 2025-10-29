@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+
 import { FiUser, FiLock, FiEye, FiEyeOff } from 'react-icons/fi';
 import LOGO from "./LOGO.png"; // Make sure this path is correct
+import { useNavigate, Link } from 'react-router-dom';
 
-const API_URL = 'https://gvs-cargo-dynamic.onrender.com/api';
+import { API_BASE_URL } from '../../config/apiConfig';
 
 const StyleInjector = () => (
     <style>
@@ -37,7 +38,7 @@ const AdminLogin = () => {
         await new Promise(resolve => setTimeout(resolve, 1500));
 
         try {
-            const response = await fetch(`${API_URL}/admin/login`, {
+            const response = await fetch(`${API_BASE_URL}/admin/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username, password }),
@@ -145,7 +146,7 @@ const AdminLogin = () => {
                                         </div>
                                     )}
 
-                                    <button
+<button
                                         type="submit"
                                         disabled={isLoading}
                                         className="w-full font-bold text-white py-3 rounded-xl bg-gradient-to-r from-[#243670] to-[#5b72b4] shadow-lg transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-[#5b72b4]/50 disabled:opacity-70 disabled:cursor-not-allowed"
@@ -153,8 +154,19 @@ const AdminLogin = () => {
                                         {isLoading ? 'SIGNING IN...' : 'SIGN IN'}
                                     </button>
                                 </form>
+
+                                {/* ADD THIS LINK */}
+                                <div className="text-center">
+                                    <Link
+                                        to="/forgot-password"
+                                        className="text-sm text-[#243670]/80 hover:text-[#243670] hover:underline transition-colors"
+                                    >
+                                        Forgot Password?
+                                    </Link>
+                                </div>
                             </div>
                         )}
+                 
                     </div>
                 </div>
             </div>

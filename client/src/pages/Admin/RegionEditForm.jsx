@@ -7,7 +7,7 @@ import {
 import PhoneInput from 'react-phone-input-2';
 import 'react-phone-input-2/lib/style.css';
 
-const API_URL = 'https://gvs-cargo-dynamic.onrender.com/api';
+import { API_BASE_URL } from '../../config/apiConfig';
 
 const FuturisticLoader = ({ regionCode }) => (
     <div className="flex flex-col items-center justify-center min-h-screen bg-slate-50">
@@ -31,7 +31,7 @@ const RegionEditForm = () => {
     const fetchContent = useCallback(async () => {
         setIsLoading(true);
         try {
-            const response = await fetch(`${API_URL}/content/${regionCode}`);
+            const response = await fetch(`${API_BASE_URL}/content/${regionCode}`);
             if (!response.ok) throw new Error('Failed to fetch content');
             const data = await response.json();
             setRegionName(data.name);
@@ -80,7 +80,7 @@ const handleSubmit = async (e) => {
         // --- THIS IS THE FIX ---
 
         // 3. Define the URL for the API endpoint.
-        const url = `${API_URL}/content/${regionCode}`;
+        const url = `${API_BASE_URL}/content/${regionCode}`;
 
         // 4. Create the correctly formatted Authorization header string.
         //    We add the "Bearer " prefix (with a space) to the raw token.
