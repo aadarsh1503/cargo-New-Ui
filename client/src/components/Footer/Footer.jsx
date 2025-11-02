@@ -160,15 +160,36 @@ const Footer = () => {
                             <div className="flex items-start space-x-4"><FaMapMarkerAlt className="text-white mt-1" /><div>{content.address && content.address.map((line, index) => (<React.Fragment key={index}>{line}{index < content.address.length - 1 && <br />}</React.Fragment>))}</div></div>
                             <div className="flex items-start space-x-4"><FaPhoneAlt className="text-white mt-1" /><a href={`tel:${content.phone}`} className="hover:underline">{content.phone}</a></div>
                             <div ref={dropdownRef} className="relative">
-                                <button onClick={toggleDropdown} className="flex items-center space-x-3 hover:underline focus:outline-none"><FaEnvelope className="text-white" /><span>Email</span><FaChevronDown className={`transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} /></button>
-                                <div className={`absolute top-full mt-2 left-1/2 -translate-x-1/2 lg:left-0 lg:translate-x-0 w-64 bg-white text-DarkBlue rounded-lg shadow-2xl z-20 overflow-hidden transform transition-all duration-300 ease-in-out ${isOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-95 pointer-events-none'}`} style={{ transformOrigin: 'top center' }}>
-                                    <ul className="p-2 space-y-1">
-                                        {content.email_customer_care && <li><a href={`mailto:${content.email_customer_care}`} className="flex items-center gap-3 p-2 rounded-md hover:bg-gray-100 transition-colors"><FaUserCog className="text-lg text-DarkBlue/80" /><span>Customer Care</span></a></li>}
-                                        {content.email_sales && <li><a href={`mailto:${content.email_sales}`} className="flex items-center gap-3 p-2 rounded-md hover:bg-gray-100 transition-colors"><FaBullhorn className="text-lg text-DarkBlue/80" /><span>Sales Team</span></a></li>}
-                                        {content.email_business && <li><a href={`mailto:${content.email_business}`} className="flex items-center gap-3 p-2 rounded-md hover:bg-gray-100 transition-colors"><FaBriefcase className="text-lg text-DarkBlue/80" /><span>Business Enquiries</span></a></li>}
-                                    </ul>
-                                </div>
-                            </div>
+    <button onClick={toggleDropdown} className="flex items-center space-x-3 hover:underline focus:outline-none">
+        <FaEnvelope className="text-white" />
+        <span>Email</span>
+        <FaChevronDown className={`transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
+    </button>
+    
+    {/* --- UPDATED DROPDOWN DIV --- */}
+    <div 
+        className={`
+            absolute w-64 bg-white text-DarkBlue rounded-lg shadow-2xl z-20 overflow-hidden 
+            transform transition-all duration-300 ease-in-out
+            
+            // Positioning: Mobile pe neeche, Desktop pe right mein
+            top-full mt-2 left-1/2 -translate-x-1/2 
+            lg:top-0 lg:left-full lg:ml-2 lg:translate-x-0
+
+            // Animation Origin: Mobile pe upar se, Desktop pe left se
+            origin-top-center lg:origin-top-left
+
+            // Visibility
+            ${isOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-95 pointer-events-none'}
+        `}
+    >
+        <ul className="p-2 space-y-1">
+            {content.email_customer_care && <li><a href={`mailto:${content.email_customer_care}`} className="flex items-center gap-3 p-2 rounded-md hover:bg-gray-100 transition-colors"><FaUserCog className="text-lg text-DarkBlue/80" /><span>Customer Care</span></a></li>}
+            {content.email_sales && <li><a href={`mailto:${content.email_sales}`} className="flex items-center gap-3 p-2 rounded-md hover:bg-gray-100 transition-colors"><FaBullhorn className="text-lg text-DarkBlue/80" /><span>Sales Team</span></a></li>}
+            {content.email_business && <li><a href={`mailto:${content.email_business}`} className="flex items-center gap-3 p-2 rounded-md hover:bg-gray-100 transition-colors"><FaBriefcase className="text-lg text-DarkBlue/80" /><span>Business Enquiries</span></a></li>}
+        </ul>
+    </div>
+</div>
                         </div>
                     </div>
 
