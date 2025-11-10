@@ -176,8 +176,7 @@ const Navbar = () => {
     { name: "Offers", link: "/offers" },
   ];
 
-  // <<< FIX 4: Determine navbar style based on page and scroll position >>>
-  // True if we are on the homepage AND at the very top
+
   const isTransparent = isHomePage && !isScrolled;
 
   const customSelectStyles = useMemo(

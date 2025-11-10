@@ -83,7 +83,7 @@ function LocationSection() {
                 
                 // Fetch all content concurrently
                 const locationPromises = regionsData.map(region =>
-                    fetch(`${API_URL}/content/${region.code}`)
+                    fetch(`${API_BASE_URL}/content/${region.code}`)
                         .then(res => {
                             if (!res.ok) {
                                 // Don't let one failed fetch break the whole page
