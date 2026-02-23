@@ -2,7 +2,6 @@
 
 require('dotenv').config();
 const express = require('express');
-const cors = require('cors');
 const helmet = require('helmet');
 const axios = require('axios');
 const pool = require('./src/config/db');
@@ -22,18 +21,6 @@ const { default: countryCodeEmoji } = require('country-code-emoji');
 const app = express();
 
 // --- Middleware Setup ---
-app.use(cors({
-  origin: [
-    'http://localhost:5173',
-    'https://gvs-cargo-dynamic.vercel.app',
-    'https://gvscargo.com',
-    'https://cargo-new-ui.vercel.app',
-    'https://cargo-backend-black.vercel.app',
-    'https://gvs-bahrain-pa25.vercel.app',
-    'https://duplicate-cargo-qd4w.vercel.app'
-  ],
-  credentials: true 
-}));
 app.use(helmet());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true })); 
@@ -46,52 +33,74 @@ app.use('/api/excels', excelRoutes);
 // -----------------
 const DEFAULT_REGION = 'bahrain'; 
 
+// Simple in-memory cache for IP-to-region mapping
+const regionCache = new Map();
+const CACHE_DURATION = 1000 * 60 * 60; // 1 hour
+
 // --- /api/detect-region ROUTE ---
 app.get('/api/detect-region', async (req, res) => {
+  const startTime = Date.now();
+  console.log('\n🔍 ===== REGION DETECTION STARTED =====');
+  
   try {
-   
-
     // Set caching headers to prevent stale responses
     res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
     res.setHeader('Pragma', 'no-cache');
     res.setHeader('Expires', '0');
 
     // 1. Robust IP Detection
+    const ipStartTime = Date.now();
     const ip = req.headers['x-vercel-forwarded-for'] 
                || req.headers['x-forwarded-for']?.split(',').shift() 
                || req.socket.remoteAddress;
 
     // Use a public IP for local testing, otherwise use the detected IP
     const finalIp = (ip === '::1' || ip === '127.0.0.1') ? '177.54.157.16' : ip; // Test IP for Brazil
+    console.log(`⏱️  IP Detection: ${Date.now() - ipStartTime}ms | IP: ${finalIp}`);
     
+    // Check cache first
+    const cacheStartTime = Date.now();
+    const cached = regionCache.get(finalIp);
+    if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
+      console.log(`✅ Cache Hit: ${Date.now() - cacheStartTime}ms`);
+      console.log(`⏱️  TOTAL TIME: ${Date.now() - startTime}ms (from cache)`);
+      console.log('🔍 ===== REGION DETECTION COMPLETED =====\n');
+      return res.json(cached.data);
+    }
+    console.log(`⏱️  Cache Check: ${Date.now() - cacheStartTime}ms (cache miss)`);
 
-    // 2. Call the Geolocation API
-    const geoApiResponse = await axios.get(`http://ip-api.com/json/${finalIp}`);
+    // 2. Call the Geolocation API with timeout
+    const geoApiStartTime = Date.now();
+    console.log('🌐 Calling external IP geolocation API...');
+    const geoApiResponse = await axios.get(`http://ip-api.com/json/${finalIp}`, {
+      timeout: 2000 // 2 second timeout
+    });
     const geoData = geoApiResponse.data;
+    console.log(`⏱️  Geolocation API: ${Date.now() - geoApiStartTime}ms`);
 
     if (geoData.status === 'success') {
       const detectedCountryCode = geoData.countryCode; // e.g., 'BR'
       let matchedRegionCode = DEFAULT_REGION; // Default fallback
 
       // 3. Convert Text Code to Emoji for DB Query
-      // This will now work correctly because countryCodeEmoji is a function.
+      const emojiStartTime = Date.now();
       const flagEmoji = countryCodeEmoji(detectedCountryCode); 
+      console.log(`⏱️  Emoji Conversion: ${Date.now() - emojiStartTime}ms | ${detectedCountryCode} -> ${flagEmoji}`);
       
       if (flagEmoji) {
-       
-
         // 4. Query the database using the EMOJI in the 'country_flag' column
+        const dbStartTime = Date.now();
+        console.log('🗄️  Querying database...');
         const query = "SELECT code FROM regions WHERE country_flag = ? AND is_active = 1";
         const [rows] = await pool.query(query, [flagEmoji]);
+        console.log(`⏱️  Database Query: ${Date.now() - dbStartTime}ms | Rows found: ${rows.length}`);
 
         if (rows.length > 0) {
           matchedRegionCode = rows[0].code;
-      
+          console.log(`✅ Matched Region: ${matchedRegionCode}`);
         } else {
-          
+          console.log(`⚠️  No region found for ${flagEmoji}, using default: ${DEFAULT_REGION}`);
         }
-      } else {
-          
       }
       
       // 5. Send the final response to the frontend
@@ -102,21 +111,32 @@ app.get('/api/detect-region', async (req, res) => {
         matchedRegionCode: matchedRegionCode
       };
 
+      // Cache the result
+      regionCache.set(finalIp, {
+        data: responsePayload,
+        timestamp: Date.now()
+      });
+
+      console.log(`⏱️  TOTAL TIME: ${Date.now() - startTime}ms`);
+      console.log('🔍 ===== REGION DETECTION COMPLETED =====\n');
       res.json(responsePayload);
-     
-      
     } else {
       // Handle cases where the geo-API fails
-     
-      res.json({
+      console.log(`❌ Geolocation API failed: ${geoData.message || 'Unknown error'}`);
+      const fallbackPayload = {
         ip: finalIp,
         error: 'Could not determine location from the API.',
         matchedRegionCode: DEFAULT_REGION
-      });
+      };
+      console.log(`⏱️  TOTAL TIME: ${Date.now() - startTime}ms (fallback)`);
+      console.log('🔍 ===== REGION DETECTION COMPLETED =====\n');
+      res.json(fallbackPayload);
     }
   } catch (error) {
     // Handle server-level or database connection errors
-    console.error("❌ Critical error in /detect-region:", error.message);
+    console.error(`❌ Critical error in /detect-region: ${error.message}`);
+    console.log(`⏱️  TOTAL TIME: ${Date.now() - startTime}ms (error)`);
+    console.log('🔍 ===== REGION DETECTION COMPLETED =====\n');
     res.status(500).json({ 
         error: 'An error occurred during region detection.',
         matchedRegionCode: DEFAULT_REGION

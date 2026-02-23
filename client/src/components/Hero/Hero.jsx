@@ -20,7 +20,7 @@ import './Hero.css';
 // SLIDES data remains the same...
 const SLIDES = [
   {
-    image: 'https://www.resilio.com/images/marine-logistics_1.jpg',
+    image: 'https://res.cloudinary.com/ds1dt3qub/image/upload/v1771836190/marine-logistics_1_qoxvwa.jpg',
     title: <>Your Global<br />Shipping Partner</>,
     subtitle: 'Air » Road » Sea',
     description: 'Connecting the World: Your Trusted Shipping Partner by Air, Road & Sea.',

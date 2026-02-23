@@ -1,1 +1,1 @@
-export const API_BASE_URL = 'https://gvscargo.com/api';
+export const API_BASE_URL = '/api';

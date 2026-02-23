@@ -7,13 +7,22 @@ export default defineConfig({
   build: {
     outDir: 'build',
   },
-  server: {
-    proxy: {
-      '/api': {
-        target: 'https://gvscargo.com/send_to_a_mail.php', 
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, ''), 
-      },
-    },
-  },
+  // server: {
+  //   proxy: {
+  //     '/api': {
+  //       target: 'https://gvscargo.com/send_to_a_mail.php', 
+  //       changeOrigin: true,
+  //       rewrite: (path) => path.replace(/^\/api/, ''), 
+  //     },
+  //   },
+  // },
+  //  server: {
+  //   proxy: {
+  //     '/api': {
+  //       target: 'http://localhost:5000', 
+  //       changeOrigin: true,
+  //       secure: false,
+  //     },
+  //   },
+  // },
 })

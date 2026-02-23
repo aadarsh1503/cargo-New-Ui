@@ -2,8 +2,6 @@ import React, { createContext, useState, useContext, useEffect } from 'react';
 import { API_BASE_URL } from '../config/apiConfig';
 
 const RegionContext = createContext();
-// Make sure this URL is correct for your environment
-
 
 export const RegionProvider = ({ children }) => {
   const [region, setRegion] = useState(null);
@@ -38,28 +36,42 @@ export const RegionProvider = ({ children }) => {
     const initializeRegion = async () => {
       setIsInitializing(true);
 
-      // We still fetch regions for the dropdown menu
-      try {
-        const regionsResponse = await fetch(`${API_BASE_URL}/regions`);
-        const regionsData = await regionsResponse.json();
-        setAvailableRegions(regionsData);
-      } catch (error) {
-        // ignore error
-      }
+      // Fetch regions in parallel with region detection
+      const regionsPromise = fetch(`${API_BASE_URL}/regions`)
+        .then(res => res.json())
+        .then(data => setAvailableRegions(data))
+        .catch(() => {});
 
       const sessionRegion = sessionStorage.getItem('userSelectedRegion');
+      
+      let regionToLoad = 'bahrain'; // Default fallback
+      
       if (sessionRegion) {
-        await fetchContentForRegion(sessionRegion);
+        regionToLoad = sessionRegion;
       } else {
+        // Detect region with timeout to prevent long waits
         try {
-          const response = await fetch(`${API_BASE_URL}/detect-region`);
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 second timeout
+          
+          const response = await fetch(`${API_BASE_URL}/detect-region`, {
+            signal: controller.signal
+          });
+          clearTimeout(timeoutId);
+          
           const data = await response.json();
-          const regionToLoad = data.matchedRegionCode;
-          await fetchContentForRegion(regionToLoad);
+          regionToLoad = data.matchedRegionCode || 'bahrain';
         } catch (error) {
-          await fetchContentForRegion('bahrain'); // Fallback if the API call itself fails
+          // If detection fails or times out, use default
+          console.log('Region detection failed or timed out, using default');
         }
       }
+
+      // Load content and wait for regions to finish
+      await Promise.all([
+        fetchContentForRegion(regionToLoad),
+        regionsPromise
+      ]);
 
       setIsInitializing(false);
     };
