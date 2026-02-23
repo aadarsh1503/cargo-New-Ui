@@ -13,13 +13,7 @@ const FuturisticLoader = () => {
           <div className="data-packet p4"></div>
         </div>
         <div className="loader-text-container">
-          <span className="static-text">Connecting to Regional Matrix...</span>
-          <div className="glitch-text-wrapper">
-            <div className="glitch-text">Calibrating Geodata</div>
-            <div className="glitch-text">Syncing Timelines</div>
-            <div className="glitch-text">Establishing Quantum Link</div>
-            <div className="glitch-text">Accessing GVS Network</div>
-          </div>
+          <span className="static-text">Loading Region...</span>
         </div>
       </div>
     </div>

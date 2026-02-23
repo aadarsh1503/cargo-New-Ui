@@ -1,53 +1,36 @@
 import React from 'react';
-import './RegionTransitionOverlay.css';
 
-// <<< 1. Define the logo URL as a constant >>>
 const logoUrl = 'https://cargo-new-ui.vercel.app/assets/GVS-Yttnar72.png';
 
 const RegionTransitionOverlay = ({ isVisible, regionName, regionFlag }) => {
   if (!isVisible) return null;
 
-  const nameChars = regionName ? regionName.split('') : [];
-
   return (
-    <div className={`region-transition-overlay ${isVisible ? 'visible' : ''}`}>
-      <div className="blueprint-background"></div>
-
-      <div className="transition-container">
-        
-        <div className="transition-content">
-          {/* <<< 2. Add the logo image here >>> */}
-          <img 
-            src={logoUrl} 
-            alt="GVS Logo" 
-            className="transition-logo" 
-          />
-          
-          <div className="flag-container font-noto-serif">
-            {regionFlag}
-          </div>
-          <h1 className="name-container text-white">
-            {nameChars.map((char, index) => (
-              <span
-                key={index}
-                style={{ animationDelay: `${0.8 + index * 0.05}s` }}
-                className='font-noto-serif'
-              >
-                {char === ' ' ? '\u00A0' : char}
-              </span>
-            ))}
-          </h1>
-        </div>
-
-        <div className="panel panel-left"></div>
-        <div className="panel panel-right"></div>
-        <div className="accent-line line-top"></div>
-        <div className="accent-line line-bottom"></div>
+    <div style={{
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      width: '100%',
+      height: '100%',
+      backgroundColor: 'rgba(36, 54, 112, 0.95)',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      zIndex: 9999,
+      color: 'white'
+    }}>
+      <img 
+        src={logoUrl} 
+        alt="GVS Logo" 
+        style={{ maxWidth: '150px', marginBottom: '30px' }}
+      />
+      <div style={{ fontSize: '64px', marginBottom: '20px' }}>
+        {regionFlag}
       </div>
-
-      <div className="status-text">
-        CONNECTING TO REGIONAL HUB...
-      </div>
+      <h1 style={{ fontSize: '36px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '2px' }}>
+        {regionName}
+      </h1>
     </div>
   );
 };
