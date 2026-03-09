@@ -1,7 +1,7 @@
 import React from 'react';
 import Bounce from '../Bounce/Bounce';
 import Slide from '../Slide/Slide';
-import ColorBar from '../Colorbar/Colorbar';
+import ColorBar from '../ColorBar/ColorBar';
 import newimage from "./newimage.png"
 import Slide1 from '../Slide1/Slide1';
 

@@ -27,29 +27,28 @@ const loginAdmin = async (req, res) => {
             username: admin.username
         };
 
-        jwt.sign(
+        // Use promisified version to avoid callback issues
+        const token = jwt.sign(
             payload,
             process.env.JWT_SECRET,
-            { expiresIn: '8h' },
-            (err, token) => {
-                if (err) {
-                    console.error("JWT signing error:", err);
-                    // It's better to send a 500 error here
-                    return res.status(500).json({ message: "Could not generate token." });
-                }
-                
-
-                res.json({
-                    success: true,
-              
-                    adminToken: token         
-                });
-            }
+            { expiresIn: '8h' }
         );
+
+        // Send response once with proper structure
+        return res.status(200).json({
+            success: true,
+            adminToken: token
+        });
 
     } catch (error) {
         console.error("Server error during login:", error);
-        res.status(500).json({ message: 'Server error during login', error: error.message });
+        // Make sure we only send one response
+        if (!res.headersSent) {
+            return res.status(500).json({ 
+                message: 'Server error during login', 
+                error: error.message 
+            });
+        }
     }
 };
 

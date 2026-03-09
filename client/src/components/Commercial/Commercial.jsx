@@ -5,7 +5,7 @@ import { ChevronDownIcon, GlobeAmericasIcon, Cog6ToothIcon, ChartPieIcon } from 
 
 import Bounce from '../Bounce/Bounce';
 import Slide from '../Slide/Slide';
-import ColorBar from '../Colorbar/Colorbar';
+import ColorBar from '../ColorBar/ColorBar';
 
 // ---===[ YOU CAN REPLACE THIS CONTENT ]===---
 // We'll structure your service as a series of questions & answers for the accordion.

@@ -11,7 +11,11 @@ const errorHandler = require('./src/middleware/errorHandler');
 // Route imports
 const contentRoutes = require('./src/routes/contentRoutes');
 const adminRoutes = require('./src/routes/adminRoutes');
-const excelRoutes = require('./src/routes/excelRoutes');   
+const excelRoutes = require('./src/routes/excelRoutes');
+const galleryRoutes = require('./src/routes/galleryRoutes');
+const settingsRoutes = require('./src/routes/settingsRoutes');
+const employmentRoutes = require('./src/routes/employmentRoutes');
+const awsSettingsRoutes = require('./src/routes/awsSettingsRoutes');   
 
 // --- THE FIX ---
 // Destructure the 'default' export from the library to get the function directly.
@@ -29,6 +33,10 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/api', contentRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/excels', excelRoutes);
+app.use('/api/gallery', galleryRoutes);
+app.use('/api/settings', settingsRoutes);
+app.use('/api/employment', employmentRoutes);
+app.use('/api/aws-settings', awsSettingsRoutes);
 
 // -----------------
 const DEFAULT_REGION = 'bahrain'; 
@@ -36,6 +44,17 @@ const DEFAULT_REGION = 'bahrain';
 // Simple in-memory cache for IP-to-region mapping
 const regionCache = new Map();
 const CACHE_DURATION = 1000 * 60 * 60; // 1 hour
+
+// Country code to region mapping
+const COUNTRY_TO_REGION = {
+  'BH': 'bahrain',
+  'BR': 'brazil',
+  'SA': 'saudi',
+  'AE': 'uae',
+  'KW': 'kuwait',
+  'QA': 'qatar',
+  'OM': 'oman',
+};
 
 // --- /api/detect-region ROUTE ---
 app.get('/api/detect-region', async (req, res) => {
@@ -55,7 +74,7 @@ app.get('/api/detect-region', async (req, res) => {
                || req.socket.remoteAddress;
 
     // Use a public IP for local testing, otherwise use the detected IP
-    const finalIp = (ip === '::1' || ip === '127.0.0.1') ? '177.54.157.16' : ip; // Test IP for Brazil
+    const finalIp = (ip === '::1' || ip === '127.0.0.1') ? '177.54.157.16' : ip;
     console.log(`⏱️  IP Detection: ${Date.now() - ipStartTime}ms | IP: ${finalIp}`);
     
     // Check cache first
@@ -69,69 +88,106 @@ app.get('/api/detect-region', async (req, res) => {
     }
     console.log(`⏱️  Cache Check: ${Date.now() - cacheStartTime}ms (cache miss)`);
 
-    // 2. Call the Geolocation API with timeout
-    const geoApiStartTime = Date.now();
-    console.log('🌐 Calling external IP geolocation API...');
-    const geoApiResponse = await axios.get(`http://ip-api.com/json/${finalIp}`, {
-      timeout: 2000 // 2 second timeout
-    });
-    const geoData = geoApiResponse.data;
-    console.log(`⏱️  Geolocation API: ${Date.now() - geoApiStartTime}ms`);
+    let detectedCountryCode = null;
+    let country = null;
+    let detectionMethod = 'none';
 
-    if (geoData.status === 'success') {
-      const detectedCountryCode = geoData.countryCode; // e.g., 'BR'
-      let matchedRegionCode = DEFAULT_REGION; // Default fallback
-
-      // 3. Convert Text Code to Emoji for DB Query
-      const emojiStartTime = Date.now();
-      const flagEmoji = countryCodeEmoji(detectedCountryCode); 
-      console.log(`⏱️  Emoji Conversion: ${Date.now() - emojiStartTime}ms | ${detectedCountryCode} -> ${flagEmoji}`);
+    // 2. Try CloudFlare header first (instant, 0ms)
+    // Note: Only works if site is behind CloudFlare proxy
+    const cfCountry = req.headers['cf-ipcountry'];
+    if (cfCountry && cfCountry !== 'XX') {
+      detectedCountryCode = cfCountry;
+      country = cfCountry;
+      detectionMethod = 'CloudFlare';
+      console.log(`✅ CloudFlare Header: 0ms | Country: ${cfCountry}`);
+    } else {
+      console.log(`⚠️  CloudFlare header not available (cf-ipcountry: ${cfCountry || 'missing'})`);
       
-      if (flagEmoji) {
-        // 4. Query the database using the EMOJI in the 'country_flag' column
-        const dbStartTime = Date.now();
-        console.log('🗄️  Querying database...');
-        const query = "SELECT code FROM regions WHERE country_flag = ? AND is_active = 1";
-        const [rows] = await pool.query(query, [flagEmoji]);
-        console.log(`⏱️  Database Query: ${Date.now() - dbStartTime}ms | Rows found: ${rows.length}`);
-
-        if (rows.length > 0) {
-          matchedRegionCode = rows[0].code;
-          console.log(`✅ Matched Region: ${matchedRegionCode}`);
-        } else {
-          console.log(`⚠️  No region found for ${flagEmoji}, using default: ${DEFAULT_REGION}`);
+      // 3. Fallback to ipapi.co (faster than ip-api.com)
+      const geoApiStartTime = Date.now();
+      console.log('🌐 Calling ipapi.co geolocation API...');
+      try {
+        const geoApiResponse = await axios.get(`https://ipapi.co/${finalIp}/json/`, {
+          timeout: 2000 // 2 second timeout
+        });
+        const geoData = geoApiResponse.data;
+        
+        if (geoData.country_code) {
+          detectedCountryCode = geoData.country_code;
+          country = geoData.country_name;
+          detectionMethod = 'ipapi.co';
+          console.log(`⏱️  ipapi.co API: ${Date.now() - geoApiStartTime}ms`);
+        }
+      } catch (error) {
+        console.log(`⚠️  ipapi.co failed (${error.message}), trying ip-api.com...`);
+        
+        // 4. Final fallback to ip-api.com
+        try {
+          const geoApiResponse = await axios.get(`http://ip-api.com/json/${finalIp}`, {
+            timeout: 2000
+          });
+          const geoData = geoApiResponse.data;
+          
+          if (geoData.status === 'success') {
+            detectedCountryCode = geoData.countryCode;
+            country = geoData.country;
+            detectionMethod = 'ip-api.com';
+            console.log(`⏱️  ip-api.com API: ${Date.now() - geoApiStartTime}ms`);
+          }
+        } catch (fallbackError) {
+          console.log(`❌ All geolocation APIs failed: ${fallbackError.message}`);
         }
       }
-      
-      // 5. Send the final response to the frontend
-      const responsePayload = {
-        ip: finalIp,
-        countryCode: detectedCountryCode,
-        country: geoData.country,
-        matchedRegionCode: matchedRegionCode
-      };
-
-      // Cache the result
-      regionCache.set(finalIp, {
-        data: responsePayload,
-        timestamp: Date.now()
-      });
-
-      console.log(`⏱️  TOTAL TIME: ${Date.now() - startTime}ms`);
-      console.log('🔍 ===== REGION DETECTION COMPLETED =====\n');
-      res.json(responsePayload);
-    } else {
-      // Handle cases where the geo-API fails
-      console.log(`❌ Geolocation API failed: ${geoData.message || 'Unknown error'}`);
-      const fallbackPayload = {
-        ip: finalIp,
-        error: 'Could not determine location from the API.',
-        matchedRegionCode: DEFAULT_REGION
-      };
-      console.log(`⏱️  TOTAL TIME: ${Date.now() - startTime}ms (fallback)`);
-      console.log('🔍 ===== REGION DETECTION COMPLETED =====\n');
-      res.json(fallbackPayload);
     }
+
+    let matchedRegionCode = DEFAULT_REGION;
+
+    if (detectedCountryCode) {
+      // Check if we have a direct mapping
+      if (COUNTRY_TO_REGION[detectedCountryCode]) {
+        matchedRegionCode = COUNTRY_TO_REGION[detectedCountryCode];
+        console.log(`✅ Direct mapping: ${detectedCountryCode} -> ${matchedRegionCode}`);
+      } else {
+        // Try emoji-based database lookup
+        const emojiStartTime = Date.now();
+        const flagEmoji = countryCodeEmoji(detectedCountryCode);
+        console.log(`⏱️  Emoji Conversion: ${Date.now() - emojiStartTime}ms | ${detectedCountryCode} -> ${flagEmoji}`);
+        
+        if (flagEmoji) {
+          const dbStartTime = Date.now();
+          console.log('🗄️  Querying database...');
+          const query = "SELECT code FROM regions WHERE country_flag = ? AND is_active = 1";
+          const [rows] = await pool.query(query, [flagEmoji]);
+          console.log(`⏱️  Database Query: ${Date.now() - dbStartTime}ms | Rows found: ${rows.length}`);
+
+          if (rows.length > 0) {
+            matchedRegionCode = rows[0].code;
+            console.log(`✅ Matched Region: ${matchedRegionCode}`);
+          } else {
+            console.log(`⚠️  No region found for ${flagEmoji}, using default: ${DEFAULT_REGION}`);
+          }
+        }
+      }
+    }
+    
+    // 5. Send the final response to the frontend
+    const responsePayload = {
+      ip: finalIp,
+      countryCode: detectedCountryCode,
+      country: country,
+      matchedRegionCode: matchedRegionCode,
+      detectionMethod: detectionMethod // Shows which method was used
+    };
+
+    // Cache the result
+    regionCache.set(finalIp, {
+      data: responsePayload,
+      timestamp: Date.now()
+    });
+
+    console.log(`⏱️  TOTAL TIME: ${Date.now() - startTime}ms`);
+    console.log('🔍 ===== REGION DETECTION COMPLETED =====\n');
+    res.json(responsePayload);
   } catch (error) {
     // Handle server-level or database connection errors
     console.error(`❌ Critical error in /detect-region: ${error.message}`);

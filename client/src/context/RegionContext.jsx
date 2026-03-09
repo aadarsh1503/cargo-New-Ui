@@ -34,22 +34,36 @@ export const RegionProvider = ({ children }) => {
   // Effect for initial load (only runs once)
   useEffect(() => {
     const initializeRegion = async () => {
+      const startTime = Date.now();
+      console.log('🚀 Frontend: Starting region initialization...');
       setIsInitializing(true);
 
       // Fetch regions in parallel with region detection
+      const regionsStartTime = Date.now();
       const regionsPromise = fetch(`${API_BASE_URL}/regions`)
-        .then(res => res.json())
-        .then(data => setAvailableRegions(data))
-        .catch(() => {});
+        .then(res => {
+          console.log(`⏱️  Frontend: Regions API responded in ${Date.now() - regionsStartTime}ms`);
+          return res.json();
+        })
+        .then(data => {
+          setAvailableRegions(data);
+          console.log(`✅ Frontend: Regions loaded (${data.length} regions)`);
+        })
+        .catch((err) => {
+          console.log(`❌ Frontend: Regions fetch failed:`, err.message);
+        });
 
       const sessionRegion = sessionStorage.getItem('userSelectedRegion');
       
       let regionToLoad = 'bahrain'; // Default fallback
       
       if (sessionRegion) {
+        console.log(`✅ Frontend: Using cached region from session: ${sessionRegion}`);
         regionToLoad = sessionRegion;
       } else {
         // Detect region with timeout to prevent long waits
+        const detectionStartTime = Date.now();
+        console.log('🔍 Frontend: Starting region detection...');
         try {
           const controller = new AbortController();
           const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 second timeout
@@ -59,21 +73,31 @@ export const RegionProvider = ({ children }) => {
           });
           clearTimeout(timeoutId);
           
+          console.log(`⏱️  Frontend: Region detection API responded in ${Date.now() - detectionStartTime}ms`);
+          
           const data = await response.json();
           regionToLoad = data.matchedRegionCode || 'bahrain';
+          console.log(`✅ Frontend: Detected region: ${regionToLoad}`);
         } catch (error) {
           // If detection fails or times out, use default
-          console.log('Region detection failed or timed out, using default');
+          console.log(`⚠️  Frontend: Region detection failed/timeout after ${Date.now() - detectionStartTime}ms, using default`);
         }
       }
 
       // Load content and wait for regions to finish
+      const contentStartTime = Date.now();
+      console.log(`🔍 Frontend: Fetching content for region: ${regionToLoad}...`);
+      
       await Promise.all([
-        fetchContentForRegion(regionToLoad),
+        fetchContentForRegion(regionToLoad).then(() => {
+          console.log(`⏱️  Frontend: Content loaded in ${Date.now() - contentStartTime}ms`);
+        }),
         regionsPromise
       ]);
 
       setIsInitializing(false);
+      console.log(`✅ Frontend: TOTAL INITIALIZATION TIME: ${Date.now() - startTime}ms`);
+      console.log('🎉 Frontend: Region initialization complete!\n');
     };
     initializeRegion();
   }, []);

@@ -5,7 +5,7 @@ import { ShieldCheckIcon, SparklesIcon, DocumentMagnifyingGlassIcon } from '@her
 
 import Bounce from '../Bounce/Bounce';
 import Slide from '../Slide/Slide';
-import ColorBar from '../Colorbar/Colorbar';
+import ColorBar from '../ColorBar/ColorBar';
 
 // ---===[ YOU CAN REPLACE THIS IMAGE PATH ]===---
 const inspectionImageUrl = "https://i2.wp.com/www.easyhaul.com/blog/wp-content/uploads/2021/04/Blog-EasyHaul-Who-Is-A-Customs-Broker-Title.png";

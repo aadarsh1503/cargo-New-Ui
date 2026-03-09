@@ -6,7 +6,6 @@ import Modal from './Modal';
 import { FiCheckCircle, FiXCircle, FiLogOut } from 'react-icons/fi'; 
 import FileUploadForm from './FileUploadForm';
 import "./e.css";
-import DashboardToggle from '../DashboardToggle/DashboardToggle';
 
 
 const LogoutConfirmation = ({ onConfirm, toastId }) => (
@@ -179,12 +178,6 @@ const ExcelUploadPanel = ({ onLogout }) => {
                 <h1 className="page-heading ml-0 lg:-ml-32 text-gradient-heading font-noto-serif">File Management</h1>
                 <p className="page-subheading font-noto-serif">Upload, publish, and manage your Excel data sheets.</p>
             </div>
-            <DashboardToggle activeView="excel" />
-          
-            {/* <button onClick={handleLogoutClick} className="btn-logout">
-                <FiLogOut size={18} />
-                <span>Logout</span>
-            </button> */}
         </div>
 
         {message.text && (

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import ColorBar from '../Colorbar/Colorbar';
+import ColorBar from '../ColorBar/ColorBar';
 import IncotermsSection from './IncotermsSection';
 import { useRegion } from '../../context/RegionContext'; // Import the context hook
 

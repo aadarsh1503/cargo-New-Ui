@@ -2,7 +2,7 @@ import React from 'react';
 // These are your existing components, you can place them as you see fit.
 import Bounce from '../Bounce/Bounce';
 import Slide from '../Slide/Slide';
-import ColorBar from '../Colorbar/Colorbar';
+import ColorBar from '../ColorBar/ColorBar';
 
 // --- HELPER ICONS (for a sleek, futuristic look) ---
 // You can replace these with SVGs from a library like Heroicons or Feather Icons.

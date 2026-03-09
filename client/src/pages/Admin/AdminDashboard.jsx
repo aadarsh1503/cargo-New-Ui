@@ -1,104 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-// Import the icon for our new modal
-import { FiLogOut } from 'react-icons/fi';
-import DashboardToggle from '../../components/DashboardToggle/DashboardToggle';
 import { API_BASE_URL } from '../../config/apiConfig';
-
-
-/**
- * A new StyleInjector to add our custom modal animations.
- * This keeps our creative flair contained and easy to manage.
- */
-const StyleInjector = () => (
-    <style>
-        {`
-            @keyframes gentle-sway {
-                0%, 100% { transform: rotate(-3deg); }
-                50% { transform: rotate(3deg); }
-            }
-        `}
-    </style>
-);
-
-/**
- * THE SEXY LOGOUT MODAL
- * A reusable, animated confirmation modal.
- */
-const LogoutConfirmationModal = ({ isOpen, onClose, onConfirm }) => {
-    useEffect(() => {
-        // Close modal on 'Escape' key press for better UX
-        const handleEsc = (event) => {
-            if (event.key === 'Escape') {
-                onClose();
-            }
-        };
-        window.addEventListener('keydown', handleEsc);
-        return () => window.removeEventListener('keydown', handleEsc);
-    }, [onClose]);
-
-    // We use conditional classes for smooth transitions.
-    // The `pointer-events-none` is crucial for the fade-out effect.
-    const overlayClasses = isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none';
-    const modalClasses = isOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-95';
-
-    return (
-        <div
-            className={`fixed inset-0 z-50 flex items-center justify-center p-4 transition-opacity duration-300 ease-in-out ${overlayClasses}`}
-            onClick={onClose} // Close modal if overlay is clicked
-            aria-modal="true"
-            role="dialog"
-        >
-            {/* The blurred background overlay */}
-            <div className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm"></div>
-
-            {/* The modal panel itself */}
-            <div
-                className={`relative w-full max-w-md p-8 bg-white/80 backdrop-blur-2xl border border-white/30 rounded-3xl shadow-2xl text-center transform transition-all duration-300 ease-in-out ${modalClasses}`}
-                onClick={(e) => e.stopPropagation()} // Prevent clicks inside the modal from closing it
-            >
-                {/* Animated Icon */}
-                <div className="mx-auto mb-6 w-20 h-20 flex items-center justify-center rounded-full bg-amber-100">
-                    <FiLogOut 
-                        size={40} 
-                        className="text-amber-500" 
-                        style={{ animation: 'gentle-sway 3s ease-in-out infinite' }}
-                    />
-                </div>
-
-                {/* Content */}
-                <h2 className="text-2xl font-bold text-[#243670]" id="modal-title">
-                    Ending Session?
-                </h2>
-                <p className="mt-2 text-slate-600">
-                    Are you sure you want to sign out? You will be returned to the login screen.
-                </p>
-
-                {/* Action Buttons */}
-                <div className="mt-8 flex justify-center space-x-4">
-                    <button
-                        onClick={onClose}
-                        className="px-8 py-2.5 font-semibold text-slate-600 bg-slate-200/70 rounded-lg hover:bg-slate-300 transition-colors duration-200"
-                    >
-                        Cancel
-                    </button>
-                    <button
-                        onClick={onConfirm}
-                        className="px-8 py-2.5 font-bold text-white bg-amber-500 rounded-lg shadow-lg shadow-amber-500/30 hover:bg-amber-600 hover:scale-105 transform transition-all duration-200"
-                    >
-                        Confirm Logout
-                    </button>
-                </div>
-            </div>
-        </div>
-    );
-};
 
 const AdminDashboard = () => {
     const [regions, setRegions] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
-    // State to manage our new logout modal visibility
-    const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
     const navigate = useNavigate();
 
     const fetchRegions = async () => {
@@ -118,15 +24,6 @@ const AdminDashboard = () => {
     useEffect(() => {
         fetchRegions();
     }, []);
-    
-    // This is the function the modal will call on confirmation
-    const handleConfirmLogout = () => {
-        localStorage.removeItem('adminToken');
-        setIsLogoutModalOpen(false); // Close the modal first
-        navigate('/admin/login');
-    };
-
-
 
 const handleDeleteRegion = async (regionCode, regionName) => {
     // The confirmation dialog is good, no changes here.
@@ -174,12 +71,6 @@ const handleDeleteRegion = async (regionCode, regionName) => {
 
     return (
         <>
-            <StyleInjector />
-            <LogoutConfirmationModal 
-                isOpen={isLogoutModalOpen}
-                onClose={() => setIsLogoutModalOpen(false)}
-                onConfirm={handleConfirmLogout}
-            />
             <div className="min-h-screen bg-[#F0F4F8] text-[#243670] p-8 sm:p-12 relative overflow-hidden">
                 <div className="absolute inset-0 z-0 opacity-50" style={{
                     backgroundImage: 'radial-gradient(#243670 0.5px, transparent 0.5px), radial-gradient(#243670 0.5px, #F0F4F8 0.5px)',
@@ -188,19 +79,9 @@ const handleDeleteRegion = async (regionCode, regionName) => {
                 }}></div>
 
                 <div className="relative z-10 max-w-7xl mx-auto">
-                    <header className="flex justify-between items-center mb-16">
-                        <div>
-                            <h1 className="text-5xl font-light text-[#243670] tracking-widest uppercase">Dashboard</h1>
-                            <p className="text-gray-500 mt-2">Holographic Content Management Interface v2.1</p>
-                        </div>
-                        <DashboardToggle activeView="dashboard" />
-                        <button 
-                            // This button now opens the modal instead of logging out directly
-                            onClick={() => setIsLogoutModalOpen(true)} 
-                            className="font-semibold text-amber-600 border-2 border-amber-500/50 px-5 py-2 rounded-lg hover:bg-amber-500 hover:text-white hover:shadow-lg hover:shadow-amber-500/30 transition-all duration-300"
-                        >
-                            Logout
-                        </button>
+                    <header className="mb-16">
+                        <h1 className="text-5xl font-light text-[#243670] tracking-widest uppercase">Dashboard</h1>
+                        <p className="text-gray-500 mt-2">Holographic Content Management Interface v2.1</p>
                     </header>
 
                     {isLoading ? (

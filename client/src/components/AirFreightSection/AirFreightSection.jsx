@@ -3,7 +3,7 @@ import React, { useEffect } from 'react';
 // Import your custom components
 import Bounce from '../Bounce/Bounce';
 import Slide from '../Slide/Slide';
-import ColorBar from '../Colorbar/Colorbar';
+import ColorBar from '../ColorBar/ColorBar';
 
 // --- IMPORT YOUR AIRPLANE IMAGE HERE ---
 // Make sure the path is correct

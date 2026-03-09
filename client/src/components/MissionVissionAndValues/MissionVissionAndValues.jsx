@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import Bounce from '../Bounce/Bounce';
 import Slide from '../Slide/Slide';
-import ColorBar from '../Colorbar/Colorbar';
+import ColorBar from '../ColorBar/ColorBar';
 
 // --- THREE POWERFUL ICONS FOR EACH PILLAR ---
 

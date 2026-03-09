@@ -40,6 +40,13 @@ import ProtectedRoute from './components/Auth/ProtectedRoute';
 import AdminSignUp from './pages/Admin/AdminSignUp';
 import CreateRegionPage from './pages/Admin/CreateRegionPage';
 import ExcelUploadPanel from './components/ExcelUploadPanel/ExcelUploadPanel';
+import GalleryManagement from './pages/Admin/GalleryManagement';
+import SettingsManagement from './pages/Admin/SettingsManagement';
+import Gallery from './pages/Gallery/Gallery';
+import EmploymentForm from './pages/EmploymentForm';
+import EmploymentManager from './pages/Admin/EmploymentManager';
+import AWSSettings from './pages/Admin/AWSSettings';
+import AdminLayout from './layouts/AdminLayout';
 import { RegionProvider, useRegion } from "./context/RegionContext";
 import { Toaster } from 'react-hot-toast';
 import useLenis from './hooks/useLenis';
@@ -136,6 +143,8 @@ const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
           <Route path="/contactUs" element={<ContactUs />} />
           <Route path="/offers" element={<Offers />} />
           <Route path="/testimonials" element={<Testimonials />} />
+          <Route path="/gallery" element={<Gallery />} />
+          <Route path="/careers" element={<EmploymentForm />} />
           <Route path="*" element={<div><h2>404 Page Not Found</h2></div>} />
         </Routes>
       </main>
@@ -160,11 +169,19 @@ function App() {
           {/* Admin Routes */}
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/create-super-user-access-a9b3c7d1" element={<AdminSignUp />} />
+          
+          {/* Protected Admin Routes with AdminLayout */}
           <Route element={<ProtectedRoute />}>
-            <Route path="/admin/dashboard" element={<AdminDashboard />} />
-            <Route path="/admin/add-region" element={<CreateRegionPage />} />
-            <Route path="/admin/edit/:regionCode" element={<RegionEditForm />} />
-            <Route path="/admin/excel-management" element={<ExcelUploadPanel />} />
+            <Route element={<AdminLayout />}>
+              <Route path="/admin/dashboard" element={<AdminDashboard />} />
+              <Route path="/admin/add-region" element={<CreateRegionPage />} />
+              <Route path="/admin/edit/:regionCode" element={<RegionEditForm />} />
+              <Route path="/admin/excel-management" element={<ExcelUploadPanel />} />
+              <Route path="/admin/gallery" element={<GalleryManagement />} />
+              <Route path="/admin/settings" element={<SettingsManagement />} />
+              <Route path="/admin/employment" element={<EmploymentManager />} />
+              <Route path="/admin/aws-settings" element={<AWSSettings />} />
+            </Route>
           </Route>
 
           {/* Public-Facing Site Routes */}

@@ -6,7 +6,7 @@ import { DocumentTextIcon, GlobeAltIcon, TruckIcon, FingerPrintIcon } from '@her
 // Import your lower components
 import Bounce from '../Bounce/Bounce';
 import Slide from '../Slide/Slide';
-import ColorBar from '../Colorbar/Colorbar';
+import ColorBar from '../ColorBar/ColorBar';
 
 // We'll break down your text into logical steps for the timeline
 const timelineSteps = [

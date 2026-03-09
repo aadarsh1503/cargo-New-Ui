@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 
 import Bounce from '../Bounce/Bounce';
 import Slide from '../Slide/Slide';
-import ColorBar from '../Colorbar/Colorbar';
+import ColorBar from '../ColorBar/ColorBar';
 
 // The data remains the same
 const packagingSolutions = [

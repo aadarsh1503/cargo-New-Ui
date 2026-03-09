@@ -1,7 +1,7 @@
 import React from 'react';
 import Bounce from '../Bounce/Bounce';
 import Slide from '../Slide/Slide';
-import ColorBar from '../Colorbar/Colorbar';
+import ColorBar from '../ColorBar/ColorBar';
 import { useRegion } from '../../context/RegionContext'; // Import the hook
 
 const WhereBrazil = () => { // Component name is kept as WhereBrazil

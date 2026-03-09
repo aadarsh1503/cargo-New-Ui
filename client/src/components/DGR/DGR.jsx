@@ -5,7 +5,7 @@ import { FireIcon, CubeTransparentIcon } from '@heroicons/react/24/outline';
 
 import Bounce from '../Bounce/Bounce';
 import Slide from '../Slide/Slide';
-import ColorBar from '../Colorbar/Colorbar';
+import ColorBar from '../ColorBar/ColorBar';
 
 // ---===[ YOU CAN REPLACE THESE IMAGE PATHS ]===---
 const dangerousGoodsImageUrl = "https://avatars.mds.yandex.net/get-altay/14020851/2a0000019460d9fd3a53dc59a77f8ec527bf/XXL_height";
