@@ -174,6 +174,8 @@ const Navbar = () => {
       ],
     },
     { name: "Offers", link: "/offers" },
+    { name: "Career", link: "/careers" },
+
   ];
 
 

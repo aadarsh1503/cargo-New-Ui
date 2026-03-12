@@ -1,6 +1,6 @@
 import React from "react";
 import "./GlobalLoader.css";
-import gvs from "./gvs.png";
+import gvs from "./GVS.png";
 
 const GlobalLoader = () => {
     return (

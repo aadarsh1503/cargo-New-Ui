@@ -14,7 +14,14 @@ export const RegionProvider = ({ children }) => {
   // This function fetches data and updates state.
   const fetchContentForRegion = async (regionCode) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/content/${regionCode}`);
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+      
+      const response = await fetch(`${API_BASE_URL}/content/${regionCode}`, {
+        signal: controller.signal
+      });
+      
+      clearTimeout(timeoutId);
 
       if (!response.ok) {
         if (regionCode !== 'bahrain') {
@@ -27,6 +34,9 @@ export const RegionProvider = ({ children }) => {
       setContent(data);
       setRegion(data.code);
     } catch (error) {
+      if (regionCode !== 'bahrain') {
+        return fetchContentForRegion('bahrain');
+      }
       setContent(null);
     }
   };

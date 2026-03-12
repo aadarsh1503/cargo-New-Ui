@@ -8,13 +8,13 @@ import sec from "./sec.png";
 import third from "./third.png";
 import Refer1 from "./Refer1.png";
 import Refer2 from "./Refer2.png";
-import Open1 from "./Open1.png";
-import Open2 from "./Open2.png";
+import Open1 from "./open1.png";
+import Open2 from "./open2.png";
 import Flat1 from "./Flat1.png";
 import Flat2 from "./Flat2.png";
-import Plataform1 from "./plataform1.png";
-import Plataform2 from "./plataform2.png";
-import Tank from "./tank.png";
+import Plataform1 from "./Plataform1.png";
+import Plataform2 from "./Plataform2.png";
+import Tank from "./Tank.png";
 import Slide1 from '../Slide1/Slide1';
 
 function Containers() {
