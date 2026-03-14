@@ -4,12 +4,16 @@ const pool = require("../config/db");
 // @route   GET /api/regions
 // @access  Public
 const getAllRegions = async (req, res) => {
+  const startTime = Date.now();
   try {
+    console.log(`🔍 [Regions API] Fetching all regions...`);
     const query =
       "SELECT id, name, code, country_flag FROM regions WHERE is_active = 1 ORDER BY name";
     const [rows] = await pool.query(query);
+    console.log(`✅ [Regions API] Found ${rows.length} regions in ${Date.now() - startTime}ms\n`);
     res.json(rows);
   } catch (error) {
+    console.log(`❌ [Regions API] Error after ${Date.now() - startTime}ms:`, error.message);
     res
       .status(500)
       .json({ message: "Error fetching regions", error: error.message });
@@ -20,8 +24,12 @@ const getAllRegions = async (req, res) => {
 // @route   GET /api/content/:regionCode
 // @access  Public
 const getContentByRegionCode = async (req, res) => {
+  const startTime = Date.now();
   try {
     const { regionCode } = req.params;
+    
+    console.log(`🔍 [Content API] Fetching content for: ${regionCode}`);
+    const queryStart = Date.now();
     
     // This query already selects all content fields, so it will automatically include the new ones
     const query = `
@@ -31,13 +39,17 @@ const getContentByRegionCode = async (req, res) => {
             WHERE r.code = ? AND r.is_active = 1
         `;
     const [rows] = await pool.query(query, [regionCode]);
+    
+    console.log(`⏱️  [Content API] Database query: ${Date.now() - queryStart}ms`);
 
     if (rows.length === 0) {
+      console.log(`❌ [Content API] No content found for: ${regionCode}`);
       return res
         .status(404)
         .json({ message: "Content not found for this region" });
     }
 
+    const processingStart = Date.now();
     const dbContent = rows[0];
 
     const regionName = dbContent.name;
@@ -64,9 +76,13 @@ const getContentByRegionCode = async (req, res) => {
         finalContent.address = [finalContent.address];
       }
     }
+    
+    console.log(`⏱️  [Content API] Processing: ${Date.now() - processingStart}ms`);
+    console.log(`✅ [Content API] TOTAL TIME: ${Date.now() - startTime}ms\n`);
 
     res.json(finalContent);
   } catch (error) {
+    console.log(`❌ [Content API] Error after ${Date.now() - startTime}ms:`, error.message);
     res
       .status(500)
       .json({ message: "Error fetching content", error: error.message });

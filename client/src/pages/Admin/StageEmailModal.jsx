@@ -21,9 +21,9 @@ const StageEmailModal = ({ isOpen, onClose, selectedApplications, newStage, onSu
     if (!app) return '';
 
     if (stage === 'Interview') {
-      return `Dear ${app.name},
+      return `Dear ${app.fullName},
 
-We are pleased to inform you that your application for the internship position in the ${app.department} department has been shortlisted.
+We are pleased to inform you that your application for the ${app.employmentDesired} position has been shortlisted.
 
 Interview Details:
 Date: ${emailData.date ? new Date(emailData.date).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) : '[Please fill in the date]'}
@@ -35,55 +35,55 @@ Please confirm your attendance by replying to this email.
 We look forward to meeting you!
 
 Best regards,
-GVS Internship Team
+GVS HR Team
 Global Vision Solutions`;
     } else if (stage === 'Accepted') {
-      return `Dear ${app.name},
+      return `Dear ${app.fullName},
 
-Congratulations! You have been selected for the internship position in the ${app.department} department at Global Vision Solutions.
+Congratulations! You have been selected for the ${app.employmentDesired} position at Global Vision Solutions.
 
 Further details regarding your joining date and onboarding process will be shared with you shortly.
 
 We look forward to having you on our team!
 
 Best regards,
-GVS Internship Team
+GVS HR Team
 Global Vision Solutions`;
     } else if (stage === 'Rejected') {
-      return `Dear ${app.name},
+      return `Dear ${app.fullName},
 
-Thank you for your interest in the internship position at Global Vision Solutions and for taking the time to apply.
+Thank you for your interest in the ${app.employmentDesired} position at Global Vision Solutions and for taking the time to apply.
 
 After careful consideration, we regret to inform you that we will not be moving forward with your application at this time.
 
 We appreciate your interest in GVS and wish you all the best in your future endeavors.
 
 Best regards,
-GVS Internship Team
+GVS HR Team
 Global Vision Solutions`;
     } else if (stage === 'Completion') {
-      return `Dear ${app.name},
+      return `Dear ${app.fullName},
 
-Congratulations on successfully completing your internship with GVS in the ${app.department} department!
+Congratulations on successfully completing your probation period with GVS as ${app.employmentDesired}!
 
 We appreciate your hard work and dedication during your time with us.
 
-We wish you all the best in your future career!
+We wish you all the best in your continued career with GVS!
 
 Best regards,
-GVS Internship Team
+GVS HR Team
 Global Vision Solutions`;
     } else if (stage === 'Certification') {
-      return `Dear ${app.name},
+      return `Dear ${app.fullName},
 
-Please find attached your internship completion certificate for your successful completion of the internship program at Global Vision Solutions.
+Please find attached your employment completion certificate for your successful completion at Global Vision Solutions.
 
 We are proud of your achievements and wish you continued success in your career.
 
 Thank you for being a part of GVS!
 
 Best regards,
-GVS Internship Team
+GVS HR Team
 Global Vision Solutions`;
     }
     return '';
@@ -95,15 +95,15 @@ Global Vision Solutions`;
       
       // Set default subject based on stage
       const defaultSubjects = {
-        'Interview': 'Interview Invitation - GVS Internship Program',
-        'Accepted': 'Congratulations! Internship Offer - GVS',
-        'Rejected': 'Update on Your Internship Application - GVS',
-        'Completion': 'Internship Completion - GVS',
-        'Certification': 'Your Internship Certificate - GVS'
+        'Interview': 'Interview Invitation - GVS Employment',
+        'Accepted': 'Congratulations! Job Offer - GVS',
+        'Rejected': 'Update on Your Job Application - GVS',
+        'Completion': 'Employment Completion - GVS',
+        'Certification': 'Your Employment Certificate - GVS'
       };
       
       setEmailData({
-        subject: defaultSubjects[newStage] || 'Internship Application Update - GVS',
+        subject: defaultSubjects[newStage] || 'Employment Application Update - GVS',
         emailContent: generateDefaultEmailContent(newStage, app),
         date: '',
         time: '',

@@ -72,17 +72,25 @@ async function sendEmail(to, subject, htmlBody) {
 exports.submitEmploymentApplication = async (req, res) => {
   try {
     const {
-      name, email, mobile, dob, gender, nationality, current_location,
-      qualification, university, department, internship_coordinator,
-      hours, joining_date, disability, disability_type
+      email, fullName, dateOfBirth, gender, nationality, mobileContact, whatsapp,
+      currentAddress, postalCode, city, country, cprNationalId, passportId, passportValidity,
+      educationLevel, courseDegree, currentlyEmployed, employmentDesired, yearsOfExperience,
+      availableStart, shiftAvailable, canTravel, drivingLicense, skills,
+      ref1Name, ref1Contact, ref1Email, ref2Name, ref2Contact, ref2Email,
+      ref3Name, ref3Contact, ref3Email, visaStatus, visaValidity,
+      expectedSalary, clientLeadsStrategy
     } = req.body;
 
-    console.log('Received internship application:', {
-      name, email, mobile, university, department
+    console.log('Received employment application:', {
+      fullName, email, mobileContact, employmentDesired
     });
 
     // Validate required fields
-    if (!name || !email || !mobile || !dob || !gender || !qualification || !university || !department) {
+    if (!email || !fullName || !dateOfBirth || !gender || !nationality || !mobileContact || 
+        !whatsapp || !currentAddress || !postalCode || !city || !country ||
+        !educationLevel || !courseDegree || !currentlyEmployed || !employmentDesired ||
+        !availableStart || !shiftAvailable || !canTravel || !drivingLicense || !skills ||
+        !expectedSalary || !clientLeadsStrategy) {
       return res.status(400).json({ 
         success: false, 
         message: 'Please fill all required fields' 
@@ -91,83 +99,80 @@ exports.submitEmploymentApplication = async (req, res) => {
 
     let resumeUrl = null;
 
-    // Handle file upload
+    // Handle file upload using Cloudinary
     if (req.file) {
       const fileBuffer = req.file.buffer;
-      const fileName = `employment_resumes/${Date.now()}_${req.file.originalname}`;
 
-      const isPdf = req.file.mimetype === 'application/pdf';
-      const isDocx = req.file.mimetype === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' || 
-                     req.file.mimetype === 'application/msword';
-      const isImage = req.file.mimetype.startsWith('image/');
-
-      if (isPdf || isDocx) {
-        const uploadResult = await imagekit.upload({
-          file: fileBuffer.toString('base64'),
-          fileName: fileName,
-          folder: '/employment_resumes'
-        });
-        resumeUrl = uploadResult.url;
-      } else if (isImage) {
-        const uploadResult = await new Promise((resolve, reject) => {
-          const uploadStream = cloudinary.uploader.upload_stream(
-            { folder: 'employment_resumes' },
-            (error, result) => {
-              if (error) reject(error);
-              else resolve(result);
-            }
-          );
-          uploadStream.end(fileBuffer);
-        });
-        resumeUrl = uploadResult.secure_url;
-      }
+      const uploadResult = await new Promise((resolve, reject) => {
+        const uploadStream = cloudinary.uploader.upload_stream(
+          { 
+            folder: 'employment_resumes',
+            resource_type: 'auto'
+          },
+          (error, result) => {
+            if (error) reject(error);
+            else resolve(result);
+          }
+        );
+        uploadStream.end(fileBuffer);
+      });
+      resumeUrl = uploadResult.secure_url;
     }
 
     // Insert into database
     const [result] = await pool.query(
       `INSERT INTO employment_applications 
-      (name, email, mobile, dob, gender, nationality, current_location, qualification, 
-       university, department, internship_coordinator, hours, joining_date, 
-       resume_url, disability, disability_type, stage) 
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Applied')`,
-      [name, email, mobile, dob, gender, nationality || null, current_location || null, 
-       qualification, university, department, internship_coordinator || null, 
-       hours || null, joining_date || null, resumeUrl, disability || 'No', 
-       disability_type || null]
+      (email, fullName, dateOfBirth, gender, nationality, mobileContact, whatsapp,
+       currentAddress, postalCode, city, country, cprNationalId, passportId, passportValidity,
+       educationLevel, courseDegree, currentlyEmployed, employmentDesired, yearsOfExperience,
+       availableStart, shiftAvailable, canTravel, drivingLicense, skills,
+       ref1Name, ref1Contact, ref1Email, ref2Name, ref2Contact, ref2Email,
+       ref3Name, ref3Contact, ref3Email, visaStatus, visaValidity,
+       expectedSalary, clientLeadsStrategy, resume_url, stage) 
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        email, fullName, dateOfBirth, gender, nationality, mobileContact, whatsapp,
+        currentAddress, postalCode, city, country, cprNationalId || null, passportId || null, passportValidity || null,
+        educationLevel, courseDegree, currentlyEmployed, employmentDesired, yearsOfExperience || null,
+        availableStart, shiftAvailable, canTravel, drivingLicense, skills,
+        ref1Name || null, ref1Contact || null, ref1Email || null, 
+        ref2Name || null, ref2Contact || null, ref2Email || null,
+        ref3Name || null, ref3Contact || null, ref3Email || null, 
+        visaStatus || null, visaValidity || null,
+        expectedSalary, clientLeadsStrategy, resumeUrl, 'Applied'
+      ]
     );
 
     // Send confirmation email to applicant
     const applicantEmailHtml = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <h2 style="color: #0284C7;">Thank You for Your Application!</h2>
-        <p>Dear ${name},</p>
-        <p>Thank you for applying for the internship position in the <strong>${department}</strong> department at Global Vision Solutions.</p>
+        <p>Dear ${fullName},</p>
+        <p>Thank you for applying for the <strong>${employmentDesired}</strong> position at Global Vision Solutions.</p>
         <p>We have received your application and our team will review it shortly. We will contact you regarding the next steps.</p>
         <p>If you have any questions, please contact us at info@gvs-bh.com</p>
         <br>
         <p>Best regards,<br>
-        <strong>GVS Internship Team</strong><br>
+        <strong>GVS HR Team</strong><br>
         Global Vision Solutions</p>
       </div>
     `;
 
-    await sendEmail(email, 'Internship Application Received - GVS', applicantEmailHtml);
+    await sendEmail(email, 'Employment Application Received - GVS', applicantEmailHtml);
 
     // Send notification email to admin
     const adminEmailHtml = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <h2 style="color: #0284C7;">New Internship Application Received</h2>
+        <h2 style="color: #0284C7;">New Employment Application Received</h2>
         <h3>Applicant Details:</h3>
         <table style="width: 100%; border-collapse: collapse;">
-          <tr><td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>Name:</strong></td><td style="padding: 8px; border-bottom: 1px solid #ddd;">${name}</td></tr>
+          <tr><td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>Name:</strong></td><td style="padding: 8px; border-bottom: 1px solid #ddd;">${fullName}</td></tr>
           <tr><td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>Email:</strong></td><td style="padding: 8px; border-bottom: 1px solid #ddd;">${email}</td></tr>
-          <tr><td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>Mobile:</strong></td><td style="padding: 8px; border-bottom: 1px solid #ddd;">${mobile}</td></tr>
-          <tr><td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>University:</strong></td><td style="padding: 8px; border-bottom: 1px solid #ddd;">${university}</td></tr>
-          <tr><td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>Department:</strong></td><td style="padding: 8px; border-bottom: 1px solid #ddd;">${department}</td></tr>
-          <tr><td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>Qualification:</strong></td><td style="padding: 8px; border-bottom: 1px solid #ddd;">${qualification}</td></tr>
-          ${internship_coordinator ? `<tr><td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>Coordinator:</strong></td><td style="padding: 8px; border-bottom: 1px solid #ddd;">${internship_coordinator}</td></tr>` : ''}
-          ${hours ? `<tr><td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>Hours:</strong></td><td style="padding: 8px; border-bottom: 1px solid #ddd;">${hours}</td></tr>` : ''}
-          ${joining_date ? `<tr><td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>Joining Date:</strong></td><td style="padding: 8px; border-bottom: 1px solid #ddd;">${new Date(joining_date).toLocaleDateString()}</td></tr>` : ''}
+          <tr><td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>Mobile:</strong></td><td style="padding: 8px; border-bottom: 1px solid #ddd;">${mobileContact}</td></tr>
+          <tr><td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>Position:</strong></td><td style="padding: 8px; border-bottom: 1px solid #ddd;">${employmentDesired}</td></tr>
+          <tr><td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>Education:</strong></td><td style="padding: 8px; border-bottom: 1px solid #ddd;">${educationLevel} - ${courseDegree}</td></tr>
+          <tr><td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>Expected Salary:</strong></td><td style="padding: 8px; border-bottom: 1px solid #ddd;">BHD ${expectedSalary}</td></tr>
+          <tr><td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>Available Start:</strong></td><td style="padding: 8px; border-bottom: 1px solid #ddd;">${new Date(availableStart).toLocaleDateString()}</td></tr>
           ${resumeUrl ? `<tr><td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>Resume:</strong></td><td style="padding: 8px; border-bottom: 1px solid #ddd;"><a href="${resumeUrl}">View Resume</a></td></tr>` : ''}
         </table>
         <p style="margin-top: 20px;"><strong>Application ID:</strong> ${result.insertId}</p>
@@ -176,7 +181,8 @@ exports.submitEmploymentApplication = async (req, res) => {
       </div>
     `;
 
-    await sendEmail('info@gvs-bh.com', `New Internship Application - ${name} (${department})`, adminEmailHtml);
+    // Send to test email for testing purposes
+    await sendEmail('info@gvs-bh.com', `New Employment Application - ${fullName} (${employmentDesired})`, adminEmailHtml);
 
     res.status(201).json({
       success: true,
@@ -208,7 +214,7 @@ exports.getEmploymentApplications = async (req, res) => {
     }
 
     if (position) {
-      query += ' AND position_applied LIKE ?';
+      query += ' AND employmentDesired LIKE ?';
       params.push(`%${position}%`);
     }
 
@@ -255,7 +261,6 @@ exports.updateApplicationStage = async (req, res) => {
       });
     }
 
-    // Get current stage to validate transition
     const [applications] = await pool.query(
       'SELECT stage FROM employment_applications WHERE id = ?',
       [id]
@@ -268,28 +273,7 @@ exports.updateApplicationStage = async (req, res) => {
       });
     }
 
-    const currentStage = applications[0].stage;
-
-    // Define allowed stage transitions (no going back)
-    const stageFlow = {
-      'Applied': ['Applied', 'Interview'],
-      'Interview': ['Interview', 'Accepted', 'Rejected'],
-      'Accepted': ['Accepted', 'Completion', 'Certification'],
-      'Rejected': ['Rejected'], // Terminal stage
-      'Completion': ['Completion', 'Certification'],
-      'Certification': ['Certification'] // Terminal stage
-    };
-
-    const allowedStages = stageFlow[currentStage] || ['Applied'];
-
-    if (!allowedStages.includes(stage)) {
-      return res.status(400).json({
-        success: false,
-        message: `Cannot change stage from ${currentStage} to ${stage}. Allowed stages: ${allowedStages.join(', ')}`
-      });
-    }
-
-    const [result] = await pool.query(
+    await pool.query(
       'UPDATE employment_applications SET stage = ? WHERE id = ?',
       [stage, id]
     );
@@ -321,7 +305,6 @@ exports.sendStageEmail = async (req, res) => {
       });
     }
 
-    // Validate required fields based on stage
     if (newStage === 'Interview') {
       if (!date || !time || !venue) {
         return res.status(400).json({
@@ -345,14 +328,12 @@ exports.sendStageEmail = async (req, res) => {
     );
 
     for (const app of applications) {
-      // Use the message content directly (already formatted by frontend)
-      const emailContent = message || `Dear ${app.name},\n\nYour application status has been updated.\n\nBest regards,\nGVS Internship Team`;
+      const emailContent = message || `Dear ${app.fullName},\n\nYour application status has been updated.\n\nBest regards,\nGVS HR Team`;
       
-      // Convert plain text to HTML with proper formatting
       const emailHtml = `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: white;">
           <div style="background: #0284C7; padding: 40px 20px; text-align: center;">
-            <h1 style="color: white; margin: 0; font-size: 28px; font-weight: 700;">GVS Internship Program</h1>
+            <h1 style="color: white; margin: 0; font-size: 28px; font-weight: 700;">GVS Employment</h1>
           </div>
           <div style="padding: 40px 30px; white-space: pre-wrap; line-height: 1.6;">
             ${emailContent.replace(/\n/g, '<br>')}
@@ -369,7 +350,6 @@ exports.sendStageEmail = async (req, res) => {
 
       await sendEmail(app.email, subject, emailHtml);
 
-      // Update stage in database
       await pool.query(
         'UPDATE employment_applications SET stage = ? WHERE id = ?',
         [newStage, app.id]
@@ -404,11 +384,10 @@ exports.uploadCertificate = async (req, res) => {
     const fileBuffer = req.file.buffer;
     const fileName = `certificates/${Date.now()}_${req.file.originalname}`;
 
-    // Upload to ImageKit
     const uploadResult = await imagekit.upload({
       file: fileBuffer.toString('base64'),
       fileName: fileName,
-      folder: '/internship_certificates'
+      folder: '/employment_certificates'
     });
 
     res.status(200).json({
@@ -455,7 +434,7 @@ exports.sendCustomEmail = async (req, res) => {
       const emailHtml = `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <h2 style="color: #0284C7;">${subject}</h2>
-          <p>Dear ${app.name},</p>
+          <p>Dear ${app.fullName},</p>
           <p>${message.replace(/\n/g, '<br>')}</p>
           ${attachmentUrl ? `<p><a href="${attachmentUrl}" style="color: #0284C7; text-decoration: underline;">View Attachment</a></p>` : ''}
           <br>
@@ -551,7 +530,7 @@ exports.exportToExcel = async (req, res) => {
     }
 
     if (position) {
-      query += ' AND position_applied LIKE ?';
+      query += ' AND employmentDesired LIKE ?';
       params.push(`%${position}%`);
     }
 
@@ -567,13 +546,14 @@ exports.exportToExcel = async (req, res) => {
 
     const [applications] = await pool.query(query, params);
 
-    // Convert to CSV
     const headers = [
-      'ID', 'Name', 'Email', 'Mobile', 'DOB', 'Gender', 'Nationality', 'Location',
-      'Qualification', 'Experience (Years)', 'Current Company', 'Position Applied',
-      'Expected Salary', 'Notice Period', 'Skills', 'LinkedIn', 'Portfolio',
-      'Resume URL', 'Disability', 'Disability Type', 'Stage', 'Interview Date',
-      'Interview Time', 'Interview Venue', 'Created At'
+      'ID', 'Full Name', 'Email', 'Mobile', 'WhatsApp', 'DOB', 'Gender', 'Nationality',
+      'Address', 'City', 'Country', 'Postal Code', 'CPR/National ID', 'Passport ID', 'Passport Validity',
+      'Education Level', 'Course/Degree', 'Currently Employed', 'Employment Desired', 'Years of Experience',
+      'Available Start', 'Shift Available', 'Can Travel', 'Driving License', 'Skills',
+      'Ref1 Name', 'Ref1 Contact', 'Ref1 Email', 'Ref2 Name', 'Ref2 Contact', 'Ref2 Email',
+      'Ref3 Name', 'Ref3 Contact', 'Ref3 Email', 'Visa Status', 'Visa Validity',
+      'Expected Salary', 'Client Leads Strategy', 'Resume URL', 'Stage', 'Created At'
     ];
 
     const csvRows = [headers.join(',')];
@@ -581,29 +561,45 @@ exports.exportToExcel = async (req, res) => {
     applications.forEach(app => {
       const row = [
         app.id,
-        `"${app.name}"`,
-        app.email,
-        app.mobile,
-        app.dob ? new Date(app.dob).toLocaleDateString() : '',
-        app.gender,
+        `"${app.fullName || ''}"`,
+        app.email || '',
+        app.mobileContact || '',
+        app.whatsapp || '',
+        app.dateOfBirth ? new Date(app.dateOfBirth).toLocaleDateString() : '',
+        app.gender || '',
         app.nationality || '',
-        `"${app.current_location || ''}"`,
-        `"${app.qualification}"`,
-        app.experience_years || '',
-        `"${app.current_company || ''}"`,
-        `"${app.position_applied}"`,
-        app.expected_salary || '',
-        app.notice_period || '',
+        `"${app.currentAddress || ''}"`,
+        app.city || '',
+        app.country || '',
+        app.postalCode || '',
+        app.cprNationalId || '',
+        app.passportId || '',
+        app.passportValidity ? new Date(app.passportValidity).toLocaleDateString() : '',
+        app.educationLevel || '',
+        `"${app.courseDegree || ''}"`,
+        app.currentlyEmployed || '',
+        `"${app.employmentDesired || ''}"`,
+        app.yearsOfExperience || '',
+        app.availableStart ? new Date(app.availableStart).toLocaleDateString() : '',
+        app.shiftAvailable || '',
+        app.canTravel || '',
+        app.drivingLicense || '',
         `"${app.skills || ''}"`,
-        app.linkedin_url || '',
-        app.portfolio_url || '',
+        `"${app.ref1Name || ''}"`,
+        app.ref1Contact || '',
+        app.ref1Email || '',
+        `"${app.ref2Name || ''}"`,
+        app.ref2Contact || '',
+        app.ref2Email || '',
+        `"${app.ref3Name || ''}"`,
+        app.ref3Contact || '',
+        app.ref3Email || '',
+        app.visaStatus || '',
+        app.visaValidity ? new Date(app.visaValidity).toLocaleDateString() : '',
+        app.expectedSalary || '',
+        `"${app.clientLeadsStrategy || ''}"`,
         app.resume_url || '',
-        app.disability,
-        app.disability_type || '',
-        app.stage,
-        app.interview_date ? new Date(app.interview_date).toLocaleString() : '',
-        app.interview_time || '',
-        `"${app.interview_venue || ''}"`,
+        app.stage || '',
         new Date(app.created_at).toLocaleString()
       ];
       csvRows.push(row.join(','));

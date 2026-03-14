@@ -274,7 +274,7 @@ const EmploymentManager = () => {
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-6">
-          <h1 className="text-3xl font-bold text-[#0284C7] mb-4">Internship Applications</h1>
+          <h1 className="text-3xl font-bold text-[#0284C7] mb-4">Employment Applications</h1>
           
           <div className="flex justify-end items-center gap-3">
             {selectedForDelete.length > 0 && (
@@ -343,8 +343,8 @@ const EmploymentManager = () => {
                   </th>
                   <th className="px-4 py-3 text-left">Name</th>
                   <th className="px-4 py-3 text-left">Email</th>
-                  <th className="px-4 py-3 text-left">University</th>
-                  <th className="px-4 py-3 text-left">Department</th>
+                  <th className="px-4 py-3 text-left">Position</th>
+                  <th className="px-4 py-3 text-left">Mobile</th>
                   <th className="px-4 py-3 text-left">Stage</th>
                   <th className="px-4 py-3 text-left">Applied Date</th>
                   <th className="px-4 py-3 text-center">Actions</th>
@@ -366,10 +366,10 @@ const EmploymentManager = () => {
                           <FaSquare size={18} />}
                       </button>
                     </td>
-                    <td className="px-4 py-3">{app.name}</td>
+                    <td className="px-4 py-3">{app.fullName}</td>
                     <td className="px-4 py-3">{app.email}</td>
-                    <td className="px-4 py-3">{app.university || 'N/A'}</td>
-                    <td className="px-4 py-3">{app.department || 'N/A'}</td>
+                    <td className="px-4 py-3">{app.employmentDesired || 'N/A'}</td>
+                    <td className="px-4 py-3">{app.mobileContact || 'N/A'}</td>
                     <td className="px-4 py-3">
                       <select
                         value={app.stage}
@@ -415,7 +415,7 @@ const EmploymentManager = () => {
                           <FaEnvelope size={18} />
                         </button>
                         <button
-                          onClick={() => openWhatsApp(app.mobile)}
+                          onClick={() => openWhatsApp(app.mobileContact)}
                           className="text-green-500 hover:text-green-700"
                           title="WhatsApp"
                         >
@@ -531,27 +531,137 @@ const EmploymentManager = () => {
                   </button>
                 </div>
                 
-                <div className="grid grid-cols-2 gap-4">
-                  <div><p className="text-sm text-gray-600">Name</p><p className="font-semibold">{selectedApplication.name}</p></div>
-                  <div><p className="text-sm text-gray-600">Email</p><p className="font-semibold">{selectedApplication.email}</p></div>
-                  <div><p className="text-sm text-gray-600">Mobile</p><p className="font-semibold">{selectedApplication.mobile}</p></div>
-                  <div><p className="text-sm text-gray-600">Date of Birth</p><p className="font-semibold">{new Date(selectedApplication.dob).toLocaleDateString()}</p></div>
-                  <div><p className="text-sm text-gray-600">Gender</p><p className="font-semibold">{selectedApplication.gender}</p></div>
-                  <div><p className="text-sm text-gray-600">Nationality</p><p className="font-semibold">{selectedApplication.nationality || 'N/A'}</p></div>
-                  <div><p className="text-sm text-gray-600">Location</p><p className="font-semibold">{selectedApplication.current_location || 'N/A'}</p></div>
-                  <div><p className="text-sm text-gray-600">Qualification</p><p className="font-semibold">{selectedApplication.qualification}</p></div>
-                  <div><p className="text-sm text-gray-600">University</p><p className="font-semibold">{selectedApplication.university || 'N/A'}</p></div>
-                  <div><p className="text-sm text-gray-600">Department</p><p className="font-semibold">{selectedApplication.department || 'N/A'}</p></div>
-                  <div><p className="text-sm text-gray-600">Internship Coordinator</p><p className="font-semibold">{selectedApplication.internship_coordinator || 'N/A'}</p></div>
-                  <div><p className="text-sm text-gray-600">Total Hours</p><p className="font-semibold">{selectedApplication.hours || 'N/A'}</p></div>
-                  <div><p className="text-sm text-gray-600">Joining Date</p><p className="font-semibold">{selectedApplication.joining_date ? new Date(selectedApplication.joining_date).toLocaleDateString() : 'N/A'}</p></div>
-                  <div><p className="text-sm text-gray-600">Disability</p><p className="font-semibold">{selectedApplication.disability === 'Yes' ? 'Yes' : 'No'}</p></div>
-                  {selectedApplication.disability === 'Yes' && (
-                    <div><p className="text-sm text-gray-600">Disability Type</p><p className="font-semibold">{selectedApplication.disability_type}</p></div>
+                <div className="space-y-6">
+                  {/* Personal Information Section */}
+                  <div>
+                    <h3 className="text-lg font-semibold text-[#0284C7] mb-3 pb-2 border-b">Personal Information</h3>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div><p className="text-sm text-gray-600">Full Name</p><p className="font-semibold">{selectedApplication.fullName}</p></div>
+                      <div><p className="text-sm text-gray-600">Email</p><p className="font-semibold">{selectedApplication.email}</p></div>
+                      <div><p className="text-sm text-gray-600">Mobile Contact</p><p className="font-semibold">{selectedApplication.mobileContact}</p></div>
+                      <div><p className="text-sm text-gray-600">WhatsApp</p><p className="font-semibold">{selectedApplication.whatsapp}</p></div>
+                      <div><p className="text-sm text-gray-600">Date of Birth</p><p className="font-semibold">{new Date(selectedApplication.dateOfBirth).toLocaleDateString()}</p></div>
+                      <div><p className="text-sm text-gray-600">Gender</p><p className="font-semibold">{selectedApplication.gender}</p></div>
+                      <div><p className="text-sm text-gray-600">Nationality</p><p className="font-semibold">{selectedApplication.nationality || 'N/A'}</p></div>
+                    </div>
+                  </div>
+
+                  {/* Address Information Section */}
+                  <div>
+                    <h3 className="text-lg font-semibold text-[#0284C7] mb-3 pb-2 border-b">Address Information</h3>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="col-span-2"><p className="text-sm text-gray-600">Current Address</p><p className="font-semibold">{selectedApplication.currentAddress || 'N/A'}</p></div>
+                      <div><p className="text-sm text-gray-600">City</p><p className="font-semibold">{selectedApplication.city || 'N/A'}</p></div>
+                      <div><p className="text-sm text-gray-600">Country</p><p className="font-semibold">{selectedApplication.country || 'N/A'}</p></div>
+                      <div><p className="text-sm text-gray-600">Postal Code</p><p className="font-semibold">{selectedApplication.postalCode || 'N/A'}</p></div>
+                    </div>
+                  </div>
+
+                  {/* Identification Documents Section */}
+                  <div>
+                    <h3 className="text-lg font-semibold text-[#0284C7] mb-3 pb-2 border-b">Identification Documents</h3>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div><p className="text-sm text-gray-600">CPR/National ID</p><p className="font-semibold">{selectedApplication.cprNationalId || 'N/A'}</p></div>
+                      <div><p className="text-sm text-gray-600">Passport ID</p><p className="font-semibold">{selectedApplication.passportId || 'N/A'}</p></div>
+                      <div><p className="text-sm text-gray-600">Passport Validity</p><p className="font-semibold">{selectedApplication.passportValidity ? new Date(selectedApplication.passportValidity).toLocaleDateString() : 'N/A'}</p></div>
+                      <div><p className="text-sm text-gray-600">Visa Status</p><p className="font-semibold">{selectedApplication.visaStatus || 'N/A'}</p></div>
+                      <div><p className="text-sm text-gray-600">Visa Validity</p><p className="font-semibold">{selectedApplication.visaValidity ? new Date(selectedApplication.visaValidity).toLocaleDateString() : 'N/A'}</p></div>
+                    </div>
+                  </div>
+
+                  {/* Education & Work Experience Section */}
+                  <div>
+                    <h3 className="text-lg font-semibold text-[#0284C7] mb-3 pb-2 border-b">Education & Work Experience</h3>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div><p className="text-sm text-gray-600">Education Level</p><p className="font-semibold">{selectedApplication.educationLevel || 'N/A'}</p></div>
+                      <div><p className="text-sm text-gray-600">Course/Degree</p><p className="font-semibold">{selectedApplication.courseDegree || 'N/A'}</p></div>
+                      <div><p className="text-sm text-gray-600">Currently Employed</p><p className="font-semibold">{selectedApplication.currentlyEmployed || 'N/A'}</p></div>
+                      <div><p className="text-sm text-gray-600">Years of Experience</p><p className="font-semibold">{selectedApplication.yearsOfExperience || 'N/A'}</p></div>
+                      <div><p className="text-sm text-gray-600">Position Applied</p><p className="font-semibold">{selectedApplication.employmentDesired || 'N/A'}</p></div>
+                      <div><p className="text-sm text-gray-600">Expected Salary (BHD)</p><p className="font-semibold">{selectedApplication.expectedSalary || 'N/A'}</p></div>
+                      <div className="col-span-2"><p className="text-sm text-gray-600">Skills</p><p className="font-semibold whitespace-pre-wrap">{selectedApplication.skills || 'N/A'}</p></div>
+                    </div>
+                  </div>
+
+                  {/* Work Preferences Section */}
+                  <div>
+                    <h3 className="text-lg font-semibold text-[#0284C7] mb-3 pb-2 border-b">Work Preferences</h3>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div><p className="text-sm text-gray-600">Available to Start</p><p className="font-semibold">{selectedApplication.availableStart || 'N/A'}</p></div>
+                      <div><p className="text-sm text-gray-600">Shift Available</p><p className="font-semibold">{selectedApplication.shiftAvailable || 'N/A'}</p></div>
+                      <div><p className="text-sm text-gray-600">Can Travel</p><p className="font-semibold">{selectedApplication.canTravel || 'N/A'}</p></div>
+                      <div><p className="text-sm text-gray-600">Driving License</p><p className="font-semibold">{selectedApplication.drivingLicense || 'N/A'}</p></div>
+                    </div>
+                  </div>
+
+                  {/* Client Leads Strategy Section */}
+                  <div>
+                    <h3 className="text-lg font-semibold text-[#0284C7] mb-3 pb-2 border-b">Client Leads Strategy</h3>
+                    <div><p className="font-semibold whitespace-pre-wrap">{selectedApplication.clientLeadsStrategy || 'N/A'}</p></div>
+                  </div>
+
+                  {/* References Section */}
+                  {(selectedApplication.ref1Name || selectedApplication.ref2Name || selectedApplication.ref3Name) && (
+                    <div>
+                      <h3 className="text-lg font-semibold text-[#0284C7] mb-3 pb-2 border-b">References</h3>
+                      <div className="space-y-4">
+                        {selectedApplication.ref1Name && (
+                          <div className="bg-gray-50 p-3 rounded">
+                            <p className="text-sm font-semibold text-gray-700 mb-2">Reference 1</p>
+                            <div className="grid grid-cols-3 gap-2 text-sm">
+                              <div><span className="text-gray-600">Name:</span> {selectedApplication.ref1Name}</div>
+                              <div><span className="text-gray-600">Contact:</span> {selectedApplication.ref1Contact}</div>
+                              <div><span className="text-gray-600">Email:</span> {selectedApplication.ref1Email}</div>
+                            </div>
+                          </div>
+                        )}
+                        {selectedApplication.ref2Name && (
+                          <div className="bg-gray-50 p-3 rounded">
+                            <p className="text-sm font-semibold text-gray-700 mb-2">Reference 2</p>
+                            <div className="grid grid-cols-3 gap-2 text-sm">
+                              <div><span className="text-gray-600">Name:</span> {selectedApplication.ref2Name}</div>
+                              <div><span className="text-gray-600">Contact:</span> {selectedApplication.ref2Contact}</div>
+                              <div><span className="text-gray-600">Email:</span> {selectedApplication.ref2Email}</div>
+                            </div>
+                          </div>
+                        )}
+                        {selectedApplication.ref3Name && (
+                          <div className="bg-gray-50 p-3 rounded">
+                            <p className="text-sm font-semibold text-gray-700 mb-2">Reference 3</p>
+                            <div className="grid grid-cols-3 gap-2 text-sm">
+                              <div><span className="text-gray-600">Name:</span> {selectedApplication.ref3Name}</div>
+                              <div><span className="text-gray-600">Contact:</span> {selectedApplication.ref3Contact}</div>
+                              <div><span className="text-gray-600">Email:</span> {selectedApplication.ref3Email}</div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   )}
+                  
+                  {/* Resume Section */}
                   {selectedApplication.resume_url && (
-                    <div className="col-span-2"><p className="text-sm text-gray-600">Resume</p><a href={selectedApplication.resume_url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">View Resume</a></div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-[#0284C7] mb-3 pb-2 border-b">Resume</h3>
+                      <a href={selectedApplication.resume_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-blue-600 hover:underline font-semibold">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        View/Download Resume
+                      </a>
+                    </div>
                   )}
+
+                  {/* Application Info Section */}
+                  <div>
+                    <h3 className="text-lg font-semibold text-[#0284C7] mb-3 pb-2 border-b">Application Information</h3>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div><p className="text-sm text-gray-600">Application ID</p><p className="font-semibold">#{selectedApplication.id}</p></div>
+                      <div><p className="text-sm text-gray-600">Current Stage</p><p className="font-semibold">{selectedApplication.stage}</p></div>
+                      <div><p className="text-sm text-gray-600">Applied Date</p><p className="font-semibold">{new Date(selectedApplication.created_at).toLocaleString()}</p></div>
+                      <div><p className="text-sm text-gray-600">Last Updated</p><p className="font-semibold">{new Date(selectedApplication.updated_at).toLocaleString()}</p></div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -566,7 +676,7 @@ const EmploymentManager = () => {
                 <div className="flex justify-between items-center mb-4">
                   <div>
                     <h2 className="text-2xl font-bold text-[#0284C7]">Send Custom Email</h2>
-                    <p className="text-sm text-gray-600 mt-1">To: {selectedApplication.name} ({selectedApplication.email})</p>
+                    <p className="text-sm text-gray-600 mt-1">To: {selectedApplication.fullName} ({selectedApplication.email})</p>
                   </div>
                   <button
                     onClick={() => setShowCustomEmailModal(false)}
@@ -658,7 +768,7 @@ const EmploymentManager = () => {
               <h2 className="text-2xl font-bold text-[#0284C7] mb-4">Confirm Delete</h2>
               <p className="text-gray-700 mb-6">
                 {deleteTarget?.type === 'single'
-                  ? `Are you sure you want to delete the application of ${deleteTarget.data.name}? This action cannot be undone.`
+                  ? `Are you sure you want to delete the application of ${deleteTarget.data.fullName}? This action cannot be undone.`
                   : `Are you sure you want to delete ${deleteTarget?.data.length} selected application(s)? This action cannot be undone.`}
               </p>
               <div className="flex justify-end gap-3">

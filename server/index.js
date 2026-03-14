@@ -172,6 +172,16 @@ app.get('/api/detect-region', async (req, res) => {
 });
 // --- END OF NEW ROUTE ---
 
+// --- HEALTH CHECK / KEEP-ALIVE ENDPOINT ---
+app.get('/api/health', (req, res) => {
+  res.json({ 
+    status: 'ok', 
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime()
+  });
+});
+// --- END OF HEALTH CHECK ---
+
 app.get('/', (req, res) => {
     res.send('GVS Cargo Merged API is running...');
 });
