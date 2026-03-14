@@ -171,11 +171,12 @@ const Navbar = () => {
         },
         { name: "Sales Team", link: `mailto:${content.email_sales}` },
         { name: "Business Enquiries", link: `mailto:${content.email_business}` },
+        { name: "Careers", link: "/careers" },
+
       ],
     },
     { name: "Offers", link: "/offers" },
-    { name: "Career", link: "/careers" },
-
+    
   ];
 
 
