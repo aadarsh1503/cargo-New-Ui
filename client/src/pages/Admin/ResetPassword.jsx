@@ -73,7 +73,7 @@ const ResetPassword = () => {
                             <FiCheckCircle className="mx-auto text-5xl text-green-500" />
                             <h2 className="text-2xl font-bold text-[#243670]">Password Reset!</h2>
                             <p className="text-green-800 bg-green-200/50 p-3 rounded-lg text-sm">{message}</p>
-                            <Link to="/admin/login" className="inline-block w-full font-bold text-white py-3 mt-4 rounded-xl bg-gradient-to-r from-[#243670] to-[#5b72b4] shadow-lg">
+                            <Link to="/login" className="inline-block w-full font-bold text-white py-3 mt-4 rounded-xl bg-gradient-to-r from-[#243670] to-[#5b72b4] shadow-lg">
                                 Proceed to Login
                             </Link>
                         </div>

@@ -34,7 +34,7 @@ const AdminSignUp = () => {
 
             setSuccess(data.message + ' Redirecting to login...');
             setTimeout(() => {
-                navigate('/admin/login');
+                navigate('/login');
             }, 3000);
 
         } catch (err) {
@@ -78,7 +78,7 @@ const AdminSignUp = () => {
                         {isLoading ? 'Creating...' : 'Create Account'}
                     </button>
                     <p className="text-center mt-4 text-sm">
-                        Already have an account? <Link to="/admin/login" className="text-blue-600 hover:underline">Log In</Link>
+                        Already have an account? <Link to="/login" className="text-blue-600 hover:underline">Log In</Link>
                     </p>
                 </form>
             </div>

@@ -335,6 +335,17 @@ const Navbar = () => {
               formatOptionLabel={formatOptionLabel}
               styles={customSelectStyles}
             />
+            {/* Login button */}
+            <Link
+              to="/login"
+              className={`px-5 py-2.5 font-semibold text-sm rounded-full border-2 transition-all duration-300 ${
+                isTransparent
+                  ? 'text-white border-white/40 hover:bg-white/20'
+                  : 'text-gray-700 border-gray-200 hover:bg-gray-100'
+              }`}
+            >
+              Login
+            </Link>
             <Link
               to="/ContactUs"
               className={`px-6 py-2.5 font-semibold text-sm rounded-full shadow-lg transition-all duration-300 ${

@@ -15,7 +15,6 @@ import Flat2 from "./Flat2.png";
 import Plataform1 from "./Plataform1.png";
 import Plataform2 from "./Plataform2.png";
 import Tank from "./Tank.png";
-import Slide1 from '../Slide1/Slide1';
 
 function Containers() {
     const [selected, setSelected] = useState('DRY BOX');
@@ -53,11 +52,11 @@ function Containers() {
             <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {containerImages[selected].map((imageSrc, index) => (
                     <img
-                        key={index}
+                        key={imageSrc}
                         src={imageSrc}
                         alt={`${selected} Photo ${index + 1}`}
                         className={`w-full object-fill rounded-lg shadow ${
-                            selected === 'TANK' ? 'lg:h-[400px] lg:w-[500px]  object-cover ' : 'h-auto lg:h-[400px]'
+                            selected === 'TANK' ? 'lg:h-[400px] lg:w-[500px] object-cover' : 'h-auto lg:h-[400px]'
                         }`}
                     />
                 ))}

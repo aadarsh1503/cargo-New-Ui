@@ -1,5 +1,5 @@
 const pool = require('../config/db');
-const { SESClient, SendEmailCommand } = require('@aws-sdk/client-ses');
+const { sendMail } = require('../../utils/emailProvider');
 const cloudinary = require('cloudinary').v2;
 const ImageKit = require('imagekit');
 
@@ -17,56 +17,8 @@ const imagekit = new ImageKit({
   urlEndpoint: process.env.IMAGEKIT_URL_ENDPOINT
 });
 
-// Helper function to get AWS settings from database
-async function getAWSSettings() {
-  const [settings] = await pool.query('SELECT setting_key, setting_value FROM aws_settings');
-  const config = {};
-  settings.forEach(setting => {
-    config[setting.setting_key] = setting.setting_value;
-  });
-  return config;
-}
-
-// Helper function to send email via AWS SES
-async function sendEmail(to, subject, htmlBody) {
-  try {
-    const awsConfig = await getAWSSettings();
-    
-    const sesClient = new SESClient({
-      region: awsConfig.AWS_REGION || process.env.AWS_REGION,
-      credentials: {
-        accessKeyId: awsConfig.AWS_ACCESS_KEY_ID || process.env.AWS_ACCESS_KEY_ID,
-        secretAccessKey: awsConfig.AWS_SECRET_ACCESS_KEY || process.env.AWS_SECRET_ACCESS_KEY
-      }
-    });
-
-    const params = {
-      Source: `${awsConfig.AWS_SES_FROM_NAME || process.env.AWS_SES_FROM_NAME} <${awsConfig.AWS_SES_FROM_EMAIL || process.env.AWS_SES_FROM_EMAIL}>`,
-      Destination: {
-        ToAddresses: Array.isArray(to) ? to : [to]
-      },
-      Message: {
-        Subject: {
-          Data: subject,
-          Charset: 'UTF-8'
-        },
-        Body: {
-          Html: {
-            Data: htmlBody,
-            Charset: 'UTF-8'
-          }
-        }
-      },
-      ReplyToAddresses: [awsConfig.AWS_SES_FROM_EMAIL || process.env.AWS_SES_FROM_EMAIL]
-    };
-
-    const command = new SendEmailCommand(params);
-    return await sesClient.send(command);
-  } catch (error) {
-    console.error('Email sending error:', error);
-    throw error;
-  }
-}
+// Thin wrapper so existing calls stay the same signature
+const sendEmail = (to, subject, html) => sendMail({ to, subject, html });
 
 // Submit Employment Application (Public)
 exports.submitEmploymentApplication = async (req, res) => {
@@ -99,24 +51,35 @@ exports.submitEmploymentApplication = async (req, res) => {
 
     let resumeUrl = null;
 
-    // Handle file upload using Cloudinary
+    // Handle file upload — use ImageKit for documents (PDF/Word), Cloudinary for images
     if (req.file) {
       const fileBuffer = req.file.buffer;
+      const originalName = req.file.originalname || 'resume';
+      const mimeType = req.file.mimetype || '';
+      const isImage = mimeType.startsWith('image/');
 
-      const uploadResult = await new Promise((resolve, reject) => {
-        const uploadStream = cloudinary.uploader.upload_stream(
-          { 
-            folder: 'employment_resumes',
-            resource_type: 'auto'
-          },
-          (error, result) => {
-            if (error) reject(error);
-            else resolve(result);
-          }
-        );
-        uploadStream.end(fileBuffer);
-      });
-      resumeUrl = uploadResult.secure_url;
+      if (isImage) {
+        // Upload images to Cloudinary
+        const uploadResult = await new Promise((resolve, reject) => {
+          const uploadStream = cloudinary.uploader.upload_stream(
+            { folder: 'employment_resumes', resource_type: 'image' },
+            (error, result) => {
+              if (error) reject(error);
+              else resolve(result);
+            }
+          );
+          uploadStream.end(fileBuffer);
+        });
+        resumeUrl = uploadResult.secure_url;
+      } else {
+        // Upload PDFs and Word docs to ImageKit
+        const uploadResult = await imagekit.upload({
+          file: fileBuffer,
+          fileName: `${Date.now()}_${originalName}`,
+          folder: '/employment_resumes'
+        });
+        resumeUrl = uploadResult.url;
+      }
     }
 
     // Insert into database

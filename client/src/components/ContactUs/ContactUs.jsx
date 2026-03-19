@@ -1,6 +1,7 @@
-import { useState, useEffect, useMemo,useRef  } from 'react';
-import { v4 as uuidv4 } from 'uuid';
+import { useState, useEffect, useMemo, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import PhoneInput from 'react-phone-input-2';
+import { API_BASE_URL } from '../../config/apiConfig';
 import 'react-phone-input-2/lib/style.css';
 import ReCAPTCHA from 'react-google-recaptcha';
 import { AiOutlineCheckCircle, AiOutlineArrowRight, AiOutlineArrowLeft } from 'react-icons/ai';
@@ -10,6 +11,170 @@ import { motion, AnimatePresence } from 'framer-motion';
 import './ContactUs.css';
 import LocationSection from '../Map/Map';
 import { useRegion } from '../../context/RegionContext';
+import OceanFreightOffers from '../OceanFreightOffers/OceanFreightOffers';
+
+// --- COUNTRY SEARCH INPUT COMPONENT ---
+const CountrySearchInput = ({ value, onChange, onBlur, name, placeholder, isValid }) => {
+    const [query, setQuery] = useState(value || '');
+    const [open, setOpen] = useState(false);
+    const [highlighted, setHighlighted] = useState(0);
+    const wrapperRef = useRef(null);
+    const allCountries = useMemo(() => countryList().getData(), []);
+
+    const filtered = useMemo(() => {
+        if (!query.trim()) return [];
+        return allCountries
+            .filter(c => c.label.toLowerCase().includes(query.toLowerCase()))
+            .slice(0, 5);
+    }, [query, allCountries]);
+
+    // Sync display when parent resets value
+    useEffect(() => {
+        if (!value) setQuery('');
+    }, [value]);
+
+    // Close on outside click
+    useEffect(() => {
+        const handler = (e) => {
+            if (wrapperRef.current && !wrapperRef.current.contains(e.target)) {
+                setOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handler);
+        return () => document.removeEventListener('mousedown', handler);
+    }, []);
+
+    const select = (label) => {
+        setQuery(label);
+        setOpen(false);
+        onChange({ target: { name, value: label } });
+        onBlur && onBlur({ target: { name, value: label } });
+    };
+
+    const handleKeyDown = (e) => {
+        if (!open || filtered.length === 0) return;
+        if (e.key === 'ArrowDown') { setHighlighted(h => Math.min(h + 1, filtered.length - 1)); e.preventDefault(); }
+        else if (e.key === 'ArrowUp') { setHighlighted(h => Math.max(h - 1, 0)); e.preventDefault(); }
+        else if (e.key === 'Enter') { e.preventDefault(); select(filtered[highlighted].label); }
+        else if (e.key === 'Escape') setOpen(false);
+    };
+
+    return (
+        <div ref={wrapperRef} className="relative">
+            <input
+                type="text"
+                autoComplete="off"
+                value={query}
+                placeholder={placeholder || 'Type to search country...'}
+                className="form-input pr-10"
+                onChange={e => { setQuery(e.target.value); setOpen(true); setHighlighted(0); }}
+                onFocus={() => { if (query) setOpen(true); }}
+                onKeyDown={handleKeyDown}
+            />
+            {isValid && (
+                <div className="absolute top-1/2 right-4 -translate-y-1/2 text-green-500 pointer-events-none">
+                    <AiOutlineCheckCircle className="h-5 w-5" />
+                </div>
+            )}
+            {open && filtered.length > 0 && (
+                <ul className="absolute z-50 w-full bg-white border border-gray-200 rounded-lg shadow-lg mt-1 overflow-hidden">
+                    {filtered.map((c, i) => (
+                        <li
+                            key={c.value}
+                            onMouseDown={() => select(c.label)}
+                            onMouseEnter={() => setHighlighted(i)}
+                            className={`px-4 py-2 cursor-pointer text-sm transition-colors ${i === highlighted ? 'bg-yellow-50 text-yellow-700 font-medium' : 'text-gray-700 hover:bg-gray-50'}`}
+                        >
+                            {c.label}
+                        </li>
+                    ))}
+                </ul>
+            )}
+        </div>
+    );
+};
+
+// --- CITY / PORT SEARCH INPUT COMPONENT ---
+const CitySearchInput = ({ value, onChange, onBlur, name, cities, isValid, disabled }) => {
+    const [query, setQuery] = useState(value || '');
+    const [open, setOpen] = useState(false);
+    const [highlighted, setHighlighted] = useState(0);
+    const wrapperRef = useRef(null);
+    const listRef = useRef(null);
+
+    const filtered = useMemo(() => {
+        if (!query.trim()) return cities;
+        return cities.filter(c => c.toLowerCase().includes(query.toLowerCase()));
+    }, [query, cities]);
+
+    useEffect(() => { if (!value) setQuery(''); }, [value]);
+
+    useEffect(() => {
+        const handler = (e) => {
+            if (wrapperRef.current && !wrapperRef.current.contains(e.target)) setOpen(false);
+        };
+        document.addEventListener('mousedown', handler);
+        return () => document.removeEventListener('mousedown', handler);
+    }, []);
+
+    // Scroll highlighted item into view
+    useEffect(() => {
+        if (listRef.current) {
+            const item = listRef.current.children[highlighted];
+            if (item) item.scrollIntoView({ block: 'nearest' });
+        }
+    }, [highlighted]);
+
+    const select = (city) => {
+        setQuery(city);
+        setOpen(false);
+        onChange({ target: { name, value: city } });
+        onBlur && onBlur({ target: { name, value: city } });
+    };
+
+    const handleKeyDown = (e) => {
+        if (!open || filtered.length === 0) return;
+        if (e.key === 'ArrowDown') { setHighlighted(h => Math.min(h + 1, filtered.length - 1)); e.preventDefault(); }
+        else if (e.key === 'ArrowUp') { setHighlighted(h => Math.max(h - 1, 0)); e.preventDefault(); }
+        else if (e.key === 'Enter') { e.preventDefault(); select(filtered[highlighted]); }
+        else if (e.key === 'Escape') setOpen(false);
+    };
+
+    return (
+        <div ref={wrapperRef} className="relative">
+            <input
+                type="text"
+                autoComplete="off"
+                value={query}
+                placeholder={disabled ? 'Select a country first...' : 'Type to search city or port...'}
+                disabled={disabled}
+                className="form-input pr-10 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                onChange={e => { setQuery(e.target.value); setOpen(true); setHighlighted(0); }}
+                onFocus={() => { if (cities.length > 0) setOpen(true); }}
+                onKeyDown={handleKeyDown}
+            />
+            {isValid && (
+                <div className="absolute top-1/2 right-4 -translate-y-1/2 text-green-500 pointer-events-none">
+                    <AiOutlineCheckCircle className="h-5 w-5" />
+                </div>
+            )}
+            {open && filtered.length > 0 && (
+                <ul ref={listRef} className="absolute z-50 w-full bg-white border border-gray-200 rounded-lg shadow-lg mt-1 max-h-52 overflow-y-auto">
+                    {filtered.map((city, i) => (
+                        <li
+                            key={i}
+                            onMouseDown={() => select(city)}
+                            onMouseEnter={() => setHighlighted(i)}
+                            className={`px-4 py-2 cursor-pointer text-sm transition-colors ${i === highlighted ? 'bg-yellow-50 text-yellow-700 font-medium' : 'text-gray-700 hover:bg-gray-50'}`}
+                        >
+                            {city}
+                        </li>
+                    ))}
+                </ul>
+            )}
+        </div>
+    );
+};
 
 // --- HELPER FUNCTIONS (No changes needed here) ---
 const cache = new Map();
@@ -128,6 +293,13 @@ const ContactUs = () => {
     const [loadingCities, setLoadingCities] = useState([]);
     const [dischargeCities, setDischargeCities] = useState([]);
 
+    // OTP state
+    const [otpStep, setOtpStep] = useState(false);
+    const [otpValue, setOtpValue] = useState('');
+    const [otpError, setOtpError] = useState('');
+    const [otpLoading, setOtpLoading] = useState(false);
+    const [otpResending, setOtpResending] = useState(false);
+
     const countryOptions = useMemo(() => countryList().getData(), []);
     useEffect(() => {
 
@@ -242,50 +414,110 @@ const ContactUs = () => {
             return; 
         }
 
-        const shortId = uuidv4().split('-')[0];
-        setUniqueId(shortId);
-        
-        const messageBody = `
-        New Contact Form Submission\n
-        ---------------------------\n
-        Reference ID: ${shortId}\n\n
-        Company: ${formData.company}\n
-        Name: ${formData.name}\n
-        Telephone: ${formData.telephone}\n
-        Email: ${formData.email}\n\n
-        -- Shipment Details --\n
-        Port of Loading: ${formData.portOfLoadingCity}, ${formData.portOfLoading}\n
-        Port of Discharge: ${formData.portOfDischargeCity}, ${formData.portOfDischarge}\n
-        Mode of Shipment: ${formData.modeOfShipment}\n\n
-        -- Cargo Details --\n
-        Commodity: ${formData.commodity}\n
-        Gross Weight: ${formData.grossWeight} ${formData.weightUnit}\n
-        Number of Boxes/Pallets: ${formData.boxesPallets}\n
-        Size of Each Box/Pallet: ${formData.boxPalletSize} ${formData.dimensionUnit}\n
-        Dimensions (LxWxH): ${formData.length} x ${formData.width} x ${formData.height}\n\n
-        -- Message --\n
-        ${formData.message}
-    `;
-        const emailData = { 
-            to: content.email_customer_care, 
-            from: content.email_customer_care, 
-            subject: `New Quote Request from ${formData.company} - Ref: ${shortId}`, 
-            message: messageBody 
-        };
-
+        // Send OTP to email first
+        setOtpLoading(true);
         try {
-            setSuccessMessage(true);
-            await fetch('https://gvscargo.com/send_to_a_mail.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(emailData) });
-            
-            // --- NEW: Refresh the page after 3 seconds ---
-            setTimeout(() => {
-                window.location.reload();
-            }, 1800);
+            const res = await fetch(`${API_BASE_URL}/freight/user/send-otp`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: formData.email }),
+            });
+            if (!res.ok) throw new Error('Failed to send code');
+            setOtpStep(true);
+            setOtpValue('');
+            setOtpError('');
+        } catch {
+            alert('Failed to send verification code. Please try again.');
+        } finally {
+            setOtpLoading(false);
+        }
+    };
 
+    const handleResendOtp = async () => {
+        setOtpResending(true);
+        setOtpError('');
+        try {
+            await fetch(`${API_BASE_URL}/freight/user/send-otp`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: formData.email }),
+            });
+            setOtpValue('');
+        } catch {
+            setOtpError('Failed to resend code. Please try again.');
+        } finally {
+            setOtpResending(false);
+        }
+    };
+
+    const handleOtpVerifyAndSubmit = async () => {
+        if (otpValue.trim().length !== 6) {
+            setOtpError('Please enter the 6-digit code.');
+            return;
+        }
+        setOtpLoading(true);
+        setOtpError('');
+
+        // Verify OTP
+        try {
+            const verifyRes = await fetch(`${API_BASE_URL}/freight/user/verify-otp`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: formData.email, otp: otpValue.trim() }),
+            });
+            const verifyData = await verifyRes.json();
+            if (!verifyRes.ok) {
+                setOtpError(verifyData.message || 'Invalid code. Please try again.');
+                setOtpLoading(false);
+                return;
+            }
+        } catch {
+            setOtpError('Verification failed. Please try again.');
+            setOtpLoading(false);
+            return;
+        }
+
+        // OTP verified — now submit the form
+        try {
+            const response = await fetch(`${API_BASE_URL}/freight/submit`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    company: formData.company,
+                    name: formData.name,
+                    telephone: formData.telephone,
+                    email: formData.email,
+                    portOfLoading: formData.portOfLoading,
+                    portOfLoadingCity: formData.portOfLoadingCity,
+                    portOfDischarge: formData.portOfDischarge,
+                    portOfDischargeCity: formData.portOfDischargeCity,
+                    modeOfShipment: formData.modeOfShipment,
+                    commodity: formData.commodity,
+                    grossWeight: formData.grossWeight,
+                    weightUnit: formData.weightUnit,
+                    boxesPallets: formData.boxesPallets,
+                    boxPalletSize: formData.boxPalletSize,
+                    boxPalletUnit: formData.boxPalletUnit,
+                    length: formData.length,
+                    width: formData.width,
+                    height: formData.height,
+                    dimensionUnit: formData.dimensionUnit,
+                    message: formData.message,
+                })
+            });
+
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.message || 'Submission failed');
+
+            setUniqueId(data.referenceId);
+            setOtpStep(false);
+            setSuccessMessage(true);
+            setTimeout(() => { window.location.reload(); }, 4000);
         } catch (error) {
             console.error('Error:', error);
-            alert('Error submitting form');
-            setSuccessMessage(false); // Revert on error
+            setOtpError('Form submission failed. Please try again.');
+        } finally {
+            setOtpLoading(false);
         }
     };
 
@@ -307,8 +539,12 @@ const ContactUs = () => {
     };
 
     return (
+        <>
         <div className="bg-slate-50 py-12 font-roboto">
-            <div className="lg:max-w-3xl max-w-lg bg-white shadow-2xl rounded-2xl mx-auto overflow-hidden">
+            {/* Two-column layout: form on left, special offers on right (stacks on mobile) */}
+            <div className="max-w-7xl mx-auto px-4 flex flex-col xl:flex-row gap-8 items-start">
+                {/* Contact Form */}
+                <div className="w-full xl:flex-1 bg-white shadow-2xl rounded-2xl overflow-hidden">
                 {successMessage ? (
                      <div className="success-message flex flex-col items-center justify-center bg-white text-gray-800 p-12 rounded-lg text-center h-[600px]">
                         <AiOutlineCheckCircle className="checkmark text-8xl text-green-500 mb-6 animate-pulse" />
@@ -320,8 +556,67 @@ const ContactUs = () => {
                             Your reference ID is: <span className="font-semibold text-gray-700">{uniqueId}</span>
                         </p>
                     </div>
+                ) : otpStep ? (
+                    <div className="flex flex-col items-center justify-center p-12 text-center min-h-[500px]">
+                        <div className="text-5xl mb-4">📧</div>
+                        <h2 className="text-2xl font-bold text-gray-800 mb-2">Verify Your Email</h2>
+                        <p className="text-gray-500 mb-1 text-sm">We sent a 6-digit code to</p>
+                        <p className="font-semibold text-gray-800 mb-8">{formData.email}</p>
+
+                        <input
+                            type="text"
+                            maxLength={6}
+                            value={otpValue}
+                            onChange={e => { setOtpValue(e.target.value.replace(/\D/g, '')); setOtpError(''); }}
+                            placeholder="000000"
+                            className="text-center text-3xl font-bold tracking-[0.5em] w-52 border-2 border-gray-300 rounded-xl py-4 focus:outline-none focus:border-yellow-500 transition-colors"
+                        />
+
+                        {otpError && (
+                            <p className="mt-3 text-red-500 text-sm">{otpError}</p>
+                        )}
+
+                        <button
+                            onClick={handleOtpVerifyAndSubmit}
+                            disabled={otpLoading || otpValue.length !== 6}
+                            className="mt-6 btn-primary w-52 flex items-center justify-center"
+                        >
+                            {otpLoading ? 'Verifying...' : 'Verify & Submit'}
+                        </button>
+
+                        <div className="mt-4 flex items-center gap-2 text-sm text-gray-500">
+                            <span>Didn't receive it?</span>
+                            <button
+                                onClick={handleResendOtp}
+                                disabled={otpResending}
+                                className="text-yellow-600 font-semibold hover:underline disabled:opacity-50"
+                            >
+                                {otpResending ? 'Sending...' : 'Resend Code'}
+                            </button>
+                        </div>
+
+                        <button
+                            onClick={() => setOtpStep(false)}
+                            className="mt-3 text-xs text-gray-400 hover:text-gray-600 underline"
+                        >
+                            ← Back to form
+                        </button>
+                    </div>
                 ) : (
                     <div className="p-8 md:p-12">
+                        {/* Form Heading */}
+                        <div className="mb-8">
+                            <h2 className="text-2xl font-bold text-gray-800">Request a Freight Quote</h2>
+                            <p className="text-sm text-gray-500 mt-1">Fill in the details below and we'll get back to you with the best rates.</p>
+                            <Link
+                                to="/container"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-2 mt-3 px-4 py-2 bg-blue-50 border border-blue-200 text-blue-700 text-sm font-medium rounded-lg hover:bg-blue-100 transition-colors"
+                            >
+                                🚢 View Container Types & Specifications
+                            </Link>
+                        </div>
                         <Stepper currentStep={currentStep} />
                         
                         <form onSubmit={handleSubmit}>
@@ -364,23 +659,26 @@ const ContactUs = () => {
                                                 <div className="space-y-4">
                                                     <div>
                                                         <label className="input-label">Country *</label>
-                                                        <div className="relative">
-                                                            <select name="portOfLoading" value={formData.portOfLoading} onChange={(e) => handleCountryChange(e, "portOfLoading")} className="form-input" required>
-                                                                <option value="" disabled>Select Country</option>
-                                                                {countryOptions.map(({ value, label }) => (<option key={value} value={label}>{label}</option>))}
-                                                            </select>
-                                                            {renderValidationIcon('portOfLoading')}
-                                                        </div>
+                                                        <CountrySearchInput
+                                                            name="portOfLoading"
+                                                            value={formData.portOfLoading}
+                                                            onChange={(e) => handleCountryChange(e, "portOfLoading")}
+                                                            onBlur={handleBlur}
+                                                            placeholder="Type to search country..."
+                                                            isValid={fieldValidity['portOfLoading']}
+                                                        />
                                                     </div>
                                                     <div>
                                                         <label className="input-label">City / Port *</label>
-                                                        <div className="relative">
-                                                            <select name="portOfLoadingCity" value={formData.portOfLoadingCity} onChange={handleChange} onBlur={handleBlur} className="form-input" required>
-                                                                <option value="" disabled>Select City or Port</option>
-                                                                {loadingCities.map((city, index) => <option key={index} value={city}>{city}</option>)}
-                                                            </select>
-                                                            {renderValidationIcon('portOfLoadingCity')}
-                                                        </div>
+                                                        <CitySearchInput
+                                                            name="portOfLoadingCity"
+                                                            value={formData.portOfLoadingCity}
+                                                            cities={loadingCities}
+                                                            onChange={handleChange}
+                                                            onBlur={handleBlur}
+                                                            isValid={fieldValidity['portOfLoadingCity']}
+                                                            disabled={!formData.portOfLoading}
+                                                        />
                                                     </div>
                                                 </div>
                                             </div>
@@ -389,23 +687,26 @@ const ContactUs = () => {
                                                 <div className="space-y-4">
                                                     <div>
                                                         <label className="input-label">Country *</label>
-                                                        <div className="relative">
-                                                            <select name="portOfDischarge" value={formData.portOfDischarge} onChange={(e) => handleCountryChange(e, 'portOfDischarge')} className="form-input" required>
-                                                                <option value="" disabled>Select Country</option>
-                                                                {countryOptions.map(({ value, label }) => (<option key={value} value={label}>{label}</option>))}
-                                                            </select>
-                                                            {renderValidationIcon('portOfDischarge')}
-                                                        </div>
+                                                        <CountrySearchInput
+                                                            name="portOfDischarge"
+                                                            value={formData.portOfDischarge}
+                                                            onChange={(e) => handleCountryChange(e, 'portOfDischarge')}
+                                                            onBlur={handleBlur}
+                                                            placeholder="Type to search country..."
+                                                            isValid={fieldValidity['portOfDischarge']}
+                                                        />
                                                     </div>
                                                     <div>
                                                         <label className="input-label">City / Port *</label>
-                                                        <div className="relative">
-                                                            <select name="portOfDischargeCity" value={formData.portOfDischargeCity} onChange={handleChange} onBlur={handleBlur} className="form-input" required>
-                                                                <option value="" disabled>Select City or Port</option>
-                                                                {dischargeCities.map((city, index) => <option key={index} value={city}>{city}</option>)}
-                                                            </select>
-                                                            {renderValidationIcon('portOfDischargeCity')}
-                                                        </div>
+                                                        <CitySearchInput
+                                                            name="portOfDischargeCity"
+                                                            value={formData.portOfDischargeCity}
+                                                            cities={dischargeCities}
+                                                            onChange={handleChange}
+                                                            onBlur={handleBlur}
+                                                            isValid={fieldValidity['portOfDischargeCity']}
+                                                            disabled={!formData.portOfDischarge}
+                                                        />
                                                     </div>
                                                 </div>
                                             </div>
@@ -491,14 +792,23 @@ const ContactUs = () => {
                             <div className="mt-10 flex justify-between items-center">
                                 {currentStep > 1 ? ( <button type="button" onClick={handleBack} className="btn-secondary"> <AiOutlineArrowLeft className="mr-2" /> Back </button> ) : ( <div></div> /* Empty div to maintain spacing */ )}
                                 {currentStep < 3 && ( <button type="button" onClick={handleNext} className="btn-primary"> Next <AiOutlineArrowRight className="ml-2" /> </button> )}
-                                {currentStep === 3 && ( <button type="submit" disabled={isLoading || !recaptchaValue} className="btn-primary"> {isLoading ? 'Submitting...' : 'Submit Request'} </button> )}
+                                {currentStep === 3 && ( <button type="submit" disabled={isLoading || !recaptchaValue || otpLoading} className="btn-primary"> {otpLoading ? 'Sending Code...' : 'Submit Request'} </button> )}
                             </div>
                         </form>
                     </div>
                 )}
+                </div>
+
+                {/* Special Offers Sidebar */}
+                <div className="w-full xl:w-[480px] xl:sticky xl:top-8">
+                    <OceanFreightOffers />
+                </div>
             </div>
+
+            {/* Location Section - full width below */}
             <LocationSection />
         </div>
+        </>
     );
 };
 

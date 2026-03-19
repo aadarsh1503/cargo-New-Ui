@@ -47,6 +47,19 @@ import EmploymentForm from './pages/EmploymentForm';
 import EmploymentManager from './pages/Admin/EmploymentManager';
 import AWSSettings from './pages/Admin/AWSSettings';
 import AdminLayout from './layouts/AdminLayout';
+import AllSpecialOffers from './pages/AllSpecialOffers';
+import LeadsManager from './pages/Admin/LeadsManager';
+import BookingsManager from './pages/Admin/BookingsManager';
+import AgentManagement from './pages/Admin/AgentManagement';
+import AgentDashboard from './pages/Agent/AgentDashboard';
+import UserBookings from './pages/User/UserBookings';
+import FreightAdminLayout from './pages/Admin/FreightAdmin/FreightAdminLayout';
+import InquiryPage from './pages/Admin/FreightAdmin/InquiryPage';
+import LeadsPage from './pages/Admin/FreightAdmin/LeadsPage';
+import BookingsPage from './pages/Admin/FreightAdmin/BookingsPage';
+import OceanFreightPage from './pages/Admin/FreightAdmin/OceanFreightPage';
+import FreightSettingsPage from './pages/Admin/FreightAdmin/FreightSettingsPage';
+import AgentsPage from './pages/Admin/FreightAdmin/AgentsPage';
 import { RegionProvider, useRegion } from "./context/RegionContext";
 import { Toaster } from 'react-hot-toast';
 import useLenis from './hooks/useLenis';
@@ -135,12 +148,14 @@ const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
           <Route path="/packaging" element={<Packaging />} />
           <Route path="/storage" element={<Storages />} />
           <Route path="/commercial" element={<Commercial />} />
+          {/* Auth / password reset */}
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password/:token" element={<ResetPassword />} />
           <Route path="/insurance" element={<Insurance />} />
           <Route path="/container" element={<Containers />} />
           <Route path="/incoTerms" element={<Incoterms />} />
           <Route path="/contactUs" element={<ContactUs />} />
+          <Route path="/special-offers" element={<AllSpecialOffers />} />
           <Route path="/offers" element={<Offers />} />
           <Route path="/testimonials" element={<Testimonials />} />
           <Route path="/gallery" element={<Gallery />} />
@@ -166,9 +181,19 @@ function App() {
       />
       <RegionProvider>
         <Routes>
-          {/* Admin Routes */}
-          <Route path="/admin/login" element={<AdminLogin />} />
+          {/* Login */}
+          <Route path="/login" element={<AdminLogin />} />
           <Route path="/create-super-user-access-a9b3c7d1" element={<AdminSignUp />} />
+
+          {/* Auth / password reset */}
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password/:token" element={<ResetPassword />} />
+
+          {/* Agent dashboard */}
+          <Route path="/agent/dashboard" element={<AgentDashboard />} />
+
+          {/* User Bookings */}
+          <Route path="/my-bookings" element={<UserBookings />} />
           
           {/* Protected Admin Routes with AdminLayout */}
           <Route element={<ProtectedRoute />}>
@@ -181,6 +206,19 @@ function App() {
               <Route path="/admin/settings" element={<SettingsManagement />} />
               <Route path="/admin/employment" element={<EmploymentManager />} />
               <Route path="/admin/aws-settings" element={<AWSSettings />} />
+              <Route path="/admin/leads" element={<LeadsManager />} />
+              <Route path="/admin/bookings" element={<BookingsManager />} />
+              <Route path="/admin/agents" element={<AgentManagement />} />
+
+          {/* Freight Admin Panel (new design) */}
+          <Route element={<FreightAdminLayout />}>
+            <Route path="/admin/freight/inquiry" element={<InquiryPage />} />
+            <Route path="/admin/freight/leads" element={<LeadsPage />} />
+            <Route path="/admin/freight/bookings" element={<BookingsPage />} />
+            <Route path="/admin/freight/ocean" element={<OceanFreightPage />} />
+            <Route path="/admin/freight/agents" element={<AgentsPage />} />
+            <Route path="/admin/freight/settings" element={<FreightSettingsPage />} />
+          </Route>
             </Route>
           </Route>
 

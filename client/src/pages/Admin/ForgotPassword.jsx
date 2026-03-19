@@ -92,7 +92,7 @@ const ForgotPassword = () => {
                         </button>
                     </form>
                     <div className="text-center mt-6">
-                        <Link to="/admin/login" className="inline-flex items-center gap-2 text-sm text-[#243670]/80 hover:text-[#243670] hover:underline">
+                        <Link to="/login" className="inline-flex items-center gap-2 text-sm text-[#243670]/80 hover:text-[#243670] hover:underline">
                             <FiArrowLeft /> Back to Login
                         </Link>
                     </div>

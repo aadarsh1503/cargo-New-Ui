@@ -7,6 +7,78 @@ import { useNavigate } from 'react-router-dom';
 import StageEmailModal from './StageEmailModal';
 import { API_BASE_URL } from '../../config/apiConfig';
 
+// Detect file type from URL and render appropriately
+const ResumeViewer = ({ url }) => {
+  const lower = url.toLowerCase();
+  const isPdf = lower.includes('.pdf');
+  const isWord = lower.includes('.doc') || lower.includes('.docx');
+  const isImage = /\.(png|jpe?g|gif|webp|svg)(\?|$)/.test(lower);
+
+  // ImageKit URLs: ik.imagekit.io — files have original extension preserved
+  // Cloudinary raw uploads: /raw/upload/ — no extension, use Google Docs viewer
+  const isRaw = lower.includes('/raw/upload/');
+
+  const googleDocsUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(url)}&embedded=true`;
+
+  if (isImage) {
+    return (
+      <div>
+        <img src={url} alt="Resume" className="max-w-full rounded border" />
+        <a href={url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-blue-600 hover:underline text-sm mt-2">
+          Open in new tab
+        </a>
+      </div>
+    );
+  }
+
+  if (isPdf) {
+    return (
+      <div>
+        <iframe
+          src={url}
+          title="Resume PDF"
+          className="w-full rounded border"
+          style={{ height: '500px' }}
+        />
+        <a href={url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-blue-600 hover:underline text-sm mt-2">
+          Open PDF in new tab
+        </a>
+      </div>
+    );
+  }
+
+  if (isWord) {
+    return (
+      <div>
+        <iframe
+          src={googleDocsUrl}
+          title="Resume Document"
+          className="w-full rounded border"
+          style={{ height: '500px' }}
+        />
+        <a href={url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-blue-600 hover:underline text-sm mt-2">
+          Download Word file
+        </a>
+      </div>
+    );
+  }
+
+  // Fallback for old Cloudinary raw uploads (no extension) — try Google Docs viewer
+  return (
+    <div>
+      <iframe
+        src={isRaw ? googleDocsUrl : url}
+        title="Resume"
+        className="w-full rounded border"
+        style={{ height: '500px' }}
+      />
+      <a href={url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-blue-600 hover:underline text-sm mt-2">
+        Download / Open in new tab
+      </a>
+    </div>
+  );
+};
+
 const EmploymentManager = () => {
   const navigate = useNavigate();
   const [applications, setApplications] = useState([]);
@@ -643,12 +715,7 @@ const EmploymentManager = () => {
                   {selectedApplication.resume_url && (
                     <div>
                       <h3 className="text-lg font-semibold text-[#0284C7] mb-3 pb-2 border-b">Resume</h3>
-                      <a href={selectedApplication.resume_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-blue-600 hover:underline font-semibold">
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                        </svg>
-                        View/Download Resume
-                      </a>
+                      <ResumeViewer url={selectedApplication.resume_url} />
                     </div>
                   )}
 

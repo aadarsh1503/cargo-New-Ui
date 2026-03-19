@@ -6,7 +6,7 @@ const ProtectedRoute = () => {
 
     // If there's a token, render the child routes (e.g., dashboard, edit form)
     // Otherwise, redirect to the login page
-    return token ? <Outlet /> : <Navigate to="/admin/login" replace />;
+    return token ? <Outlet /> : <Navigate to="/login" replace />;
 };
 
 export default ProtectedRoute;

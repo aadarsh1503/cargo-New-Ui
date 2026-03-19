@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import DashboardToggle from '../components/DashboardToggle/DashboardToggle';
 import { FiLogOut } from 'react-icons/fi';
+import useFreightCounts from '../hooks/useFreightCounts';
 
 // Logout Confirmation Modal
 const LogoutConfirmationModal = ({ isOpen, onClose, onConfirm }) => {
@@ -67,10 +68,12 @@ const AdminLayout = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
+  const { total } = useFreightCounts();
 
   // Determine active view based on current path
   const getActiveView = () => {
     const path = location.pathname;
+    if (path.includes('/admin/freight')) return 'freight';
     if (path.includes('/admin/dashboard')) return 'dashboard';
     if (path.includes('/admin/excel-management')) return 'excel';
     if (path.includes('/admin/gallery')) return 'gallery';
@@ -83,7 +86,7 @@ const AdminLayout = () => {
   const handleConfirmLogout = () => {
     localStorage.removeItem('adminToken');
     setIsLogoutModalOpen(false);
-    navigate('/admin/login');
+    navigate('/login');
   };
 
   return (
@@ -100,7 +103,7 @@ const AdminLayout = () => {
           <div className="max-w-7xl mx-auto px-6 py-4">
             <div className="flex items-center justify-between">
               <div className="flex-1 flex justify-center">
-                <DashboardToggle activeView={getActiveView()} />
+                <DashboardToggle activeView={getActiveView()} freightBadge={total} />
               </div>
               
               {/* Logout Button */}

@@ -1,0 +1,2 @@
+ALTER TABLE freight_requests
+  ADD COLUMN IF NOT EXISTS paypal_order_id VARCHAR(64) NULL DEFAULT NULL;

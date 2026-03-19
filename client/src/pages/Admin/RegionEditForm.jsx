@@ -27,8 +27,10 @@ const RegionEditForm = () => {
     const [isSaving, setIsSaving] = useState(false);
     const [message, setMessage] = useState('');
     const [regionName, setRegionName] = useState('');
+    const [mapMode, setMapMode] = useState('link'); // 'link' | 'coordinates'
+    const [mapCoords, setMapCoords] = useState({ lat: '', lng: '' });
 
-    const fetchContent = useCallback(async () => {
+    const fetchContent = useCallback(async (skipModeDetect = false) => {
         setIsLoading(true);
         try {
             const response = await fetch(`${API_BASE_URL}/content/${regionCode}`);
@@ -39,6 +41,20 @@ const RegionEditForm = () => {
                 data.address = data.address.join('\n');
             }
             setContent(data);
+            // Only auto-detect mode on initial load, not after save
+            if (!skipModeDetect && data.local_modal_map_src) {
+                const src = data.local_modal_map_src;
+                // coords-based only if it's a plain maps URL with q=lat,lng (not a pb= embed)
+                const isCoordsUrl = !src.includes('/maps/embed') && !src.includes('pb=');
+                const coordMatch = isCoordsUrl && src.match(/[?&]q=(-?\d+\.?\d*),(-?\d+\.?\d*)/);
+                if (coordMatch) {
+                    setMapMode('coordinates');
+                    setMapCoords({ lat: coordMatch[1], lng: coordMatch[2] });
+                } else {
+                    setMapMode('link');
+                    setMapCoords({ lat: '', lng: '' });
+                }
+            }
         } catch (error) {
             setMessage(`Error: ${error.message}`);
         } finally {
@@ -73,8 +89,18 @@ const handleSubmit = async (e) => {
     if (submissionData.address) {
         submissionData.address = submissionData.address.split('\n').filter(line => line.trim() !== '');
     }
+
+    // Build the correct map URL based on active mode
+    if (mapMode === 'coordinates' && mapCoords.lat && mapCoords.lng) {
+        submissionData.local_modal_map_src = `https://maps.google.com/maps?q=${mapCoords.lat},${mapCoords.lng}&z=15&output=embed`;
+    } else if (mapMode === 'link') {
+        // keep whatever is in content.local_modal_map_src (typed by user)
+    }
+
     const fieldsToDelete = ['id', 'region_id', 'name', 'code', 'country_flag', 'updated_at', 'welcome_message', 'operate_heading', 'local_button_text', 'global_button_text', 'local_modal_title', 'local_modal_description', 'global_modal_title', 'global_modal_description', 'close_button_text', 'operate_in_country_title', 'operate_in_country_desc'];
     fieldsToDelete.forEach(field => delete submissionData[field]);
+
+    console.log('[RegionEditForm] mapMode:', mapMode, '| local_modal_map_src being saved:', submissionData.local_modal_map_src);
 
     try {
         // --- THIS IS THE FIX ---
@@ -104,8 +130,9 @@ const handleSubmit = async (e) => {
         }
 
         const result = await response.json();
+        console.log('[RegionEditForm] Save response:', result);
         setMessage(result.message);
-        await fetchContent(); 
+        await fetchContent(true); // skip mode re-detection after save
         setTimeout(() => setMessage(''), 4000);
         
     } catch (error) { 
@@ -115,11 +142,21 @@ const handleSubmit = async (e) => {
     }
 };
     
+    const buildCoordsEmbedUrl = (lat, lng) =>
+        `https://maps.google.com/maps?q=${lat},${lng}&z=15&output=embed`;
+
+    const handleCoordsChange = (field, val) => {
+        const updated = { ...mapCoords, [field]: val };
+        setMapCoords(updated);
+        if (updated.lat && updated.lng) {
+            setContent(prev => ({ ...prev, local_modal_map_src: buildCoordsEmbedUrl(updated.lat, updated.lng) }));
+        }
+    };
+
     const coreFields = ['address', 'phone', 'whatsapp', 'whatsapp_sales', 'whatsapp_support'];
     const optionalFields = [
         'email_customer_care', 'email_sales', 'email_business',
         'social_linkedin', 'social_instagram', 'social_facebook', 'social_twitter',
-        'local_modal_map_src'
     ];
     
     const baseInputClass = "w-full bg-slate-50 border-2 border-transparent rounded-lg outline-none transition-all duration-300 placeholder-slate-400 text-[#243670] focus:bg-white focus:border-[#F59E0B] p-3";
@@ -180,6 +217,124 @@ const handleSubmit = async (e) => {
                                     </div>
                                 ))}
                             </div>
+                        </fieldset>
+
+                        {/* ── Map Source ─────────────────────────────────── */}
+                        <fieldset className="border border-slate-300 rounded-lg p-6">
+                            <legend className="px-2 text-lg font-semibold text-[#243670]">Map Location</legend>
+                            <p className="text-xs text-slate-400 mb-4">Choose one method — the other will be disabled</p>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                                {/* ── Box 1: Embed Link ── */}
+                                <div
+                                    onClick={() => setMapMode('link')}
+                                    className={`relative border-2 rounded-xl p-5 cursor-pointer transition-all duration-200 space-y-3
+                                        ${mapMode === 'link'
+                                            ? 'border-[#243670] bg-white shadow-md'
+                                            : 'border-slate-200 bg-slate-50 opacity-50 blur-[1px]'
+                                        }`}
+                                >
+                                    {/* Active indicator */}
+                                    {mapMode === 'link' && (
+                                        <span className="absolute top-3 right-3 w-3 h-3 rounded-full bg-[#243670]" />
+                                    )}
+                                    <p className="text-sm font-bold text-[#243670]">📎 Embed Link</p>
+                                    <p className="text-xs text-slate-400">Paste the src URL from Google Maps → Share → Embed a map</p>
+                                    <input
+                                        type="text"
+                                        name="local_modal_map_src"
+                                        value={content.local_modal_map_src || ''}
+                                        onChange={handleChange}
+                                        onClick={e => e.stopPropagation()}
+                                        placeholder="https://www.google.com/maps/embed?pb=..."
+                                        className={baseInputClass}
+                                        disabled={mapMode !== 'link'}
+                                    />
+                                </div>
+
+                                {/* ── Box 2: Coordinates ── */}
+                                <div
+                                    onClick={() => setMapMode('coordinates')}
+                                    className={`relative border-2 rounded-xl p-5 cursor-pointer transition-all duration-200 space-y-3
+                                        ${mapMode === 'coordinates'
+                                            ? 'border-[#243670] bg-white shadow-md'
+                                            : 'border-slate-200 bg-slate-50 opacity-50 blur-[1px]'
+                                        }`}
+                                >
+                                    {mapMode === 'coordinates' && (
+                                        <span className="absolute top-3 right-3 w-3 h-3 rounded-full bg-[#243670]" />
+                                    )}
+                                    <p className="text-sm font-bold text-[#243670]">📍 Coordinates</p>
+                                    <p className="text-xs text-slate-400">Enter lat/lng or use your current location</p>
+
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <div>
+                                            <label className="block text-xs font-semibold text-gray-500 mb-1">Latitude</label>
+                                            <input
+                                                type="text"
+                                                inputMode="decimal"
+                                                value={mapCoords.lat}
+                                                onChange={e => handleCoordsChange('lat', e.target.value)}
+                                                onClick={e => e.stopPropagation()}
+                                                placeholder="e.g. 26.2235"
+                                                className={baseInputClass}
+                                                disabled={mapMode !== 'coordinates'}
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-semibold text-gray-500 mb-1">Longitude</label>
+                                            <input
+                                                type="text"
+                                                inputMode="decimal"
+                                                value={mapCoords.lng}
+                                                onChange={e => handleCoordsChange('lng', e.target.value)}
+                                                onClick={e => e.stopPropagation()}
+                                                placeholder="e.g. 50.5860"
+                                                className={baseInputClass}
+                                                disabled={mapMode !== 'coordinates'}
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <button
+                                        type="button"
+                                        onClick={e => {
+                                            e.stopPropagation();
+                                            if (!navigator.geolocation) return alert('Geolocation not supported.');
+                                            navigator.geolocation.getCurrentPosition(
+                                                ({ coords }) => {
+                                                    const lat = coords.latitude.toFixed(6);
+                                                    const lng = coords.longitude.toFixed(6);
+                                                    setMapCoords({ lat, lng });
+                                                    setContent(prev => ({ ...prev, local_modal_map_src: buildCoordsEmbedUrl(lat, lng) }));
+                                                },
+                                                () => alert('Unable to get location. Please allow access.')
+                                            );
+                                        }}
+                                        disabled={mapMode !== 'coordinates'}
+                                        className="text-xs px-3 py-1.5 rounded-lg border border-[#243670] text-[#243670] font-semibold hover:bg-[#243670] hover:text-white transition-colors disabled:opacity-50"
+                                    >
+                                        Use My Location
+                                    </button>
+
+                                    {mapCoords.lat && mapCoords.lng && mapMode === 'coordinates' && (
+                                        <div className="rounded-lg overflow-hidden border border-slate-200 h-36">
+                                            <iframe
+                                                src={buildCoordsEmbedUrl(mapCoords.lat, mapCoords.lng)}
+                                                width="100%" height="100%" style={{ border: 0 }}
+                                                loading="lazy" title="Map Preview"
+                                            />
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+
+                            {content.local_modal_map_src && (
+                                <p className="text-xs text-slate-400 mt-3 break-all">
+                                    Saved: <span className="text-[#243670]">{content.local_modal_map_src}</span>
+                                </p>
+                            )}
                         </fieldset>
                     </div>
 

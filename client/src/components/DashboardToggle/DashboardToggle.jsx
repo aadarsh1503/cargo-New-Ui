@@ -1,15 +1,14 @@
-import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FiLayout, FiFileText, FiImage, FiSettings, FiUsers, FiKey } from 'react-icons/fi';
+import { FiLayout, FiFileText, FiImage, FiSettings, FiUsers, FiKey, FiTruck } from 'react-icons/fi';
 
 /**
  * A futuristic, reusable navigation toggle for the admin panel.
- * It navigates between dashboard, data management, gallery, settings, employment, and AWS settings.
  *
  * @param {object} props
- * @param {'dashboard' | 'excel' | 'gallery' | 'settings' | 'employment' | 'aws'} props.activeView - The currently active view.
+ * @param {'dashboard' | 'excel' | 'gallery' | 'settings' | 'employment' | 'aws' | 'leads' | 'bookings' | 'agents'} props.activeView
+ * @param {number} [props.freightBadge] - total unread count for freight tab
  */
-const DashboardToggle = ({ activeView }) => {
+const DashboardToggle = ({ activeView, freightBadge = 0 }) => {
     const navigate = useNavigate();
 
     const handleNavigate = (view) => {
@@ -21,122 +20,45 @@ const DashboardToggle = ({ activeView }) => {
             gallery: '/admin/gallery',
             settings: '/admin/settings',
             employment: '/admin/employment',
-            aws: '/admin/aws-settings'
+            aws: '/admin/aws-settings',
+            freight: '/admin/freight/inquiry',
         };
 
         navigate(routes[view]);
     };
 
-    // Calculate slider position based on active view
-    const getSliderPosition = () => {
-        const positions = {
-            dashboard: '0.375rem',
-            excel: 'calc(16.666% + 0.1875rem)',
-            gallery: 'calc(33.333% + 0rem)',
-            settings: 'calc(50% - 0.1875rem)',
-            employment: 'calc(66.666% - 0.375rem)',
-            aws: 'calc(83.333% - 0.5625rem)'
-        };
-        return positions[activeView] || '0.375rem';
-    };
-
-    const buttonBaseStyles = "relative z-10 flex w-1/6 items-center justify-center gap-2 rounded-full py-2.5 text-sm font-bold transition-colors duration-300 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500";
+    const tabs = [
+        { key: 'dashboard', label: 'Dashboard', icon: <FiLayout size={14} /> },
+        { key: 'freight', label: 'Freight Services', icon: <FiTruck size={14} /> },
+        { key: 'excel', label: 'Data', icon: <FiFileText size={14} /> },
+        { key: 'gallery', label: 'Gallery', icon: <FiImage size={14} /> },
+        { key: 'settings', label: 'Settings', icon: <FiSettings size={14} /> },
+        { key: 'employment', label: 'Jobs', icon: <FiUsers size={14} /> },
+        { key: 'aws', label: 'AWS', icon: <FiKey size={14} /> },
+    ];
 
     return (
-        <div className="relative flex w-[960px] items-center rounded-full bg-slate-200/70 p-1.5 backdrop-blur-sm border border-slate-300/50 shadow-inner shadow-slate-900/10">
-            {/* The Sliding, Glowing Indicator */}
-            <span
-                className="absolute top-1.5 h-[calc(100%-0.75rem)] w-[calc(16.666%-0.375rem)] rounded-full 
-                           bg-gradient-to-br from-amber-400 to-amber-500 
-                           shadow-lg shadow-amber-500/30
-                           transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]"
-                style={{ left: getSliderPosition() }}
-                aria-hidden="true"
-            />
-
-            {/* Dashboard Button */}
-            <button
-                onClick={() => handleNavigate('dashboard')}
-                className={`${buttonBaseStyles} ${
-                    activeView === 'dashboard'
-                        ? 'text-white'
-                        : 'text-[#243670] opacity-70 hover:opacity-100'
-                }`}
-                aria-current={activeView === 'dashboard'}
-            >
-                <FiLayout size={16} />
-                Dashboard
-            </button>
-
-            {/* Excel Management Button */}
-            <button
-                onClick={() => handleNavigate('excel')}
-                className={`${buttonBaseStyles} ${
-                    activeView === 'excel'
-                        ? 'text-white'
-                        : 'text-[#243670] opacity-70 hover:opacity-100'
-                }`}
-                aria-current={activeView === 'excel'}
-            >
-                <FiFileText size={16} />
-                Data
-            </button>
-
-            {/* Gallery Button */}
-            <button
-                onClick={() => handleNavigate('gallery')}
-                className={`${buttonBaseStyles} ${
-                    activeView === 'gallery'
-                        ? 'text-white'
-                        : 'text-[#243670] opacity-70 hover:opacity-100'
-                }`}
-                aria-current={activeView === 'gallery'}
-            >
-                <FiImage size={16} />
-                Gallery
-            </button>
-
-            {/* Settings Button */}
-            <button
-                onClick={() => handleNavigate('settings')}
-                className={`${buttonBaseStyles} ${
-                    activeView === 'settings'
-                        ? 'text-white'
-                        : 'text-[#243670] opacity-70 hover:opacity-100'
-                }`}
-                aria-current={activeView === 'settings'}
-            >
-                <FiSettings size={16} />
-                Settings
-            </button>
-
-            {/* Employment Button */}
-            <button
-                onClick={() => handleNavigate('employment')}
-                className={`${buttonBaseStyles} ${
-                    activeView === 'employment'
-                        ? 'text-white'
-                        : 'text-[#243670] opacity-70 hover:opacity-100'
-                }`}
-                aria-current={activeView === 'employment'}
-            >
-                <FiUsers size={16} />
-                Jobs
-            </button>
-
-            {/* AWS Settings Button */}
-            <button
-                onClick={() => handleNavigate('aws')}
-                className={`${buttonBaseStyles} ${
-                    activeView === 'aws'
-                        ? 'text-white'
-                        : 'text-[#243670] opacity-70 hover:opacity-100'
-                }`}
-                aria-current={activeView === 'aws'}
-            >
-                <FiKey size={16} />
-                AWS
-            </button>
+        <div className="relative flex items-center rounded-full bg-slate-200/70 p-1.5 gap-1 backdrop-blur-sm border border-slate-300/50 shadow-inner shadow-slate-900/10 overflow-x-auto max-w-full">
+            {tabs.map(tab => (
+                <button
+                    key={tab.key}
+                    onClick={() => handleNavigate(tab.key)}
+                    className={`relative z-10 flex items-center justify-center gap-1.5 rounded-full py-2 px-4 text-xs font-bold transition-all duration-300 whitespace-nowrap focus:outline-none ${
+                        activeView === tab.key
+                            ? 'bg-gradient-to-br from-amber-400 to-amber-500 text-white shadow-lg shadow-amber-500/30'
+                            : 'text-[#243670] opacity-70 hover:opacity-100 hover:bg-white/40'
+                    }`}
+                    aria-current={activeView === tab.key}
+                >
+                    {tab.icon}
+                    {tab.label}
+                    {tab.key === 'freight' && freightBadge > 0 && (
+                        <span className="absolute -top-1 -right-1 min-w-[16px] h-[16px] px-0.5 rounded-full bg-rose-500 text-white text-[9px] font-bold flex items-center justify-center leading-none shadow">
+                            {freightBadge > 99 ? '99+' : freightBadge}
+                        </span>
+                    )}
+                </button>
+            ))}
         </div>
     );
 };

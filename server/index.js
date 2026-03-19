@@ -15,7 +15,8 @@ const excelRoutes = require('./src/routes/excelRoutes');
 const galleryRoutes = require('./src/routes/galleryRoutes');
 const settingsRoutes = require('./src/routes/settingsRoutes');
 const employmentRoutes = require('./src/routes/employmentRoutes');
-const awsSettingsRoutes = require('./src/routes/awsSettingsRoutes');   
+const awsSettingsRoutes = require('./src/routes/awsSettingsRoutes');
+const freightRoutes = require('./src/routes/freightRoutes');
 
 // --- THE FIX ---
 // Destructure the 'default' export from the library to get the function directly.
@@ -37,6 +38,8 @@ app.use('/api/gallery', galleryRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/employment', employmentRoutes);
 app.use('/api/aws-settings', awsSettingsRoutes);
+app.use('/api/freight', freightRoutes);
+app.use('/api/freight-settings', require('./src/routes/freightSettingsRoutes'));
 
 // -----------------
 const DEFAULT_REGION = 'bahrain'; 
