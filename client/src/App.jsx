@@ -68,6 +68,18 @@ import ForgotPassword from './pages/Admin/ForgotPassword';
 import ResetPassword from './pages/Admin/ResetPassword';
 import { API_BASE_URL } from './config/apiConfig';
 
+// Standalone WhatsApp widget for agent/user pages (fetches numbers independently)
+const StandaloneChat = () => {
+  const [numbers, setNumbers] = useState({});
+  useEffect(() => {
+    fetch(`${API_BASE_URL}/content/bahrain`)
+      .then(r => r.json())
+      .then(d => setNumbers({ sales: d.whatsapp_sales, support: d.whatsapp_support }))
+      .catch(() => {});
+  }, []);
+  return <ChatWidget salesNumber={numbers.sales} supportNumber={numbers.support} />;
+};
+
 // The API URL, make sure this is correct
 
 
@@ -190,10 +202,10 @@ function App() {
           <Route path="/reset-password/:token" element={<ResetPassword />} />
 
           {/* Agent dashboard */}
-          <Route path="/agent/dashboard" element={<AgentDashboard />} />
+          <Route path="/agent/dashboard" element={<><AgentDashboard /><StandaloneChat /></>} />
 
           {/* User Bookings */}
-          <Route path="/my-bookings" element={<UserBookings />} />
+          <Route path="/my-bookings" element={<><UserBookings /><StandaloneChat /></>} />
           
           {/* Protected Admin Routes with AdminLayout */}
           <Route element={<ProtectedRoute />}>

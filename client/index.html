@@ -11,6 +11,15 @@
         scroll-behavior: smooth;
       }
     </style>
+    <!-- Google reCAPTCHA v3 -->
+    <script src="https://www.google.com/recaptcha/api.js?render=6Lc5YpMsAAAAAE3GJ6FVxF5JsEXYK4vRI-Qn232E"></script>
+    <script>
+      grecaptcha.ready(function () {
+        grecaptcha.execute('6Lc5YpMsAAAAAE3GJ6FVxF5JsEXYK4vRI-Qn232E', { action: 'pageload' }).then(function (token) {
+          console.log('[reCAPTCHA] ✅ Badge active, token generated.');
+        });
+      });
+    </script>
   </head>
   <body>
 

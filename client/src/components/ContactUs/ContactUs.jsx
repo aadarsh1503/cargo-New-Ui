@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import PhoneInput from 'react-phone-input-2';
 import { API_BASE_URL } from '../../config/apiConfig';
 import 'react-phone-input-2/lib/style.css';
-import ReCAPTCHA from 'react-google-recaptcha';
+import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 import { AiOutlineCheckCircle, AiOutlineArrowRight, AiOutlineArrowLeft } from 'react-icons/ai';
 import { FaCheck } from 'react-icons/fa';
 import countryList from 'react-select-country-list';
@@ -287,7 +287,7 @@ const ContactUs = () => {
     const [currentStep, setCurrentStep] = useState(1);
     
     const [initialCountry, setInitialCountry] = useState('bh');
-    const [recaptchaValue, setRecaptchaValue] = useState(null);
+    const { executeRecaptcha } = useGoogleReCaptcha();
     const [successMessage, setSuccessMessage] = useState(false);
     const [uniqueId, setUniqueId] = useState('');
     const [loadingCities, setLoadingCities] = useState([]);
@@ -390,8 +390,38 @@ const ContactUs = () => {
         return isStepValid;
     };
     
+    const saveDraft = (data) => {
+        fetch(`${API_BASE_URL}/freight/draft`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data),
+        }).catch(() => {});
+    };
+
     const handleNext = () => {
         if (validateCurrentStep()) {
+            if (currentStep === 1) {
+                // Step 1 done — create draft with contact info
+                saveDraft({
+                    name: formData.name,
+                    email: formData.email,
+                    telephone: formData.telephone,
+                    company: formData.company,
+                });
+            } else if (currentStep === 2) {
+                // Step 2 done — update draft with route info
+                saveDraft({
+                    name: formData.name,
+                    email: formData.email,
+                    telephone: formData.telephone,
+                    company: formData.company,
+                    portOfLoading: formData.portOfLoading,
+                    portOfLoadingCity: formData.portOfLoadingCity,
+                    portOfDischarge: formData.portOfDischarge,
+                    portOfDischargeCity: formData.portOfDischargeCity,
+                    modeOfShipment: formData.modeOfShipment,
+                });
+            }
             setCurrentStep(prev => prev + 1);
         } else {
             alert('Please fill out all required fields on this page correctly.');
@@ -409,18 +439,19 @@ const ContactUs = () => {
              alert('Please fill out all required fields correctly.');
              return;
         }
-        if (!recaptchaValue) { 
-            alert("Please verify you're not a robot.");
-            return; 
+        if (!executeRecaptcha) {
+            alert("reCAPTCHA not ready. Please try again.");
+            return;
         }
 
         // Send OTP to email first
         setOtpLoading(true);
         try {
+            const recaptchaToken = await executeRecaptcha('contact_form');
             const res = await fetch(`${API_BASE_URL}/freight/user/send-otp`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email: formData.email }),
+                body: JSON.stringify({ email: formData.email, recaptchaToken }),
             });
             if (!res.ok) throw new Error('Failed to send code');
             setOtpStep(true);
@@ -781,9 +812,6 @@ const ContactUs = () => {
             <textarea name="message" value={formData.message} onChange={handleChange} onBlur={handleBlur} placeholder="Any additional details or special requirements..." className="form-input" rows="4" required />
         </div>
 
-        <div className="flex justify-center">
-            <ReCAPTCHA sitekey="6LeqpnkqAAAAAHNUm3Ey9nv2T0hmhl0Ym4L_yaTS" onChange={(value) => setRecaptchaValue(value)} />
-        </div>
     </div>
 )}
                                 </motion.div>
@@ -792,7 +820,7 @@ const ContactUs = () => {
                             <div className="mt-10 flex justify-between items-center">
                                 {currentStep > 1 ? ( <button type="button" onClick={handleBack} className="btn-secondary"> <AiOutlineArrowLeft className="mr-2" /> Back </button> ) : ( <div></div> /* Empty div to maintain spacing */ )}
                                 {currentStep < 3 && ( <button type="button" onClick={handleNext} className="btn-primary"> Next <AiOutlineArrowRight className="ml-2" /> </button> )}
-                                {currentStep === 3 && ( <button type="submit" disabled={isLoading || !recaptchaValue || otpLoading} className="btn-primary"> {otpLoading ? 'Sending Code...' : 'Submit Request'} </button> )}
+                                {currentStep === 3 && ( <button type="submit" disabled={isLoading || otpLoading} className="btn-primary"> {otpLoading ? 'Sending Code...' : 'Submit Request'} </button> )}
                             </div>
                         </form>
                     </div>

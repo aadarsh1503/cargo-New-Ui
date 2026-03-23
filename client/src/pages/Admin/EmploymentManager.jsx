@@ -1,877 +1,487 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { toast, ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-import { FaWhatsapp, FaFileExcel, FaEye, FaFilter, FaTrash, FaCheckSquare, FaSquare, FaArrowLeft, FaEnvelope } from 'react-icons/fa';
-import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
+import { FaWhatsapp, FaFileExcel, FaTrash, FaCheckSquare, FaSquare, FaEnvelope } from 'react-icons/fa';
+import { FiX } from 'react-icons/fi';
 import StageEmailModal from './StageEmailModal';
 import { API_BASE_URL } from '../../config/apiConfig';
 
-// Detect file type from URL and render appropriately
+const STAGE_CFG = {
+  Applied:       { bg: 'bg-blue-100',   text: 'text-blue-800' },
+  Interview:     { bg: 'bg-yellow-100', text: 'text-yellow-800' },
+  Accepted:      { bg: 'bg-green-100',  text: 'text-green-800' },
+  Rejected:      { bg: 'bg-red-100',    text: 'text-red-800' },
+  Completion:    { bg: 'bg-purple-100', text: 'text-purple-800' },
+  Certification: { bg: 'bg-indigo-100', text: 'text-indigo-800' },
+};
+
+const STAGES = ['Applied', 'Interview', 'Accepted', 'Rejected', 'Completion', 'Certification'];
+const DEPARTMENTS = ['IT', 'Finance', 'Admin', 'HR', 'Marketing', 'Operations'];
+
+const STAGE_FLOW = {
+  Applied:       ['Applied', 'Interview'],
+  Interview:     ['Interview', 'Accepted', 'Rejected'],
+  Accepted:      ['Accepted', 'Completion', 'Certification'],
+  Rejected:      ['Rejected'],
+  Completion:    ['Completion', 'Certification'],
+  Certification: ['Certification'],
+};
+
 const ResumeViewer = ({ url }) => {
   const lower = url.toLowerCase();
   const isPdf = lower.includes('.pdf');
   const isWord = lower.includes('.doc') || lower.includes('.docx');
   const isImage = /\.(png|jpe?g|gif|webp|svg)(\?|$)/.test(lower);
-
-  // ImageKit URLs: ik.imagekit.io — files have original extension preserved
-  // Cloudinary raw uploads: /raw/upload/ — no extension, use Google Docs viewer
   const isRaw = lower.includes('/raw/upload/');
-
   const googleDocsUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(url)}&embedded=true`;
 
-  if (isImage) {
-    return (
-      <div>
-        <img src={url} alt="Resume" className="max-w-full rounded border" />
-        <a href={url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-blue-600 hover:underline text-sm mt-2">
-          Open in new tab
-        </a>
-      </div>
-    );
-  }
-
-  if (isPdf) {
-    return (
-      <div>
-        <iframe
-          src={url}
-          title="Resume PDF"
-          className="w-full rounded border"
-          style={{ height: '500px' }}
-        />
-        <a href={url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-blue-600 hover:underline text-sm mt-2">
-          Open PDF in new tab
-        </a>
-      </div>
-    );
-  }
-
-  if (isWord) {
-    return (
-      <div>
-        <iframe
-          src={googleDocsUrl}
-          title="Resume Document"
-          className="w-full rounded border"
-          style={{ height: '500px' }}
-        />
-        <a href={url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-blue-600 hover:underline text-sm mt-2">
-          Download Word file
-        </a>
-      </div>
-    );
-  }
-
-  // Fallback for old Cloudinary raw uploads (no extension) — try Google Docs viewer
+  if (isImage) return (
+    <div>
+      <img src={url} alt="Resume" className="max-w-full rounded border" />
+      <a href={url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline text-xs mt-1 block">Open in new tab</a>
+    </div>
+  );
   return (
     <div>
-      <iframe
-        src={isRaw ? googleDocsUrl : url}
-        title="Resume"
-        className="w-full rounded border"
-        style={{ height: '500px' }}
-      />
-      <a href={url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-blue-600 hover:underline text-sm mt-2">
-        Download / Open in new tab
+      <iframe src={isPdf ? url : isWord ? googleDocsUrl : isRaw ? googleDocsUrl : url}
+        title="Resume" className="w-full rounded border" style={{ height: '400px' }} />
+      <a href={url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline text-xs mt-1 block">
+        {isPdf ? 'Open PDF in new tab' : isWord ? 'Download Word file' : 'Download / Open in new tab'}
       </a>
     </div>
   );
 };
 
+const Field = ({ label, value }) => (
+  <div>
+    <p className="text-[10px] text-gray-400 uppercase tracking-wide">{label}</p>
+    <p className="text-xs font-semibold text-gray-800">{value || 'N/A'}</p>
+  </div>
+);
+
+const Section = ({ title, children }) => (
+  <div>
+    <p className="text-xs font-bold text-[#0284C7] uppercase tracking-widest mb-2 pb-1 border-b border-blue-100">{title}</p>
+    {children}
+  </div>
+);
+
 const EmploymentManager = () => {
-  const navigate = useNavigate();
   const [applications, setApplications] = useState([]);
-  const [filteredApplications, setFilteredApplications] = useState([]);
+  const [filtered, setFiltered] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selectedApplication, setSelectedApplication] = useState(null);
-  const [showModal, setShowModal] = useState(false);
-  const [showCustomEmailModal, setShowCustomEmailModal] = useState(false);
+  const [selected, setSelected] = useState(null);
+  const [showEmailModal, setShowEmailModal] = useState(false);
   const [showStageEmailModal, setShowStageEmailModal] = useState(false);
   const [pendingStageChange, setPendingStageChange] = useState(null);
   const [selectedForDelete, setSelectedForDelete] = useState([]);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [isSendingEmail, setIsSendingEmail] = useState(false);
-  const [customEmailData, setCustomEmailData] = useState({
-    subject: '',
-    message: '',
-    attachmentUrl: ''
-  });
-
+  const [customEmailData, setCustomEmailData] = useState({ subject: '', message: '', attachmentUrl: '' });
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [itemsPerPage, setItemsPerPage] = useState(25);
+  const [filters, setFilters] = useState({ stage: '', department: '' });
+  const [search, setSearch] = useState('');
 
-  const [filters, setFilters] = useState({
-    stage: '',
-    department: ''
-  });
-
-  const stages = ['Applied', 'Interview', 'Accepted', 'Rejected', 'Completion', 'Certification'];
-  const departments = ['IT', 'Finance', 'Admin', 'HR', 'Marketing', 'Operations'];
-
-  // Get allowed next stages based on current stage (no going back)
-  const getAllowedStages = (currentStage) => {
-    const stageFlow = {
-      'Applied': ['Applied', 'Interview'],
-      'Interview': ['Interview', 'Accepted', 'Rejected'],
-      'Accepted': ['Accepted', 'Completion', 'Certification'],
-      'Rejected': ['Rejected'], // Terminal stage
-      'Completion': ['Completion', 'Certification'],
-      'Certification': ['Certification'] // Terminal stage
-    };
-    return stageFlow[currentStage] || ['Applied'];
-  };
+  useEffect(() => { fetchApplications(); }, []);
 
   useEffect(() => {
-    fetchApplications();
-  }, []);
-
-  useEffect(() => {
-    applyFilters();
-  }, [filters, applications]);
+    let f = [...applications];
+    if (filters.stage) f = f.filter(a => a.stage === filters.stage);
+    if (filters.department) f = f.filter(a => a.department?.toLowerCase().includes(filters.department.toLowerCase()));
+    if (search) {
+      const q = search.toLowerCase();
+      f = f.filter(a => a.fullName?.toLowerCase().includes(q) || a.email?.toLowerCase().includes(q) || a.employmentDesired?.toLowerCase().includes(q));
+    }
+    setFiltered(f);
+    setCurrentPage(1);
+  }, [filters, applications, search]);
 
   const fetchApplications = async () => {
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await axios.get(`${API_BASE_URL}/employment/applications`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      setApplications(response.data.data);
-      setFilteredApplications(response.data.data);
-      setLoading(false);
-    } catch (error) {
-      console.error('Fetch error:', error);
-      toast.error('❌ Failed to fetch applications');
-      setLoading(false);
-    }
+      const res = await axios.get(`${API_BASE_URL}/employment/applications`, { headers: { Authorization: `Bearer ${token}` } });
+      setApplications(res.data.data);
+      setFiltered(res.data.data);
+    } catch { toast.error('Failed to fetch applications'); }
+    finally { setLoading(false); }
   };
 
-  const applyFilters = () => {
-    let filtered = [...applications];
+  const indexOfLast = currentPage * itemsPerPage;
+  const indexOfFirst = indexOfLast - itemsPerPage;
+  const currentApps = filtered.slice(indexOfFirst, indexOfLast);
+  const totalPages = Math.ceil(filtered.length / itemsPerPage);
 
-    if (filters.stage) {
-      filtered = filtered.filter(app => app.stage === filters.stage);
-    }
-
-    if (filters.department) {
-      filtered = filtered.filter(app => 
-        app.department && app.department.toLowerCase().includes(filters.department.toLowerCase())
-      );
-    }
-
-    setFilteredApplications(filtered);
-    setCurrentPage(1);
-  };
-
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentApplications = filteredApplications.slice(indexOfFirstItem, indexOfLastItem);
-  const totalPages = Math.ceil(filteredApplications.length / itemsPerPage);
-
-  const paginate = (pageNumber) => setCurrentPage(pageNumber);
-  const nextPage = () => { if (currentPage < totalPages) setCurrentPage(currentPage + 1); };
-  const prevPage = () => { if (currentPage > 1) setCurrentPage(currentPage - 1); };
-
-  const updateStage = async (id, newStage) => {
-    // Find the application
+  const updateStage = (id, newStage) => {
     const app = applications.find(a => a.id === id);
-    if (!app) {
-      toast.error('❌ Application not found');
-      return;
-    }
-
-    // Check if trying to select same stage
-    if (app.stage === newStage) {
-      toast.info('ℹ️ Application is already in this stage');
-      return;
-    }
-
-    // Open email modal to compose email before updating stage
+    if (!app || app.stage === newStage) return;
     setPendingStageChange({ id, newStage });
-    setSelectedApplication(app);
+    setSelected(app);
     setShowStageEmailModal(true);
-  };
-
-  const handleStageEmailSuccess = () => {
-    // Refresh applications after email is sent and stage is updated
-    fetchApplications();
-    setPendingStageChange(null);
-    setSelectedApplication(null);
-    setShowStageEmailModal(false);
-  };
-
-  const openCustomEmailModal = (application) => {
-    setSelectedApplication(application);
-    setCustomEmailData({ subject: '', message: '', attachmentUrl: '' });
-    setShowCustomEmailModal(true);
-  };
-
-  const sendCustomEmail = async () => {
-    if (!customEmailData.subject.trim() || !customEmailData.message.trim()) {
-      toast.error('❌ Subject and message are required');
-      return;
-    }
-
-    setIsSendingEmail(true);
-    try {
-      const token = localStorage.getItem('adminToken');
-      await axios.post(
-        `${API_BASE_URL}/employment/applications/send-custom-email`,
-        {
-          applicationIds: [selectedApplication.id],
-          subject: customEmailData.subject,
-          message: customEmailData.message,
-          attachmentUrl: customEmailData.attachmentUrl
-        },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      toast.success('✅ Email sent successfully!');
-      setShowCustomEmailModal(false);
-      setSelectedApplication(null);
-      setCustomEmailData({ subject: '', message: '', attachmentUrl: '' });
-    } catch (error) {
-      console.error('Send error:', error);
-      toast.error(error.response?.data?.message || '❌ Failed to send email');
-    } finally {
-      setIsSendingEmail(false);
-    }
   };
 
   const exportToExcel = async () => {
     try {
-      toast.info('📊 Preparing Excel file...');
       const token = localStorage.getItem('adminToken');
-      const response = await axios.get(`${API_BASE_URL}/employment/export`, {
-        headers: { Authorization: `Bearer ${token}` },
-        responseType: 'blob'
-      });
-
-      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const res = await axios.get(`${API_BASE_URL}/employment/export`, { headers: { Authorization: `Bearer ${token}` }, responseType: 'blob' });
+      const url = window.URL.createObjectURL(new Blob([res.data]));
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', `employment_applications_${new Date().toISOString().split('T')[0]}.csv`);
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      toast.success('✅ File downloaded successfully!');
-    } catch (error) {
-      console.error('Export error:', error);
-      toast.error('❌ Failed to export data');
-    }
+      link.setAttribute('download', `employment_${new Date().toISOString().split('T')[0]}.csv`);
+      document.body.appendChild(link); link.click(); link.remove();
+      toast.success('File downloaded');
+    } catch { toast.error('Failed to export'); }
   };
 
-  const openWhatsApp = (mobile) => {
-    const cleanNumber = mobile.replace(/[^0-9]/g, '');
-    if (cleanNumber) {
-      window.open(`https://wa.me/${cleanNumber}`, '_blank');
-      toast.success('📱 Opening WhatsApp...');
-    } else {
-      toast.error('❌ Invalid mobile number');
-    }
-  };
-
-  const viewDetails = (application) => {
-    setSelectedApplication(application);
-    setShowModal(true);
-  };
-
-  const toggleSelectApplication = (id) => {
-    setSelectedForDelete(prev => 
-      prev.includes(id) ? prev.filter(appId => appId !== id) : [...prev, id]
-    );
-  };
-
-  const toggleSelectAll = () => {
-    if (selectedForDelete.length === filteredApplications.length) {
-      setSelectedForDelete([]);
-    } else {
-      setSelectedForDelete(filteredApplications.map(app => app.id));
-    }
-  };
-
-  const handleDeleteSingle = (application) => {
-    setDeleteTarget({ type: 'single', data: application });
-    setShowDeleteConfirm(true);
-  };
-
-  const handleDeleteBulk = () => {
-    if (selectedForDelete.length === 0) {
-      toast.warning('⚠️ Please select applications to delete');
-      return;
-    }
-    setDeleteTarget({ type: 'bulk', data: selectedForDelete });
-    setShowDeleteConfirm(true);
+  const sendCustomEmail = async () => {
+    if (!customEmailData.subject.trim() || !customEmailData.message.trim()) return toast.error('Subject and message required');
+    setIsSendingEmail(true);
+    try {
+      const token = localStorage.getItem('adminToken');
+      await axios.post(`${API_BASE_URL}/employment/applications/send-custom-email`,
+        { applicationIds: [selected.id], ...customEmailData },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      toast.success('Email sent');
+      setShowEmailModal(false);
+    } catch (e) { toast.error(e.response?.data?.message || 'Failed to send email'); }
+    finally { setIsSendingEmail(false); }
   };
 
   const confirmDelete = async () => {
     try {
       const token = localStorage.getItem('adminToken');
       if (deleteTarget.type === 'single') {
-        await axios.delete(
-          `${API_BASE_URL}/employment/applications/${deleteTarget.data.id}`,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        toast.success('✅ Application deleted successfully');
+        await axios.delete(`${API_BASE_URL}/employment/applications/${deleteTarget.data.id}`, { headers: { Authorization: `Bearer ${token}` } });
+        toast.success('Deleted');
       } else {
-        await axios.post(
-          `${API_BASE_URL}/employment/applications/bulk-delete`,
-          { applicationIds: deleteTarget.data },
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        toast.success(`✅ ${deleteTarget.data.length} applications deleted successfully`);
+        await axios.post(`${API_BASE_URL}/employment/applications/bulk-delete`, { applicationIds: deleteTarget.data }, { headers: { Authorization: `Bearer ${token}` } });
+        toast.success(`${deleteTarget.data.length} deleted`);
         setSelectedForDelete([]);
       }
       fetchApplications();
       setShowDeleteConfirm(false);
       setDeleteTarget(null);
-    } catch (error) {
-      console.error('Delete error:', error);
-      toast.error('❌ Failed to delete application(s)');
-    }
+    } catch { toast.error('Failed to delete'); }
   };
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#0284C7]"></div>
-      </div>
-    );
-  }
+  const toggleSelect = (id) => setSelectedForDelete(p => p.includes(id) ? p.filter(x => x !== id) : [...p, id]);
+  const toggleAll = () => setSelectedForDelete(selectedForDelete.length === filtered.length ? [] : filtered.map(a => a.id));
+
+  const stageCfg = (stage) => STAGE_CFG[stage] || { bg: 'bg-gray-100', text: 'text-gray-700' };
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
-      <ToastContainer position="top-right" autoClose={3000} />
-      
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold text-[#0284C7] mb-4">Employment Applications</h1>
-          
-          <div className="flex justify-end items-center gap-3">
-            {selectedForDelete.length > 0 && (
-              <button
-                onClick={handleDeleteBulk}
-                className="flex items-center gap-2 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition"
-              >
-                <FaTrash /> Delete Selected ({selectedForDelete.length})
-              </button>
-            )}
-            <button
-              onClick={exportToExcel}
-              className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition"
-            >
-              <FaFileExcel /> Export to Excel
-            </button>
-          </div>
-        </div>
-
-        {/* Filters */}
-        <div className="bg-white p-4 rounded-lg shadow-md mb-6">
-          <div className="flex items-center gap-2 mb-4">
-            <FaFilter className="text-[#0284C7]" />
-            <h2 className="text-lg font-semibold">Filters</h2>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <select
-              value={filters.stage}
-              onChange={(e) => setFilters({ ...filters, stage: e.target.value })}
-              className="border border-gray-300 rounded-lg px-3 py-2"
-            >
+    <div className="flex h-[calc(100vh-57px)] overflow-hidden bg-gray-50">
+      {/* Left — table list */}
+      <div className="w-[480px] border-r border-gray-200 flex flex-col flex-shrink-0 bg-white">
+        {/* Toolbar */}
+        <div className="p-2 border-b border-gray-100 space-y-1.5">
+          <div className="flex gap-1.5">
+            <input type="text" placeholder="Search name, email, position…" value={search} onChange={e => setSearch(e.target.value)}
+              className="flex-1 border border-gray-200 rounded px-2 py-1 text-xs focus:outline-none focus:border-[#0284C7]" />
+            <select value={filters.stage} onChange={e => setFilters(p => ({ ...p, stage: e.target.value }))}
+              className="border border-gray-200 rounded px-2 py-1 text-xs focus:outline-none bg-white">
               <option value="">All Stages</option>
-              {stages.map(stage => (
-                <option key={stage} value={stage}>{stage}</option>
-              ))}
+              {STAGES.map(s => <option key={s} value={s}>{s}</option>)}
             </select>
-            
-            <select
-              value={filters.department}
-              onChange={(e) => setFilters({ ...filters, department: e.target.value })}
-              className="border border-gray-300 rounded-lg px-3 py-2"
-            >
-              <option value="">All Departments</option>
-              {departments.map(dept => (
-                <option key={dept} value={dept}>{dept}</option>
-              ))}
+            <select value={filters.department} onChange={e => setFilters(p => ({ ...p, department: e.target.value }))}
+              className="border border-gray-200 rounded px-2 py-1 text-xs focus:outline-none bg-white">
+              <option value="">All Depts</option>
+              {DEPARTMENTS.map(d => <option key={d} value={d}>{d}</option>)}
             </select>
+          </div>
+          <div className="flex items-center justify-between">
+            <div className="flex gap-1.5">
+              {selectedForDelete.length > 0 && (
+                <button onClick={() => { setDeleteTarget({ type: 'bulk', data: selectedForDelete }); setShowDeleteConfirm(true); }}
+                  className="flex items-center gap-1 bg-red-500 text-white px-2 py-1 rounded text-[10px] font-semibold hover:bg-red-600">
+                  <FaTrash size={9} /> Delete ({selectedForDelete.length})
+                </button>
+              )}
+              <button onClick={exportToExcel}
+                className="flex items-center gap-1 bg-green-600 text-white px-2 py-1 rounded text-[10px] font-semibold hover:bg-green-700">
+                <FaFileExcel size={9} /> Export
+              </button>
+            </div>
+            <span className="text-[10px] text-gray-400">{filtered.length} applications</span>
           </div>
         </div>
 
-        {/* Applications Table */}
-        <div className="bg-white rounded-lg shadow-md overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-[#0284C7] text-white">
-                <tr>
-                  <th className="px-4 py-3 text-center w-12">
-                    <button
-                      onClick={toggleSelectAll}
-                      className="text-white hover:text-gray-200"
-                    >
-                      {selectedForDelete.length === filteredApplications.length ? 
-                        <FaCheckSquare size={18} /> : <FaSquare size={18} />}
+        {/* Table */}
+        <div className="flex-1 overflow-y-auto">
+          {loading ? (
+            <div className="flex justify-center items-center h-32">
+              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#0284C7]" />
+            </div>
+          ) : currentApps.length === 0 ? (
+            <p className="text-center py-8 text-gray-400 text-xs">No applications found</p>
+          ) : (
+            <table className="w-full text-xs">
+              <thead className="sticky top-0 bg-gray-50 z-10">
+                <tr className="border-b border-gray-200">
+                  <th className="px-2 py-1.5 w-6">
+                    <button onClick={toggleAll} className="text-gray-500 hover:text-[#0284C7]">
+                      {selectedForDelete.length === filtered.length ? <FaCheckSquare size={12} className="text-[#0284C7]" /> : <FaSquare size={12} />}
                     </button>
                   </th>
-                  <th className="px-4 py-3 text-left">Name</th>
-                  <th className="px-4 py-3 text-left">Email</th>
-                  <th className="px-4 py-3 text-left">Position</th>
-                  <th className="px-4 py-3 text-left">Mobile</th>
-                  <th className="px-4 py-3 text-left">Stage</th>
-                  <th className="px-4 py-3 text-left">Applied Date</th>
-                  <th className="px-4 py-3 text-center">Actions</th>
+                  <th className="text-left px-2 py-1.5 font-semibold text-gray-500 uppercase tracking-wide text-[10px]">Name</th>
+                  <th className="text-left px-2 py-1.5 font-semibold text-gray-500 uppercase tracking-wide text-[10px]">Position</th>
+                  <th className="text-left px-2 py-1.5 font-semibold text-gray-500 uppercase tracking-wide text-[10px]">Stage</th>
+                  <th className="text-left px-2 py-1.5 font-semibold text-gray-500 uppercase tracking-wide text-[10px]">Date</th>
+                  <th className="px-2 py-1.5 text-[10px]"></th>
                 </tr>
               </thead>
               <tbody>
-                {currentApplications.map((app) => (
-                  <tr 
-                    key={app.id} 
-                    className={`border-b hover:bg-gray-50 ${selectedForDelete.includes(app.id) ? 'bg-red-50' : ''}`}
-                  >
-                    <td className="px-4 py-3 text-center">
-                      <button
-                        onClick={() => toggleSelectApplication(app.id)}
-                        className="text-gray-600 hover:text-[#0284C7]"
-                      >
-                        {selectedForDelete.includes(app.id) ? 
-                          <FaCheckSquare size={18} className="text-[#0284C7]" /> : 
-                          <FaSquare size={18} />}
-                      </button>
-                    </td>
-                    <td className="px-4 py-3">{app.fullName}</td>
-                    <td className="px-4 py-3">{app.email}</td>
-                    <td className="px-4 py-3">{app.employmentDesired || 'N/A'}</td>
-                    <td className="px-4 py-3">{app.mobileContact || 'N/A'}</td>
-                    <td className="px-4 py-3">
-                      <select
-                        value={app.stage}
-                        onChange={(e) => updateStage(app.id, e.target.value)}
-                        className={`px-2 py-1 rounded text-sm font-semibold ${
-                          app.stage === 'Applied' ? 'bg-blue-100 text-blue-800' :
-                          app.stage === 'Interview' ? 'bg-yellow-100 text-yellow-800' :
-                          app.stage === 'Accepted' ? 'bg-green-100 text-green-800' :
-                          app.stage === 'Rejected' ? 'bg-red-100 text-red-800' :
-                          app.stage === 'Completion' ? 'bg-purple-100 text-purple-800' :
-                          app.stage === 'Certification' ? 'bg-indigo-100 text-indigo-800' :
-                          'bg-gray-100 text-gray-800'
-                        }`}
-                      >
-                        {stages.map(stage => {
-                          const allowedStages = getAllowedStages(app.stage);
-                          const isDisabled = !allowedStages.includes(stage);
-                          return (
-                            <option key={stage} value={stage} disabled={isDisabled}>
-                              {stage}
-                            </option>
-                          );
-                        })}
-                      </select>
-                    </td>
-                    <td className="px-4 py-3">
-                      {new Date(app.created_at).toLocaleDateString()}
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="flex justify-center gap-2">
-                        <button
-                          onClick={() => viewDetails(app)}
-                          className="text-blue-600 hover:text-blue-800"
-                          title="View Details"
-                        >
-                          <FaEye size={18} />
-                        </button>
-                        <button
-                          onClick={() => openCustomEmailModal(app)}
-                          className="text-purple-600 hover:text-purple-800"
-                          title="Send Email"
-                        >
-                          <FaEnvelope size={18} />
-                        </button>
-                        <button
-                          onClick={() => openWhatsApp(app.mobileContact)}
-                          className="text-green-500 hover:text-green-700"
-                          title="WhatsApp"
-                        >
-                          <FaWhatsapp size={18} />
-                        </button>
-                        <button
-                          onClick={() => handleDeleteSingle(app)}
-                          className="text-red-600 hover:text-red-800"
-                          title="Delete"
-                        >
-                          <FaTrash size={18} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+                {currentApps.map(app => {
+                  const sc = stageCfg(app.stage);
+                  const isActive = selected?.id === app.id;
+                  return (
+                    <tr key={app.id} onClick={() => setSelected(app)}
+                      className={`border-b border-gray-100 cursor-pointer transition-colors ${isActive ? 'bg-blue-50 border-l-2 border-l-[#0284C7]' : selectedForDelete.includes(app.id) ? 'bg-red-50' : 'hover:bg-gray-50'}`}>
+                      <td className="px-2 py-1.5" onClick={e => { e.stopPropagation(); toggleSelect(app.id); }}>
+                        {selectedForDelete.includes(app.id) ? <FaCheckSquare size={11} className="text-[#0284C7]" /> : <FaSquare size={11} className="text-gray-400" />}
+                      </td>
+                      <td className="px-2 py-1.5">
+                        <p className="font-semibold text-gray-800 truncate max-w-[100px]">{app.fullName}</p>
+                        <p className="text-gray-400 truncate max-w-[100px]">{app.email}</p>
+                      </td>
+                      <td className="px-2 py-1.5 text-gray-600 truncate max-w-[80px]">{app.employmentDesired || '—'}</td>
+                      <td className="px-2 py-1.5">
+                        <select value={app.stage} onClick={e => e.stopPropagation()}
+                          onChange={e => updateStage(app.id, e.target.value)}
+                          className={`px-1.5 py-0.5 rounded text-[10px] font-semibold cursor-pointer ${sc.bg} ${sc.text}`}>
+                          {STAGES.map(s => {
+                            const allowed = STAGE_FLOW[app.stage] || ['Applied'];
+                            return <option key={s} value={s} disabled={!allowed.includes(s)}>{s}</option>;
+                          })}
+                        </select>
+                      </td>
+                      <td className="px-2 py-1.5 text-gray-400 whitespace-nowrap">{new Date(app.created_at).toLocaleDateString()}</td>
+                      <td className="px-2 py-1.5">
+                        <div className="flex gap-1" onClick={e => e.stopPropagation()}>
+                          <button onClick={() => { setSelected(app); setCustomEmailData({ subject: '', message: '', attachmentUrl: '' }); setShowEmailModal(true); }}
+                            className="text-purple-500 hover:text-purple-700" title="Email"><FaEnvelope size={11} /></button>
+                          <button onClick={() => { const n = app.mobileContact?.replace(/[^0-9]/g, ''); if (n) window.open(`https://wa.me/${n}`, '_blank'); }}
+                            className="text-green-500 hover:text-green-700" title="WhatsApp"><FaWhatsapp size={11} /></button>
+                          <button onClick={() => { setDeleteTarget({ type: 'single', data: app }); setShowDeleteConfirm(true); }}
+                            className="text-red-500 hover:text-red-700" title="Delete"><FaTrash size={11} /></button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
-          </div>
-
-          {/* Pagination */}
-          {filteredApplications.length > 0 && (
-            <div className="flex flex-col sm:flex-row justify-between items-center px-6 py-4 border-t border-gray-200 gap-4">
-              <div className="flex items-center gap-4">
-                <div className="text-sm text-gray-600">
-                  Showing {indexOfFirstItem + 1} to {Math.min(indexOfLastItem, filteredApplications.length)} of {filteredApplications.length} applications
-                </div>
-                <div className="flex items-center gap-2">
-                  <label className="text-sm text-gray-600">Show:</label>
-                  <select
-                    value={itemsPerPage}
-                    onChange={(e) => {
-                      setItemsPerPage(Number(e.target.value));
-                      setCurrentPage(1);
-                    }}
-                    className="border border-gray-300 rounded-lg px-2 py-1 text-sm"
-                  >
-                    <option value={5}>5</option>
-                    <option value={10}>10</option>
-                    <option value={25}>25</option>
-                    <option value={50}>50</option>
-                  </select>
-                  <span className="text-sm text-gray-600">per page</span>
-                </div>
-              </div>
-
-              {totalPages > 1 && (
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={prevPage}
-                    disabled={currentPage === 1}
-                    className="px-3 py-1 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50"
-                  >
-                    Previous
-                  </button>
-                  
-                  <div className="flex gap-1">
-                    {[...Array(totalPages)].map((_, index) => {
-                      const pageNumber = index + 1;
-                      if (
-                        pageNumber === 1 ||
-                        pageNumber === totalPages ||
-                        (pageNumber >= currentPage - 1 && pageNumber <= currentPage + 1)
-                      ) {
-                        return (
-                          <button
-                            key={pageNumber}
-                            onClick={() => paginate(pageNumber)}
-                            className={`px-3 py-1 rounded-lg ${
-                              currentPage === pageNumber
-                                ? 'bg-[#0284C7] text-white'
-                                : 'border border-gray-300 hover:bg-gray-50'
-                            }`}
-                          >
-                            {pageNumber}
-                          </button>
-                        );
-                      } else if (
-                        pageNumber === currentPage - 2 ||
-                        pageNumber === currentPage + 2
-                      ) {
-                        return <span key={pageNumber} className="px-2">...</span>;
-                      }
-                      return null;
-                    })}
-                  </div>
-
-                  <button
-                    onClick={nextPage}
-                    disabled={currentPage === totalPages}
-                    className="px-3 py-1 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50"
-                  >
-                    Next
-                  </button>
-                </div>
-              )}
-            </div>
           )}
         </div>
 
-        {/* Details Modal */}
-        {showModal && selectedApplication && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto">
-              <div className="p-6">
-                <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-2xl font-bold text-[#0284C7]">Application Details</h2>
-                  <button
-                    onClick={() => setShowModal(false)}
-                    className="text-gray-500 hover:text-gray-700 text-2xl"
-                  >
-                    ×
-                  </button>
-                </div>
-                
-                <div className="space-y-6">
-                  {/* Personal Information Section */}
-                  <div>
-                    <h3 className="text-lg font-semibold text-[#0284C7] mb-3 pb-2 border-b">Personal Information</h3>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div><p className="text-sm text-gray-600">Full Name</p><p className="font-semibold">{selectedApplication.fullName}</p></div>
-                      <div><p className="text-sm text-gray-600">Email</p><p className="font-semibold">{selectedApplication.email}</p></div>
-                      <div><p className="text-sm text-gray-600">Mobile Contact</p><p className="font-semibold">{selectedApplication.mobileContact}</p></div>
-                      <div><p className="text-sm text-gray-600">WhatsApp</p><p className="font-semibold">{selectedApplication.whatsapp}</p></div>
-                      <div><p className="text-sm text-gray-600">Date of Birth</p><p className="font-semibold">{new Date(selectedApplication.dateOfBirth).toLocaleDateString()}</p></div>
-                      <div><p className="text-sm text-gray-600">Gender</p><p className="font-semibold">{selectedApplication.gender}</p></div>
-                      <div><p className="text-sm text-gray-600">Nationality</p><p className="font-semibold">{selectedApplication.nationality || 'N/A'}</p></div>
-                    </div>
-                  </div>
-
-                  {/* Address Information Section */}
-                  <div>
-                    <h3 className="text-lg font-semibold text-[#0284C7] mb-3 pb-2 border-b">Address Information</h3>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="col-span-2"><p className="text-sm text-gray-600">Current Address</p><p className="font-semibold">{selectedApplication.currentAddress || 'N/A'}</p></div>
-                      <div><p className="text-sm text-gray-600">City</p><p className="font-semibold">{selectedApplication.city || 'N/A'}</p></div>
-                      <div><p className="text-sm text-gray-600">Country</p><p className="font-semibold">{selectedApplication.country || 'N/A'}</p></div>
-                      <div><p className="text-sm text-gray-600">Postal Code</p><p className="font-semibold">{selectedApplication.postalCode || 'N/A'}</p></div>
-                    </div>
-                  </div>
-
-                  {/* Identification Documents Section */}
-                  <div>
-                    <h3 className="text-lg font-semibold text-[#0284C7] mb-3 pb-2 border-b">Identification Documents</h3>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div><p className="text-sm text-gray-600">CPR/National ID</p><p className="font-semibold">{selectedApplication.cprNationalId || 'N/A'}</p></div>
-                      <div><p className="text-sm text-gray-600">Passport ID</p><p className="font-semibold">{selectedApplication.passportId || 'N/A'}</p></div>
-                      <div><p className="text-sm text-gray-600">Passport Validity</p><p className="font-semibold">{selectedApplication.passportValidity ? new Date(selectedApplication.passportValidity).toLocaleDateString() : 'N/A'}</p></div>
-                      <div><p className="text-sm text-gray-600">Visa Status</p><p className="font-semibold">{selectedApplication.visaStatus || 'N/A'}</p></div>
-                      <div><p className="text-sm text-gray-600">Visa Validity</p><p className="font-semibold">{selectedApplication.visaValidity ? new Date(selectedApplication.visaValidity).toLocaleDateString() : 'N/A'}</p></div>
-                    </div>
-                  </div>
-
-                  {/* Education & Work Experience Section */}
-                  <div>
-                    <h3 className="text-lg font-semibold text-[#0284C7] mb-3 pb-2 border-b">Education & Work Experience</h3>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div><p className="text-sm text-gray-600">Education Level</p><p className="font-semibold">{selectedApplication.educationLevel || 'N/A'}</p></div>
-                      <div><p className="text-sm text-gray-600">Course/Degree</p><p className="font-semibold">{selectedApplication.courseDegree || 'N/A'}</p></div>
-                      <div><p className="text-sm text-gray-600">Currently Employed</p><p className="font-semibold">{selectedApplication.currentlyEmployed || 'N/A'}</p></div>
-                      <div><p className="text-sm text-gray-600">Years of Experience</p><p className="font-semibold">{selectedApplication.yearsOfExperience || 'N/A'}</p></div>
-                      <div><p className="text-sm text-gray-600">Position Applied</p><p className="font-semibold">{selectedApplication.employmentDesired || 'N/A'}</p></div>
-                      <div><p className="text-sm text-gray-600">Expected Salary (BHD)</p><p className="font-semibold">{selectedApplication.expectedSalary || 'N/A'}</p></div>
-                      <div className="col-span-2"><p className="text-sm text-gray-600">Skills</p><p className="font-semibold whitespace-pre-wrap">{selectedApplication.skills || 'N/A'}</p></div>
-                    </div>
-                  </div>
-
-                  {/* Work Preferences Section */}
-                  <div>
-                    <h3 className="text-lg font-semibold text-[#0284C7] mb-3 pb-2 border-b">Work Preferences</h3>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div><p className="text-sm text-gray-600">Available to Start</p><p className="font-semibold">{selectedApplication.availableStart || 'N/A'}</p></div>
-                      <div><p className="text-sm text-gray-600">Shift Available</p><p className="font-semibold">{selectedApplication.shiftAvailable || 'N/A'}</p></div>
-                      <div><p className="text-sm text-gray-600">Can Travel</p><p className="font-semibold">{selectedApplication.canTravel || 'N/A'}</p></div>
-                      <div><p className="text-sm text-gray-600">Driving License</p><p className="font-semibold">{selectedApplication.drivingLicense || 'N/A'}</p></div>
-                    </div>
-                  </div>
-
-                  {/* Client Leads Strategy Section */}
-                  <div>
-                    <h3 className="text-lg font-semibold text-[#0284C7] mb-3 pb-2 border-b">Client Leads Strategy</h3>
-                    <div><p className="font-semibold whitespace-pre-wrap">{selectedApplication.clientLeadsStrategy || 'N/A'}</p></div>
-                  </div>
-
-                  {/* References Section */}
-                  {(selectedApplication.ref1Name || selectedApplication.ref2Name || selectedApplication.ref3Name) && (
-                    <div>
-                      <h3 className="text-lg font-semibold text-[#0284C7] mb-3 pb-2 border-b">References</h3>
-                      <div className="space-y-4">
-                        {selectedApplication.ref1Name && (
-                          <div className="bg-gray-50 p-3 rounded">
-                            <p className="text-sm font-semibold text-gray-700 mb-2">Reference 1</p>
-                            <div className="grid grid-cols-3 gap-2 text-sm">
-                              <div><span className="text-gray-600">Name:</span> {selectedApplication.ref1Name}</div>
-                              <div><span className="text-gray-600">Contact:</span> {selectedApplication.ref1Contact}</div>
-                              <div><span className="text-gray-600">Email:</span> {selectedApplication.ref1Email}</div>
-                            </div>
-                          </div>
-                        )}
-                        {selectedApplication.ref2Name && (
-                          <div className="bg-gray-50 p-3 rounded">
-                            <p className="text-sm font-semibold text-gray-700 mb-2">Reference 2</p>
-                            <div className="grid grid-cols-3 gap-2 text-sm">
-                              <div><span className="text-gray-600">Name:</span> {selectedApplication.ref2Name}</div>
-                              <div><span className="text-gray-600">Contact:</span> {selectedApplication.ref2Contact}</div>
-                              <div><span className="text-gray-600">Email:</span> {selectedApplication.ref2Email}</div>
-                            </div>
-                          </div>
-                        )}
-                        {selectedApplication.ref3Name && (
-                          <div className="bg-gray-50 p-3 rounded">
-                            <p className="text-sm font-semibold text-gray-700 mb-2">Reference 3</p>
-                            <div className="grid grid-cols-3 gap-2 text-sm">
-                              <div><span className="text-gray-600">Name:</span> {selectedApplication.ref3Name}</div>
-                              <div><span className="text-gray-600">Contact:</span> {selectedApplication.ref3Contact}</div>
-                              <div><span className="text-gray-600">Email:</span> {selectedApplication.ref3Email}</div>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  )}
-                  
-                  {/* Resume Section */}
-                  {selectedApplication.resume_url && (
-                    <div>
-                      <h3 className="text-lg font-semibold text-[#0284C7] mb-3 pb-2 border-b">Resume</h3>
-                      <ResumeViewer url={selectedApplication.resume_url} />
-                    </div>
-                  )}
-
-                  {/* Application Info Section */}
-                  <div>
-                    <h3 className="text-lg font-semibold text-[#0284C7] mb-3 pb-2 border-b">Application Information</h3>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div><p className="text-sm text-gray-600">Application ID</p><p className="font-semibold">#{selectedApplication.id}</p></div>
-                      <div><p className="text-sm text-gray-600">Current Stage</p><p className="font-semibold">{selectedApplication.stage}</p></div>
-                      <div><p className="text-sm text-gray-600">Applied Date</p><p className="font-semibold">{new Date(selectedApplication.created_at).toLocaleString()}</p></div>
-                      <div><p className="text-sm text-gray-600">Last Updated</p><p className="font-semibold">{new Date(selectedApplication.updated_at).toLocaleString()}</p></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+        {/* Pagination */}
+        {filtered.length > 0 && (
+          <div className="border-t border-gray-100 px-2 py-1.5 flex items-center justify-between gap-2">
+            <div className="flex items-center gap-1.5">
+              <span className="text-[10px] text-gray-400">{indexOfFirst + 1}–{Math.min(indexOfLast, filtered.length)} of {filtered.length}</span>
+              <select value={itemsPerPage} onChange={e => { setItemsPerPage(Number(e.target.value)); setCurrentPage(1); }}
+                className="border border-gray-200 rounded px-1 py-0.5 text-[10px] bg-white">
+                {[10, 25, 50].map(n => <option key={n} value={n}>{n}/page</option>)}
+              </select>
             </div>
+            {totalPages > 1 && (
+              <div className="flex gap-1">
+                <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1}
+                  className="px-2 py-0.5 border border-gray-200 rounded text-[10px] disabled:opacity-40 hover:bg-gray-50">‹</button>
+                <span className="px-2 py-0.5 text-[10px] text-gray-500">{currentPage}/{totalPages}</span>
+                <button onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages}
+                  className="px-2 py-0.5 border border-gray-200 rounded text-[10px] disabled:opacity-40 hover:bg-gray-50">›</button>
+              </div>
+            )}
           </div>
         )}
-
-        {/* Custom Email Modal */}
-        {showCustomEmailModal && selectedApplication && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto">
-              <div className="p-6">
-                <div className="flex justify-between items-center mb-4">
-                  <div>
-                    <h2 className="text-2xl font-bold text-[#0284C7]">Send Custom Email</h2>
-                    <p className="text-sm text-gray-600 mt-1">To: {selectedApplication.fullName} ({selectedApplication.email})</p>
-                  </div>
-                  <button
-                    onClick={() => setShowCustomEmailModal(false)}
-                    className="text-gray-500 hover:text-gray-700 text-2xl"
-                  >
-                    ×
-                  </button>
-                </div>
-                
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Subject <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      value={customEmailData.subject}
-                      onChange={(e) => setCustomEmailData({ ...customEmailData, subject: e.target.value })}
-                      className="w-full border border-gray-300 rounded-lg px-4 py-2"
-                      placeholder="Email subject"
-                    />
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Message <span className="text-red-500">*</span>
-                    </label>
-                    <textarea
-                      value={customEmailData.message}
-                      onChange={(e) => setCustomEmailData({ ...customEmailData, message: e.target.value })}
-                      rows="10"
-                      className="w-full border border-gray-300 rounded-lg px-4 py-2"
-                      placeholder="Write your message here..."
-                    />
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Attachment URL (Optional)
-                    </label>
-                    <input
-                      type="url"
-                      value={customEmailData.attachmentUrl}
-                      onChange={(e) => setCustomEmailData({ ...customEmailData, attachmentUrl: e.target.value })}
-                      className="w-full border border-gray-300 rounded-lg px-4 py-2"
-                      placeholder="https://example.com/file.pdf"
-                    />
-                  </div>
-                  
-                  <div className="flex justify-end gap-3 pt-4 border-t">
-                    <button
-                      onClick={() => setShowCustomEmailModal(false)}
-                      disabled={isSendingEmail}
-                      className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      onClick={sendCustomEmail}
-                      disabled={isSendingEmail}
-                      className="px-6 py-2 bg-[#0284C7] text-white rounded-lg hover:bg-[#0369A1] flex items-center gap-2"
-                    >
-                      {isSendingEmail ? (
-                        <>
-                          <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                          </svg>
-                          <span>Sending...</span>
-                        </>
-                      ) : (
-                        <>
-                          <FaEnvelope />
-                          Send Email
-                        </>
-                      )}
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Delete Confirmation Modal */}
-        {showDeleteConfirm && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-lg max-w-md w-full p-6">
-              <h2 className="text-2xl font-bold text-[#0284C7] mb-4">Confirm Delete</h2>
-              <p className="text-gray-700 mb-6">
-                {deleteTarget?.type === 'single'
-                  ? `Are you sure you want to delete the application of ${deleteTarget.data.fullName}? This action cannot be undone.`
-                  : `Are you sure you want to delete ${deleteTarget?.data.length} selected application(s)? This action cannot be undone.`}
-              </p>
-              <div className="flex justify-end gap-3">
-                <button
-                  onClick={() => {
-                    setShowDeleteConfirm(false);
-                    setDeleteTarget(null);
-                  }}
-                  className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={confirmDelete}
-                  className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
-                >
-                  Delete
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Stage Email Modal */}
-        <StageEmailModal
-          isOpen={showStageEmailModal}
-          onClose={() => {
-            setShowStageEmailModal(false);
-            setPendingStageChange(null);
-            setSelectedApplication(null);
-          }}
-          selectedApplications={selectedApplication ? [selectedApplication] : []}
-          newStage={pendingStageChange?.newStage || ''}
-          onSuccess={handleStageEmailSuccess}
-        />
       </div>
+
+      {/* Right — detail panel */}
+      <div className="flex-1 overflow-y-auto p-4">
+        {!selected ? (
+          <p className="text-gray-400 text-xs">Select an application to view details</p>
+        ) : (
+          <div className="max-w-2xl space-y-4">
+            {/* Header */}
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-bold text-gray-800">{selected.fullName}</p>
+                <p className="text-xs text-gray-400">{selected.email} · #{selected.id}</p>
+              </div>
+              <div className="flex gap-2">
+                <button onClick={() => { setCustomEmailData({ subject: '', message: '', attachmentUrl: '' }); setShowEmailModal(true); }}
+                  className="flex items-center gap-1 px-3 py-1.5 bg-purple-100 text-purple-700 rounded text-xs font-semibold hover:bg-purple-200">
+                  <FaEnvelope size={10} /> Email
+                </button>
+                <button onClick={() => { const n = selected.mobileContact?.replace(/[^0-9]/g, ''); if (n) window.open(`https://wa.me/${n}`, '_blank'); }}
+                  className="flex items-center gap-1 px-3 py-1.5 bg-green-100 text-green-700 rounded text-xs font-semibold hover:bg-green-200">
+                  <FaWhatsapp size={10} /> WhatsApp
+                </button>
+              </div>
+            </div>
+
+            <Section title="Personal Information">
+              <div className="grid grid-cols-3 gap-2">
+                <Field label="Full Name" value={selected.fullName} />
+                <Field label="Email" value={selected.email} />
+                <Field label="Mobile" value={selected.mobileContact} />
+                <Field label="WhatsApp" value={selected.whatsapp} />
+                <Field label="Date of Birth" value={selected.dateOfBirth ? new Date(selected.dateOfBirth).toLocaleDateString() : null} />
+                <Field label="Gender" value={selected.gender} />
+                <Field label="Nationality" value={selected.nationality} />
+              </div>
+            </Section>
+
+            <Section title="Address">
+              <div className="grid grid-cols-3 gap-2">
+                <div className="col-span-3"><Field label="Current Address" value={selected.currentAddress} /></div>
+                <Field label="City" value={selected.city} />
+                <Field label="Country" value={selected.country} />
+                <Field label="Postal Code" value={selected.postalCode} />
+              </div>
+            </Section>
+
+            <Section title="Identification">
+              <div className="grid grid-cols-3 gap-2">
+                <Field label="CPR / National ID" value={selected.cprNationalId} />
+                <Field label="Passport ID" value={selected.passportId} />
+                <Field label="Passport Validity" value={selected.passportValidity ? new Date(selected.passportValidity).toLocaleDateString() : null} />
+                <Field label="Visa Status" value={selected.visaStatus} />
+                <Field label="Visa Validity" value={selected.visaValidity ? new Date(selected.visaValidity).toLocaleDateString() : null} />
+              </div>
+            </Section>
+
+            <Section title="Education & Experience">
+              <div className="grid grid-cols-3 gap-2">
+                <Field label="Education Level" value={selected.educationLevel} />
+                <Field label="Course / Degree" value={selected.courseDegree} />
+                <Field label="Currently Employed" value={selected.currentlyEmployed} />
+                <Field label="Years of Experience" value={selected.yearsOfExperience} />
+                <Field label="Position Applied" value={selected.employmentDesired} />
+                <Field label="Expected Salary (BHD)" value={selected.expectedSalary} />
+                <div className="col-span-3"><Field label="Skills" value={selected.skills} /></div>
+              </div>
+            </Section>
+
+            <Section title="Work Preferences">
+              <div className="grid grid-cols-3 gap-2">
+                <Field label="Available to Start" value={selected.availableStart} />
+                <Field label="Shift Available" value={selected.shiftAvailable} />
+                <Field label="Can Travel" value={selected.canTravel} />
+                <Field label="Driving License" value={selected.drivingLicense} />
+              </div>
+            </Section>
+
+            <Section title="Client Leads Strategy">
+              <p className="text-xs text-gray-700 whitespace-pre-wrap">{selected.clientLeadsStrategy || 'N/A'}</p>
+            </Section>
+
+            {(selected.ref1Name || selected.ref2Name || selected.ref3Name) && (
+              <Section title="References">
+                <div className="space-y-2">
+                  {[1, 2, 3].map(n => {
+                    const name = selected[`ref${n}Name`];
+                    if (!name) return null;
+                    return (
+                      <div key={n} className="bg-gray-50 rounded p-2 grid grid-cols-3 gap-2">
+                        <Field label={`Ref ${n} Name`} value={name} />
+                        <Field label="Contact" value={selected[`ref${n}Contact`]} />
+                        <Field label="Email" value={selected[`ref${n}Email`]} />
+                      </div>
+                    );
+                  })}
+                </div>
+              </Section>
+            )}
+
+            {selected.resume_url && (
+              <Section title="Resume">
+                <ResumeViewer url={selected.resume_url} />
+              </Section>
+            )}
+
+            <Section title="Application Info">
+              <div className="grid grid-cols-3 gap-2">
+                <Field label="Application ID" value={`#${selected.id}`} />
+                <Field label="Current Stage" value={selected.stage} />
+                <Field label="Applied Date" value={new Date(selected.created_at).toLocaleString()} />
+                <Field label="Last Updated" value={new Date(selected.updated_at).toLocaleString()} />
+              </div>
+            </Section>
+          </div>
+        )}
+      </div>
+
+      {/* Custom Email Modal */}
+      {showEmailModal && selected && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-lg p-4 space-y-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-bold text-gray-800">Send Email</p>
+                <p className="text-xs text-gray-400">To: {selected.fullName} ({selected.email})</p>
+              </div>
+              <button onClick={() => setShowEmailModal(false)} className="p-1 rounded-full hover:bg-gray-100"><FiX size={16} /></button>
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1">Subject *</label>
+              <input type="text" value={customEmailData.subject} onChange={e => setCustomEmailData(p => ({ ...p, subject: e.target.value }))}
+                className="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:border-[#0284C7]" placeholder="Email subject" />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1">Message *</label>
+              <textarea value={customEmailData.message} onChange={e => setCustomEmailData(p => ({ ...p, message: e.target.value }))}
+                rows={6} className="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:border-[#0284C7] resize-none"
+                placeholder="Write your message..." />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1">Attachment URL (optional)</label>
+              <input type="url" value={customEmailData.attachmentUrl} onChange={e => setCustomEmailData(p => ({ ...p, attachmentUrl: e.target.value }))}
+                className="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:border-[#0284C7]" placeholder="https://..." />
+            </div>
+            <div className="flex justify-end gap-2 pt-1">
+              <button onClick={() => setShowEmailModal(false)} disabled={isSendingEmail}
+                className="px-4 py-1.5 border border-gray-200 rounded-lg text-xs hover:bg-gray-50">Cancel</button>
+              <button onClick={sendCustomEmail} disabled={isSendingEmail}
+                className="px-4 py-1.5 bg-[#0284C7] text-white rounded-lg text-xs font-semibold hover:bg-[#0369A1] disabled:opacity-50 flex items-center gap-1.5">
+                {isSendingEmail ? 'Sending...' : <><FaEnvelope size={10} /> Send Email</>}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirm Modal */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-sm p-4 space-y-3">
+            <p className="text-sm font-bold text-gray-800">Confirm Delete</p>
+            <p className="text-xs text-gray-600">
+              {deleteTarget?.type === 'single'
+                ? `Delete application of ${deleteTarget.data.fullName}? This cannot be undone.`
+                : `Delete ${deleteTarget?.data.length} selected application(s)? This cannot be undone.`}
+            </p>
+            <div className="flex justify-end gap-2">
+              <button onClick={() => { setShowDeleteConfirm(false); setDeleteTarget(null); }}
+                className="px-4 py-1.5 border border-gray-200 rounded-lg text-xs hover:bg-gray-50">Cancel</button>
+              <button onClick={confirmDelete}
+                className="px-4 py-1.5 bg-red-600 text-white rounded-lg text-xs font-semibold hover:bg-red-700">Delete</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Stage Email Modal */}
+      <StageEmailModal
+        isOpen={showStageEmailModal}
+        onClose={() => { setShowStageEmailModal(false); setPendingStageChange(null); setSelected(null); }}
+        selectedApplications={selected ? [selected] : []}
+        newStage={pendingStageChange?.newStage || ''}
+        onSuccess={() => { fetchApplications(); setPendingStageChange(null); setSelected(null); setShowStageEmailModal(false); }}
+      />
     </div>
   );
 };

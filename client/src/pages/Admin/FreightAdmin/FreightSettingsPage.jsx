@@ -396,7 +396,7 @@ const AdminPaymentDetailsTab = () => {
 };
 
 // ─── Main Settings Page ───────────────────────────────────────────────────────
-const SUBTABS = ['Payment Details'];
+const SUBTABS = ['Payment Details','Pricing'];
 // const SUBTABS = ['Shipment', 'Port', 'Pricing', 'General', 'Payment Details'];
 
 
@@ -416,9 +416,9 @@ const FreightSettingsPage = () => {
         ))}
       </div>
       {/* {activeSubTab === 'Shipment' && <ShipmentTab />}
-      {activeSubTab === 'Port' && <PortTab />}
-      {activeSubTab === 'Pricing' && <PricingTab />}
-      {activeSubTab === 'General' && <GeneralTab />} */}
+      {activeSubTab === 'Port' && <PortTab />} */}
+       {activeSubTab === 'Pricing' && <PricingTab />}
+       {activeSubTab === 'General' && <GeneralTab />}
       {activeSubTab === 'Payment Details' && <AdminPaymentDetailsTab />}
     </div>
   );

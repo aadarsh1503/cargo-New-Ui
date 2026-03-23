@@ -59,7 +59,7 @@ const ChatWidget = ({
   }
 
   return (
-    <div className="fixed bottom-8 right-2 z-50">
+    <div className="fixed bottom-3 left-2 z-50">
       <button
         onClick={toggleChat}
         className="bg-green-500 text-white p-2 pl-3 pr-4 rounded-full shadow-lg flex items-center hover:bg-green-600 transition duration-300"

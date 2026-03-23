@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { FiLayout, FiFileText, FiImage, FiSettings, FiUsers, FiKey, FiTruck } from 'react-icons/fi';
+import { FiLayout, FiFileText, FiImage, FiSettings, FiUsers, FiTruck } from 'react-icons/fi';
 
 /**
  * A futuristic, reusable navigation toggle for the admin panel.
@@ -20,7 +20,6 @@ const DashboardToggle = ({ activeView, freightBadge = 0 }) => {
             gallery: '/admin/gallery',
             settings: '/admin/settings',
             employment: '/admin/employment',
-            aws: '/admin/aws-settings',
             freight: '/admin/freight/inquiry',
         };
 
@@ -28,13 +27,12 @@ const DashboardToggle = ({ activeView, freightBadge = 0 }) => {
     };
 
     const tabs = [
-        { key: 'dashboard', label: 'Dashboard', icon: <FiLayout size={14} /> },
+        { key: 'dashboard', label: 'Branch Settings', icon: <FiLayout size={14} /> },
         { key: 'freight', label: 'Freight Services', icon: <FiTruck size={14} /> },
-        { key: 'excel', label: 'Data', icon: <FiFileText size={14} /> },
+        { key: 'excel', label: 'Offers', icon: <FiFileText size={14} /> },
         { key: 'gallery', label: 'Gallery', icon: <FiImage size={14} /> },
         { key: 'settings', label: 'Settings', icon: <FiSettings size={14} /> },
         { key: 'employment', label: 'Jobs', icon: <FiUsers size={14} /> },
-        { key: 'aws', label: 'AWS', icon: <FiKey size={14} /> },
     ];
 
     return (

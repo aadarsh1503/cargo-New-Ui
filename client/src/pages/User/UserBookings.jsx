@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 import { API_BASE_URL } from '../../config/apiConfig';
 import toast from 'react-hot-toast';
 import FreightRequestDetail from '../../components/FreightRequestDetail/FreightRequestDetail';
@@ -117,6 +118,7 @@ const CityInput = ({ placeholder, value, onChange }) => {
 };
 
 const UserBookingsInner = () => {
+  const { executeRecaptcha } = useGoogleReCaptcha();
   const [step, setStep]             = useState('email');
   const [emailInput, setEmailInput] = useState('');
   const [email, setEmail]           = useState('');
@@ -159,14 +161,18 @@ const UserBookingsInner = () => {
       setEmail(fromLogin);
       localStorage.removeItem('userEmail');
       // Auto-send OTP
-      fetch(`${API_BASE_URL}/freight/user/send-otp`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: fromLogin }),
-      }).then(async r => {
-        const data = await r.json();
-        if (r.ok) { setStep('otp'); toast.success('Verification code sent to your email'); }
-        else toast.error(data.message || 'Failed to send code. Please try again.');
-      }).catch(() => toast.error('Failed to send code. Please try again.'));
+      (async () => {
+        try {
+          const recaptchaToken = executeRecaptcha ? await executeRecaptcha('send_otp') : null;
+          const r = await fetch(`${API_BASE_URL}/freight/user/send-otp`, {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: fromLogin, recaptchaToken }),
+          });
+          const data = await r.json();
+          if (r.ok) { setStep('otp'); toast.success('Verification code sent to your email'); }
+          else toast.error(data.message || 'Failed to send code. Please try again.');
+        } catch { toast.error('Failed to send code. Please try again.'); }
+      })();
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -175,9 +181,10 @@ const UserBookingsInner = () => {
     if (!emailInput.trim()) return;
     setSending(true);
     try {
+      const recaptchaToken = executeRecaptcha ? await executeRecaptcha('send_otp') : null;
       const res = await fetch(`${API_BASE_URL}/freight/user/send-otp`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: emailInput.trim() }),
+        body: JSON.stringify({ email: emailInput.trim(), recaptchaToken }),
       });
       const data = await res.json();
       if (!res.ok) { toast.error(data.message || 'Failed to send code. Please try again.'); return; }
@@ -344,9 +351,10 @@ const UserBookingsInner = () => {
               onClick={async () => {
                 setSending(true);
                 try {
+                  const recaptchaToken = executeRecaptcha ? await executeRecaptcha('send_otp') : null;
                   await fetch(`${API_BASE_URL}/freight/user/send-otp`, {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email }),
+                    body: JSON.stringify({ email, recaptchaToken }),
                   });
                   toast.success('New code sent');
                 } catch { toast.error('Failed to resend code'); }

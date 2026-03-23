@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import DashboardToggle from '../components/DashboardToggle/DashboardToggle';
-import { FiLogOut } from 'react-icons/fi';
+import { FiLogOut, FiDownload } from 'react-icons/fi';
 import useFreightCounts from '../hooks/useFreightCounts';
+import { API_BASE_URL } from '../config/apiConfig';
+import toast from 'react-hot-toast';
 
 // Logout Confirmation Modal
 const LogoutConfirmationModal = ({ isOpen, onClose, onConfirm }) => {
@@ -68,7 +70,31 @@ const AdminLayout = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
+  const [exporting, setExporting] = useState(false);
   const { total } = useFreightCounts();
+
+  const handleExport = async () => {
+    setExporting(true);
+    try {
+      const token = localStorage.getItem('adminToken');
+      const res = await fetch(`${API_BASE_URL}/admin/export-excel`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error();
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `gvs_export_${new Date().toISOString().slice(0, 10)}.xlsx`;
+      a.click();
+      URL.revokeObjectURL(url);
+      toast.success('Export downloaded');
+    } catch {
+      toast.error('Export failed');
+    } finally {
+      setExporting(false);
+    }
+  };
 
   // Determine active view based on current path
   const getActiveView = () => {
@@ -79,7 +105,6 @@ const AdminLayout = () => {
     if (path.includes('/admin/gallery')) return 'gallery';
     if (path.includes('/admin/settings')) return 'settings';
     if (path.includes('/admin/employment')) return 'employment';
-    if (path.includes('/admin/aws-settings')) return 'aws';
     return 'dashboard';
   };
 
@@ -106,14 +131,24 @@ const AdminLayout = () => {
                 <DashboardToggle activeView={getActiveView()} freightBadge={total} />
               </div>
               
-              {/* Logout Button */}
-              <button
-                onClick={() => setIsLogoutModalOpen(true)}
-                className="flex items-center gap-2 font-semibold text-amber-600 border-2 border-amber-500/50 px-5 py-2 rounded-lg hover:bg-amber-500 hover:text-white hover:shadow-lg hover:shadow-amber-500/30 transition-all duration-300"
-              >
-                <FiLogOut size={18} />
-                <span>Logout</span>
-              </button>
+              {/* Export + Logout */}
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handleExport}
+                  disabled={exporting}
+                  className="flex items-center gap-2 font-semibold text-emerald-600 border-2 border-emerald-500/50 px-4 py-2 rounded-lg hover:bg-emerald-500 hover:text-white hover:shadow-lg hover:shadow-emerald-500/30 transition-all duration-300 disabled:opacity-50"
+                >
+                  <FiDownload size={16} />
+                  <span className="text-sm">{exporting ? 'Exporting...' : 'Export'}</span>
+                </button>
+                <button
+                  onClick={() => setIsLogoutModalOpen(true)}
+                  className="flex items-center gap-2 font-semibold text-amber-600 border-2 border-amber-500/50 px-5 py-2 rounded-lg hover:bg-amber-500 hover:text-white hover:shadow-lg hover:shadow-amber-500/30 transition-all duration-300"
+                >
+                  <FiLogOut size={18} />
+                  <span>Logout</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>

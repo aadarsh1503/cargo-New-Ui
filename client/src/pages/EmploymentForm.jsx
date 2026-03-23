@@ -8,6 +8,7 @@ import { useLocation } from 'react-router-dom';
 import { API_BASE_URL } from '../config/apiConfig';
 import PhoneInput from 'react-phone-input-2';
 import 'react-phone-input-2/lib/style.css';
+import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 
 // Step Components - Moved outside to prevent re-creation on every render
 const PersonalInfoStep = ({ formData, errors, handleChange, handlePhoneChange, countries, defaultCountry }) => (
@@ -636,6 +637,7 @@ const AdditionalInfoStep = ({ formData, errors, handleChange, file, fileError, h
 
 const EmploymentForm = () => {
   const { pathname } = useLocation();
+  const { executeRecaptcha } = useGoogleReCaptcha();
   const [step, setStep] = useState(1);
   const [countries, setCountries] = useState([]);
   const [defaultCountry, setDefaultCountry] = useState('bh');
@@ -1002,6 +1004,12 @@ const EmploymentForm = () => {
         formDataToSend.append(key, formData[key]);
       }
       if (file) formDataToSend.append('resume', file);
+
+      // Get reCAPTCHA v3 token
+      if (executeRecaptcha) {
+        const recaptchaToken = await executeRecaptcha('employment_form');
+        formDataToSend.append('recaptchaToken', recaptchaToken);
+      }
 
       const response = await fetch(`${API_BASE_URL}/employment/submit`, {
         method: 'POST',

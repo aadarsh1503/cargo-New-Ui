@@ -141,39 +141,27 @@ const AgentsPage = () => {
   };
 
   return (
-    <div className="p-6">
-      <div className="flex items-center justify-between mb-4">
-        <p className="text-base font-bold text-gray-800">Agents <span className="text-gray-400 font-normal text-sm">({agents.length})</span></p>
-        <button
-          onClick={() => setModal('create')}
-          className="flex items-center gap-1.5 bg-[#243670] text-white px-4 py-2 rounded-full text-sm font-semibold hover:bg-blue-900 transition-colors"
-        >
-          <FiPlus size={13} /> Add Agent
+    <div className="p-3">
+      <div className="flex items-center justify-between mb-3">
+        <p className="text-sm font-bold text-gray-800">Agents <span className="text-gray-400 font-normal text-xs">({agents.length})</span></p>
+        <button onClick={() => setModal('create')}
+          className="flex items-center gap-1 bg-[#243670] text-white px-3 py-1.5 rounded text-xs font-semibold hover:bg-blue-900">
+          <FiPlus size={11} /> Add Agent
         </button>
       </div>
 
       {/* Filters */}
-      <div className="flex flex-wrap gap-2 mb-5">
-        <input
-          type="text"
-          placeholder="Search name, email, company..."
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          className="border border-gray-200 rounded-full px-4 py-1.5 text-sm focus:outline-none focus:border-[#243670] w-64"
-        />
-        <select
-          value={statusFilter}
-          onChange={e => setStatusFilter(e.target.value)}
-          className="border border-gray-200 rounded-full px-4 py-1.5 text-sm focus:outline-none focus:border-[#243670] bg-white"
-        >
+      <div className="flex flex-wrap gap-1.5 mb-3">
+        <input type="text" placeholder="Search name, email, company…" value={search} onChange={e => setSearch(e.target.value)}
+          className="border border-gray-200 rounded px-2.5 py-1 text-xs focus:outline-none focus:border-[#243670] w-52" />
+        <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)}
+          className="border border-gray-200 rounded px-2.5 py-1 text-xs focus:outline-none bg-white">
           <option value="">All Status</option>
           <option value="active">Active</option>
           <option value="inactive">Inactive</option>
         </select>
         {(search || statusFilter) && (
-          <button onClick={() => { setSearch(''); setStatusFilter(''); }} className="px-4 py-1.5 rounded-full border border-gray-200 text-gray-500 text-sm hover:bg-gray-50">
-            Clear
-          </button>
+          <button onClick={() => { setSearch(''); setStatusFilter(''); }} className="px-2.5 py-1 rounded border border-gray-200 text-gray-500 text-xs hover:bg-gray-50">Clear</button>
         )}
       </div>
 
@@ -187,59 +175,53 @@ const AgentsPage = () => {
         return loading ? (
           <LoadingSpinner />
         ) : filtered.length === 0 ? (
-          <p className="text-sm text-gray-400 text-center py-16">{agents.length === 0 ? 'No agents yet.' : 'No results.'}</p>
+          <p className="text-xs text-gray-400 text-center py-10">{agents.length === 0 ? 'No agents yet.' : 'No results.'}</p>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="w-full text-xs">
               <thead>
-                <tr className="border-b border-gray-200">
+                <tr className="border-b border-gray-200 bg-gray-50">
                   {['Agent', 'Email', 'Phone', 'Company', 'Password', 'Status', 'Joined', ''].map(h => (
-                    <th key={h} className="text-left py-2.5 px-3 text-xs font-semibold text-[#243670] uppercase tracking-wide whitespace-nowrap">{h}</th>
+                    <th key={h} className="text-left py-1.5 px-2 text-[10px] font-semibold text-gray-500 uppercase tracking-wide whitespace-nowrap">{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
                 {filtered.map(a => (
                   <tr key={a.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors group">
-                    <td className="py-2.5 px-3">
-                      <div className="flex items-center gap-2.5">
-                        <div className="w-7 h-7 rounded-full bg-rose-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                    <td className="py-1.5 px-2">
+                      <div className="flex items-center gap-1.5">
+                        <div className="w-5 h-5 rounded-full bg-rose-500 flex items-center justify-center text-white text-[9px] font-bold flex-shrink-0">
                           {a.name.charAt(0).toUpperCase()}
                         </div>
                         <span className="font-semibold text-gray-800 whitespace-nowrap">{a.name}</span>
                       </div>
                     </td>
-                    <td className="py-2.5 px-3 text-gray-500">{a.email}</td>
-                    <td className="py-2.5 px-3 text-gray-500">{a.phone || '—'}</td>
-                    <td className="py-2.5 px-3 text-gray-500">{a.company || '—'}</td>
-                    <td className="py-2.5 px-3">
-                      <div className="flex items-center gap-1.5">
-                        <span className="font-mono text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded">
+                    <td className="py-1.5 px-2 text-gray-500">{a.email}</td>
+                    <td className="py-1.5 px-2 text-gray-500">{a.phone || '—'}</td>
+                    <td className="py-1.5 px-2 text-gray-500">{a.company || '—'}</td>
+                    <td className="py-1.5 px-2">
+                      <div className="flex items-center gap-1">
+                        <span className="font-mono text-[10px] text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded">
                           {revealedPwd[a.id] ? (a.plain_password || '—') : '••••••••'}
                         </span>
-                        <button
-                          type="button"
-                          onClick={() => setRevealedPwd(p => ({ ...p, [a.id]: !p[a.id] }))}
-                          className="text-gray-400 hover:text-gray-600 transition-colors"
-                          title={revealedPwd[a.id] ? 'Hide' : 'Show'}
-                        >
-                          {revealedPwd[a.id] ? <FiEyeOff size={12} /> : <FiEye size={12} />}
+                        <button type="button" onClick={() => setRevealedPwd(p => ({ ...p, [a.id]: !p[a.id] }))}
+                          className="text-gray-400 hover:text-gray-600" title={revealedPwd[a.id] ? 'Hide' : 'Show'}>
+                          {revealedPwd[a.id] ? <FiEyeOff size={10} /> : <FiEye size={10} />}
                         </button>
                       </div>
                     </td>
-                    <td className="py-2.5 px-3">
-                      <button
-                        onClick={() => handleToggle(a.id, a.is_active)}
-                        className={`px-3 py-1 rounded-full text-xs font-semibold transition-colors ${a.is_active ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}
-                      >
+                    <td className="py-1.5 px-2">
+                      <button onClick={() => handleToggle(a.id, a.is_active)}
+                        className={`px-2 py-0.5 rounded text-[10px] font-semibold transition-colors ${a.is_active ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}>
                         {a.is_active ? 'Active' : 'Inactive'}
                       </button>
                     </td>
-                    <td className="py-2.5 px-3 text-gray-400 text-xs whitespace-nowrap">{new Date(a.created_at).toLocaleDateString()}</td>
-                    <td className="py-2.5 px-3">
+                    <td className="py-1.5 px-2 text-gray-400 whitespace-nowrap">{new Date(a.created_at).toLocaleDateString()}</td>
+                    <td className="py-1.5 px-2">
                       <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button onClick={() => setModal(a)} className="p-1.5 rounded-lg bg-blue-50 text-[#243670] hover:bg-blue-100 transition-colors" title="Edit"><FiEdit2 size={12} /></button>
-                        <button onClick={() => handleDelete(a.id)} className="p-1.5 rounded-lg bg-red-50 text-red-400 hover:bg-red-100 transition-colors" title="Delete"><FiTrash2 size={12} /></button>
+                        <button onClick={() => setModal(a)} className="p-1 rounded bg-blue-50 text-[#243670] hover:bg-blue-100" title="Edit"><FiEdit2 size={10} /></button>
+                        <button onClick={() => handleDelete(a.id)} className="p-1 rounded bg-red-50 text-red-400 hover:bg-red-100" title="Delete"><FiTrash2 size={10} /></button>
                       </div>
                     </td>
                   </tr>

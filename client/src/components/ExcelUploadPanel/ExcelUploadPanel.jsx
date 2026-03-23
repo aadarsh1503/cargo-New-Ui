@@ -3,42 +3,9 @@ import toast from 'react-hot-toast';
 import * as api from './ExcelService';
 import FileList from './FileList';
 import Modal from './Modal';
-import { FiCheckCircle, FiXCircle, FiLogOut } from 'react-icons/fi'; 
+import { FiCheckCircle, FiXCircle } from 'react-icons/fi';
 import FileUploadForm from './FileUploadForm';
 import "./e.css";
-
-
-const LogoutConfirmation = ({ onConfirm, toastId }) => (
-  <div className="flex flex-col items-center gap-4 p-4 bg-white rounded-lg shadow-2xl border border-gray-200 w-80 font-noto-serif">
-    <div className="relative">
-      <div className="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center">
-        <FiLogOut className="text-red-500 text-4xl animate-pulse" />
-      </div>
-    </div>
-    <h3 className="text-xl font-bold text-gray-800">Are you sure?</h3>
-    <p className="text-sm text-center text-gray-500">
-      You will be logged out and will need to sign in again to manage files.
-    </p>
-    <div className="flex w-full gap-3 mt-2">
-      <button
-        onClick={() => toast.dismiss(toastId)} 
-        className="w-full px-4 py-2 text-sm font-semibold text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 transition-all"
-      >
-        Cancel
-      </button>
-      <button
-        onClick={() => {
-          onConfirm(); 
-          toast.dismiss(toastId); 
-        }}
-        className="w-full px-4 py-2 text-sm font-semibold text-white bg-red-500 rounded-md hover:bg-red-600 transition-all shadow-md"
-      >
-        Logout
-      </button>
-    </div>
-  </div>
-);
-
 
 const ExcelUploadPanel = ({ onLogout }) => {
   const [files, setFiles] = useState([]);
@@ -46,7 +13,6 @@ const ExcelUploadPanel = ({ onLogout }) => {
   const [isUploading, setIsUploading] = useState(false);
   const [deletingId, setDeletingId] = useState(null);
   const [message, setMessage] = useState({ text: '', type: '' });
-
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [fileToRename, setFileToRename] = useState(null);
   const [newName, setNewName] = useState('');
@@ -57,46 +23,31 @@ const ExcelUploadPanel = ({ onLogout }) => {
     try {
       setIsLoading(true);
       const response = await api.getFiles();
-  
       if (Array.isArray(response.data)) {
-        const filesWithStatus = response.data.map(file => ({
-          ...file,
-          status: 'processed' 
-        }));
-        setFiles(filesWithStatus);
+        setFiles(response.data.map(file => ({ ...file, status: 'processed' })));
       } else {
         setFiles([]);
       }
     } catch (error) {
       setMessage({ text: 'Error fetching files.', type: 'error' });
-      console.error(error);
     } finally {
       setIsLoading(false);
     }
   }, []);
 
-  useEffect(() => {
-    fetchFiles();
-  }, [fetchFiles]);
-  
+  useEffect(() => { fetchFiles(); }, [fetchFiles]);
+
   const handleUpload = useCallback(async (file) => {
     setIsUploading(true);
     try {
       const response = await api.uploadFile(file);
       if (response.data && response.data.id) {
-       
-        const newFileWithStatus = {
-          ...response.data,
-          status: 'uploaded'
-        };
-        setFiles(prevFiles => [newFileWithStatus, ...prevFiles]);
+        setFiles(prev => [{ ...response.data, status: 'uploaded' }, ...prev]);
         setMessage({ text: 'File uploaded successfully!', type: 'success' });
       } else {
-        console.error("Received an invalid object from the server after upload:", response.data);
         setMessage({ text: 'Error updating list. Please refresh.', type: 'error' });
       }
     } catch (error) {
-      console.error("❌ Upload Failed:", error.response?.data || error.message);
       setMessage({ text: error.response?.data?.message || 'Upload failed.', type: 'error' });
     } finally {
       setIsUploading(false);
@@ -104,8 +55,6 @@ const ExcelUploadPanel = ({ onLogout }) => {
     }
   }, []);
 
-
-  
   const handleDelete = useCallback(async (id) => {
     if (window.confirm('Are you sure you want to delete this file permanently?')) {
       setDeletingId(id);
@@ -123,24 +72,17 @@ const ExcelUploadPanel = ({ onLogout }) => {
   }, []);
 
   const openRenameModal = (file) => {
-    
     setFileToRename(file);
-    setNewName(file.fileName); 
+    setNewName(file.fileName);
     setIsModalOpen(true);
   };
 
   const handleRename = async (e) => {
     e.preventDefault();
     if (!fileToRename || !newName.trim()) return;
-
     try {
       const response = await api.renameFile(fileToRename.id, newName.trim());
-     
-      const updatedFileWithStatus = {
-          ...response.data,
-          status: fileToRename.status 
-      };
-      setFiles(files => files.map(f => f.id === fileToRename.id ? updatedFileWithStatus : f));
+      setFiles(files => files.map(f => f.id === fileToRename.id ? { ...response.data, status: fileToRename.status } : f));
       setMessage({ text: 'File renamed successfully!', type: 'success' });
       setIsModalOpen(false);
     } catch (error) {
@@ -150,81 +92,67 @@ const ExcelUploadPanel = ({ onLogout }) => {
     }
   };
 
-
-  const handleLogoutClick = () => {
-    toast(
-      (t) => (
-        <LogoutConfirmation 
-          onConfirm={onLogout} 
-          toastId={t.id} 
-        />
-      ),
-      {
-        duration: Infinity, 
-        style: {
-          background: 'transparent',
-          boxShadow: 'none',
-          padding: 0,
-        },
-      }
-    );
-  };
-
-
   return (
-    <div className="panel-container font-noto-serif">
-        <div className="panel-header">
-            <div>
-                <h1 className="page-heading ml-0 lg:-ml-32 text-gradient-heading font-noto-serif">File Management</h1>
-                <p className="page-subheading font-noto-serif">Upload, publish, and manage your Excel data sheets.</p>
-            </div>
+    <div className="min-h-screen bg-[#F0F4F8] p-4">
+      <div className="max-w-5xl mx-auto space-y-3">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-semibold text-[#243670] tracking-widest uppercase">File Management</h1>
+            <p className="text-gray-400 text-xs mt-0.5">Upload and manage Excel data sheets</p>
+          </div>
+          <span className="text-xs text-gray-400">{files.length} file{files.length !== 1 ? 's' : ''}</span>
         </div>
 
+        {/* Message */}
         {message.text && (
-            <div className={`message-box ${message.type === 'success' ? 'message-success' : 'message-error'}`}>
-                {message.type === 'success' ? <FiCheckCircle /> : <FiXCircle />}
-                {message.text}
-            </div>
+          <div className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium ${message.type === 'success' ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
+            {message.type === 'success' ? <FiCheckCircle size={14} /> : <FiXCircle size={14} />}
+            {message.text}
+          </div>
         )}
-        
-        <div className="panel-glass font-noto-serif">
-            <h2 className="panel-title">Upload New Sheet</h2>
-            <FileUploadForm onUpload={handleUpload} isUploading={isUploading} />
+
+        {/* Upload */}
+        <div className="bg-white/80 backdrop-blur-sm rounded-xl border border-[#243670]/10 shadow-sm p-4">
+          <h2 className="text-xs font-semibold text-[#243670] uppercase tracking-widest mb-3">Upload New Sheet</h2>
+          <FileUploadForm onUpload={handleUpload} isUploading={isUploading} />
         </div>
 
-        <div className="panel-glass">
-            <h2 className="panel-title">Uploaded Files Repository</h2>
-            <FileList 
-                files={files}
-                isLoading={isLoading}
-                onRename={openRenameModal}
-                onDelete={handleDelete}
-                deletingId={deletingId}
-               
-            />
+        {/* File list */}
+        <div className="bg-white/80 backdrop-blur-sm rounded-xl border border-[#243670]/10 shadow-sm p-4">
+          <h2 className="text-xs font-semibold text-[#243670] uppercase tracking-widest mb-3">Uploaded Files ({files.length})</h2>
+          <FileList
+            files={files}
+            isLoading={isLoading}
+            onRename={openRenameModal}
+            onDelete={handleDelete}
+            deletingId={deletingId}
+          />
         </div>
 
+        {/* Rename Modal */}
         <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Rename File">
-            <form onSubmit={handleRename}>
-                <label htmlFor="newName" className="modal-form-label">New File Name</label>
-                <input
-                    type="text"
-                    id="newName"
-                    value={newName || ''} // Safety check
-                    onChange={(e) => setNewName(e.target.value)}
-                    className="modal-form-input"
-                    autoFocus
-                />
-                <div className="modal-actions">
-                    <button type="button" onClick={() => setIsModalOpen(false)} className="btn btn-secondary">
-                        Cancel
-                    </button>
-                    <button type="submit" className="btn btn-primary">
-                        Save Changes
-                    </button>
-                </div>
-            </form>
+          <form onSubmit={handleRename}>
+            <label htmlFor="newName" className="block text-xs font-medium text-gray-600 mb-1">New File Name</label>
+            <input
+              type="text" id="newName" value={newName || ''}
+              onChange={(e) => setNewName(e.target.value)}
+              className="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:border-[#243670]"
+              autoFocus
+            />
+            <div className="mt-3 flex justify-end gap-2">
+              <button type="button" onClick={() => setIsModalOpen(false)}
+                className="px-4 py-1.5 text-xs font-semibold text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200">
+                Cancel
+              </button>
+              <button type="submit"
+                className="px-4 py-1.5 text-xs font-semibold text-white bg-[#243670] rounded-lg hover:bg-blue-900">
+                Save
+              </button>
+            </div>
+          </form>
         </Modal>
+      </div>
     </div>
   );
 };

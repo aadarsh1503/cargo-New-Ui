@@ -201,11 +201,11 @@ function LocationSection() {
             </div>
 
             {/* All locations — HQ in centre, others on left/right */}
-            <div className="flex flex-col lg:flex-row items-stretch justify-center gap-8">
+            <div className="flex flex-col lg:flex-row items-stretch justify-center gap-4 lg:gap-6 max-w-5xl mx-auto">
 
                 {/* Left offices */}
                 {others.length > 0 && (
-                    <div className="flex flex-col gap-8 flex-1 max-w-[360px] mx-auto lg:mx-0">
+                    <div className="flex flex-col gap-4 lg:gap-6 w-full lg:w-[320px] flex-shrink-0 mx-auto lg:mx-0">
                         {others.filter((_, i) => i % 2 === 0).map(loc => (
                             <LocationCard key={loc.code} location={loc} />
                         ))}
@@ -214,7 +214,7 @@ function LocationSection() {
 
                 {/* Centre — Main HQ */}
                 {hq && (
-                    <div className="flex flex-col items-center gap-2 flex-shrink-0 w-full max-w-[400px] mx-auto">
+                    <div className="flex flex-col items-center gap-2 w-full lg:w-[360px] flex-shrink-0 mx-auto">
                         <p className="text-xs font-semibold uppercase tracking-widest text-DarkBlue">Main Headquarters</p>
                         <LocationCard location={hq} isHQ={true} />
                     </div>
@@ -222,7 +222,7 @@ function LocationSection() {
 
                 {/* Right offices */}
                 {others.length > 1 && (
-                    <div className="flex flex-col gap-8 flex-1 max-w-[360px] mx-auto lg:mx-0">
+                    <div className="flex flex-col gap-4 lg:gap-6 w-full lg:w-[320px] flex-shrink-0 mx-auto lg:mx-0">
                         {others.filter((_, i) => i % 2 === 1).map(loc => (
                             <LocationCard key={loc.code} location={loc} />
                         ))}

@@ -1,183 +1,238 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import { API_BASE_URL } from '../../config/apiConfig';
 import toast from 'react-hot-toast';
+import { FaSave, FaCheckCircle } from 'react-icons/fa';
 
-const SettingsManagement = () => {
-  const navigate = useNavigate();
+// ─── Google Maps Section ──────────────────────────────────────────────────────
+const GoogleMapsSection = () => {
   const [settings, setSettings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [editingKey, setEditingKey] = useState(null);
 
   useEffect(() => {
-    fetchSettings();
+    const token = localStorage.getItem('adminToken');
+    fetch(`${API_BASE_URL}/settings`, { headers: { Authorization: `Bearer ${token}` } })
+      .then(r => r.json())
+      .then(data => setSettings(Array.isArray(data) ? data.filter(s => s.setting_key === 'google_maps_api_key') : []))
+      .catch(() => toast.error('Error fetching settings'))
+      .finally(() => setLoading(false));
   }, []);
 
-  const fetchSettings = async () => {
+  const handleSubmit = async (e, key) => {
+    e.preventDefault();
+    const value = new FormData(e.target).get('value');
+    setSaving(true); setEditingKey(key);
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await fetch(`${API_BASE_URL}/settings`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      const data = await response.json();
-      setSettings(data);
-    } catch (error) {
-      toast.error('Error fetching settings');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleUpdate = async (key, value) => {
-    setSaving(true);
-    setEditingKey(key);
-    const token = localStorage.getItem('adminToken');
-
-    try {
-      const response = await fetch(`${API_BASE_URL}/settings/${key}`, {
+      const res = await fetch(`${API_BASE_URL}/settings/${key}`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ value })
       });
-
-      if (response.ok) {
-        toast.success('Setting updated successfully');
-        fetchSettings();
-      } else {
-        toast.error('Update failed');
-      }
-    } catch (error) {
-      toast.error('Error updating setting');
-    } finally {
-      setSaving(false);
-      setEditingKey(null);
-    }
+      if (res.ok) toast.success('Setting updated');
+      else toast.error('Update failed');
+    } catch { toast.error('Error updating setting'); }
+    finally { setSaving(false); setEditingKey(null); }
   };
 
-  const handleSubmit = (e, key) => {
-    e.preventDefault();
-    const formData = new FormData(e.target);
-    const value = formData.get('value');
-    handleUpdate(key, value);
-  };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-[#F0F4F8] flex items-center justify-center">
-        <div className="text-[#243670] text-xl">Loading settings...</div>
-      </div>
-    );
-  }
+  if (loading) return <p className="text-xs text-gray-400">Loading...</p>;
 
   return (
-    <div className="min-h-screen bg-[#F0F4F8] text-[#243670] p-8 relative overflow-hidden">
-      {/* Background Pattern */}
-      <div className="absolute inset-0 z-0 opacity-30" style={{
-        backgroundImage: 'radial-gradient(#243670 0.5px, transparent 0.5px), radial-gradient(#243670 0.5px, #F0F4F8 0.5px)',
-        backgroundSize: '20px 20px',
-        backgroundPosition: '0 0, 10px 10px'
-      }}></div>
-
-      <div className="relative z-10 max-w-4xl mx-auto">
-        {/* Header */}
-        <div className="mb-12">
-          <h1 className="text-5xl font-light tracking-widest uppercase text-[#243670] mb-2">
-            Settings Management
-          </h1>
-          <p className="text-gray-500">Configure your application settings</p>
+    <div className="space-y-3">
+      {settings.length === 0 ? (
+        <p className="text-xs text-gray-400">No Google Maps key found. Run the SQL migration first.</p>
+      ) : settings.map(setting => (
+        <div key={setting.id}>
+          {setting.description && <p className="text-xs text-gray-400 mb-1">{setting.description}</p>}
+          <form onSubmit={(e) => handleSubmit(e, setting.setting_key)} className="flex gap-2">
+            <input type="text" name="value" defaultValue={setting.setting_value}
+              className="flex-1 border border-[#243670]/20 rounded-lg px-3 py-1.5 text-xs font-mono focus:border-[#F59E0B] focus:outline-none"
+              placeholder="Enter Google Maps API Key" />
+            <button type="submit" disabled={saving && editingKey === setting.setting_key}
+              className="bg-gradient-to-r from-[#F59E0B] to-[#D97706] text-white px-3 py-1.5 rounded-lg text-xs font-semibold disabled:opacity-50 whitespace-nowrap">
+              {saving && editingKey === setting.setting_key ? 'Saving...' : '💾 Save'}
+            </button>
+          </form>
         </div>
+      ))}
+      <div className="bg-blue-50 border border-blue-100 rounded-lg p-3">
+        <p className="text-xs text-blue-800 mb-1.5">Used for interactive maps. <a href="https://console.cloud.google.com/google/maps-apis" target="_blank" rel="noopener noreferrer" className="font-semibold underline">Get API key →</a></p>
+        <ol className="text-[10px] text-blue-700 space-y-0.5 list-decimal list-inside">
+          <li>Visit Google Cloud Console</li>
+          <li>Enable "Maps JavaScript API"</li>
+          <li>Create credentials (API Key)</li>
+          <li>Paste the key above</li>
+        </ol>
+      </div>
+    </div>
+  );
+};
 
-        {/* Settings Cards */}
-        <div className="space-y-6">
-          {settings.length === 0 ? (
-            <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl p-12 border-2 border-[#243670]/10">
-              <div className="text-center mb-6">
-                <div className="text-6xl mb-4">⚙️</div>
-                <h3 className="text-2xl font-semibold text-[#243670] mb-4">No Settings Found</h3>
-                <p className="text-gray-600 mb-6">Run the SQL migration to add default settings.</p>
-              </div>
-              <div className="bg-[#243670]/5 rounded-xl p-6">
-                <code className="text-sm text-[#243670] block whitespace-pre-wrap">
-                  INSERT INTO settings (setting_key, setting_value, description){'\n'}
-                  VALUES ('google_maps_api_key', '', 'Google Maps API Key for map components'){'\n'}
-                  ON DUPLICATE KEY UPDATE setting_key = setting_key;
-                </code>
-              </div>
-            </div>
-          ) : (
-            settings.map((setting) => (
-              <div key={setting.id} className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl p-8 border-2 border-[#243670]/10 hover:border-[#F59E0B] transition-all duration-300">
-                <div className="flex items-start gap-4 mb-6">
-                  <div className="text-4xl">
-                    {setting.setting_key === 'google_maps_api_key' ? '🗺️' : '⚙️'}
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-2xl font-semibold text-[#243670] capitalize mb-2">
-                      {setting.setting_key.replace(/_/g, ' ')}
-                    </h3>
-                    {setting.description && (
-                      <p className="text-sm text-gray-600">{setting.description}</p>
-                    )}
-                  </div>
-                </div>
-                
-                <form onSubmit={(e) => handleSubmit(e, setting.setting_key)}>
-                  <div className="flex gap-4">
-                    <input
-                      type="text"
-                      name="value"
-                      defaultValue={setting.setting_value}
-                      className="flex-1 border-2 border-[#243670]/20 rounded-lg p-4 focus:border-[#F59E0B] focus:outline-none transition-colors text-[#243670] font-mono text-sm"
-                      placeholder={`Enter ${setting.setting_key.replace(/_/g, ' ')}`}
-                    />
-                    <button
-                      type="submit"
-                      disabled={saving && editingKey === setting.setting_key}
-                      className="bg-gradient-to-r from-[#F59E0B] to-[#D97706] text-white px-8 py-4 rounded-lg font-semibold hover:shadow-lg hover:shadow-[#F59E0B]/30 disabled:opacity-50 transition-all duration-300 transform hover:-translate-y-1 whitespace-nowrap"
-                    >
-                      {saving && editingKey === setting.setting_key ? '💾 Saving...' : '💾 Save'}
-                    </button>
-                  </div>
-                </form>
-              </div>
-            ))
-          )}
-        </div>
+// ─── Email / AWS Section ──────────────────────────────────────────────────────
+const EmailSettingsSection = () => {
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [testing, setTesting] = useState(false);
+  const [activeTab, setActiveTab] = useState('smtp');
+  const [emailSettings, setEmailSettings] = useState({
+    EMAIL_PROVIDER: 'smtp',
+    AWS_ACCESS_KEY_ID: '', AWS_SECRET_ACCESS_KEY: '',
+    AWS_REGION: '', AWS_SES_FROM_EMAIL: '', AWS_SES_FROM_NAME: '',
+    SMTP_HOST: '', SMTP_PORT: '465', SMTP_SECURE: 'true',
+    SMTP_USER: '', SMTP_PASS: '', SMTP_FROM_EMAIL: '', SMTP_FROM_NAME: '',
+  });
 
-        {/* Info Card */}
-        <div className="mt-12 bg-gradient-to-r from-blue-50 to-cyan-50 border-2 border-blue-200 rounded-2xl p-8 shadow-lg">
-          <div className="flex items-start gap-4">
-            <div className="text-4xl">💡</div>
-            <div>
-              <h3 className="font-bold text-blue-900 text-xl mb-3">Google Maps API Key</h3>
-              <p className="text-blue-800 mb-4 leading-relaxed">
-                The Google Maps API Key is used for displaying interactive maps on your website. 
-                This key enables location-based features and map visualizations.
-              </p>
-              <div className="bg-white/60 rounded-lg p-4 mb-4">
-                <p className="text-sm text-blue-900 font-semibold mb-2">How to get your API key:</p>
-                <ol className="text-sm text-blue-800 space-y-1 list-decimal list-inside">
-                  <li>Visit Google Cloud Console</li>
-                  <li>Create a new project or select existing one</li>
-                  <li>Enable "Maps JavaScript API"</li>
-                  <li>Create credentials (API Key)</li>
-                  <li>Copy and paste the key above</li>
-                </ol>
-              </div>
-              <a
-                href="https://console.cloud.google.com/google/maps-apis"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
-              >
-                🔗 Open Google Cloud Console
-              </a>
-            </div>
+  const token = localStorage.getItem('adminToken');
+  const headers = { Authorization: `Bearer ${token}` };
+
+  useEffect(() => {
+    axios.get(`${API_BASE_URL}/aws-settings`, { headers })
+      .then(r => {
+        setEmailSettings(prev => ({ ...prev, ...r.data.data }));
+        setActiveTab(r.data.data.EMAIL_PROVIDER === 'aws' ? 'aws' : 'smtp');
+      })
+      .catch(() => toast.error('Failed to load email settings'))
+      .finally(() => setLoading(false));
+  }, []);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setEmailSettings(prev => ({ ...prev, [name]: value }));
+  };
+
+  const setProvider = (p) => {
+    setEmailSettings(prev => ({ ...prev, EMAIL_PROVIDER: p }));
+    setActiveTab(p);
+  };
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      await axios.put(`${API_BASE_URL}/aws-settings`, { settings: emailSettings }, { headers });
+      toast.success('Email settings saved');
+    } catch { toast.error('Failed to save'); }
+    finally { setSaving(false); }
+  };
+
+  const handleTest = async () => {
+    setTesting(true);
+    try {
+      await axios.put(`${API_BASE_URL}/aws-settings`, { settings: emailSettings }, { headers });
+      const r = await axios.post(`${API_BASE_URL}/aws-settings/test`, {}, { headers });
+      toast.success(r.data.message);
+    } catch (e) { toast.error(e.response?.data?.message || 'Test failed'); }
+    finally { setTesting(false); }
+  };
+
+  const inp = 'w-full border border-gray-200 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:border-[#243670]';
+  const lbl = 'block text-[10px] font-semibold text-gray-500 uppercase tracking-wide mb-0.5';
+
+  if (loading) return <p className="text-xs text-gray-400">Loading...</p>;
+
+  return (
+    <div className="space-y-3">
+      {/* Provider toggle */}
+      <div className="flex gap-2">
+        {[{ key: 'smtp', label: '📧 SMTP', desc: 'Titan, Gmail, Outlook…' }, { key: 'aws', label: '☁️ AWS SES', desc: 'Amazon SES' }].map(opt => (
+          <button key={opt.key} onClick={() => setProvider(opt.key)}
+            className={`flex-1 py-2 px-3 rounded-lg border text-left transition-all ${emailSettings.EMAIL_PROVIDER === opt.key ? 'border-[#243670] bg-blue-50' : 'border-gray-200 hover:border-gray-300'}`}>
+            <p className={`font-semibold text-xs ${emailSettings.EMAIL_PROVIDER === opt.key ? 'text-[#243670]' : 'text-gray-600'}`}>{opt.label}</p>
+            <p className="text-[10px] text-gray-400">{opt.desc}</p>
+          </button>
+        ))}
+      </div>
+
+      {/* SMTP */}
+      {activeTab === 'smtp' && (
+        <div className="space-y-2">
+          <div className="grid grid-cols-2 gap-2">
+            <div><label className={lbl}>SMTP Host</label><input name="SMTP_HOST" value={emailSettings.SMTP_HOST} onChange={handleChange} className={inp} placeholder="smtp.titan.email" /></div>
+            <div><label className={lbl}>Port</label><input name="SMTP_PORT" value={emailSettings.SMTP_PORT} onChange={handleChange} className={inp} placeholder="465" /></div>
+            <div><label className={lbl}>Username / Email</label><input name="SMTP_USER" value={emailSettings.SMTP_USER} onChange={handleChange} className={inp} placeholder="you@domain.com" /></div>
+            <div><label className={lbl}>Password</label><input type="text" name="SMTP_PASS" value={emailSettings.SMTP_PASS} onChange={handleChange} className={inp} placeholder="Enter password" /></div>
+            <div><label className={lbl}>From Email</label><input name="SMTP_FROM_EMAIL" value={emailSettings.SMTP_FROM_EMAIL} onChange={handleChange} className={inp} placeholder="noreply@domain.com" /></div>
+            <div><label className={lbl}>From Name</label><input name="SMTP_FROM_NAME" value={emailSettings.SMTP_FROM_NAME} onChange={handleChange} className={inp} placeholder="GVS Cargo" /></div>
           </div>
+          <div>
+            <label className={lbl}>Secure (SSL)</label>
+            <select name="SMTP_SECURE" value={emailSettings.SMTP_SECURE} onChange={handleChange} className={inp}>
+              <option value="true">Yes — SSL (port 465)</option>
+              <option value="false">No — TLS/STARTTLS (port 587)</option>
+            </select>
+          </div>
+        </div>
+      )}
+
+      {/* AWS SES */}
+      {activeTab === 'aws' && (
+        <div className="space-y-2">
+          <div><label className={lbl}>Access Key ID</label><input name="AWS_ACCESS_KEY_ID" value={emailSettings.AWS_ACCESS_KEY_ID} onChange={handleChange} className={inp} placeholder="AKIA..." /></div>
+          <div><label className={lbl}>Secret Access Key</label><input type="text" name="AWS_SECRET_ACCESS_KEY" value={emailSettings.AWS_SECRET_ACCESS_KEY} onChange={handleChange} className={inp} placeholder="Enter secret key" /></div>
+          <div><label className={lbl}>Region</label><input name="AWS_REGION" value={emailSettings.AWS_REGION} onChange={handleChange} className={inp} placeholder="eu-north-1" /></div>
+          <div className="grid grid-cols-2 gap-2">
+            <div><label className={lbl}>From Email</label><input name="AWS_SES_FROM_EMAIL" value={emailSettings.AWS_SES_FROM_EMAIL} onChange={handleChange} className={inp} placeholder="info@gvs-bh.com" /></div>
+            <div><label className={lbl}>From Name</label><input name="AWS_SES_FROM_NAME" value={emailSettings.AWS_SES_FROM_NAME} onChange={handleChange} className={inp} placeholder="GVS Cargo" /></div>
+          </div>
+          <div className="bg-amber-50 border border-amber-200 rounded-lg p-2 text-[10px] text-amber-800 space-y-0.5">
+            <p className="font-semibold">Before using AWS SES:</p>
+            <p>• Verify sender email in AWS SES console</p>
+            <p>• IAM user needs ses:SendEmail permission</p>
+            <p>• In sandbox mode, verify recipient emails too</p>
+          </div>
+        </div>
+      )}
+
+      {/* Actions */}
+      <div className="flex gap-2">
+        <button onClick={handleSave} disabled={saving}
+          className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-[#243670] text-white rounded-lg text-xs font-semibold hover:bg-blue-900 disabled:opacity-50">
+          <FaSave size={11} /> {saving ? 'Saving...' : 'Save'}
+        </button>
+        <button onClick={handleTest} disabled={testing}
+          className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-green-600 text-white rounded-lg text-xs font-semibold hover:bg-green-700 disabled:opacity-50">
+          <FaCheckCircle size={11} /> {testing ? 'Sending...' : 'Test Email'}
+        </button>
+      </div>
+    </div>
+  );
+};
+
+// ─── Main Settings Page ───────────────────────────────────────────────────────
+const TABS = ['Google Maps', 'Email / AWS'];
+
+const SettingsManagement = () => {
+  const [activeTab, setActiveTab] = useState('Google Maps');
+
+  return (
+    <div className="min-h-screen bg-[#F0F4F8] text-[#243670] p-4 relative overflow-hidden">
+      <div className="absolute inset-0 z-0 opacity-20" style={{
+        backgroundImage: 'radial-gradient(#243670 0.5px, transparent 0.5px), radial-gradient(#243670 0.5px, #F0F4F8 0.5px)',
+        backgroundSize: '20px 20px', backgroundPosition: '0 0, 10px 10px'
+      }} />
+
+      <div className="relative z-10 max-w-2xl mx-auto space-y-4">
+        {/* Header */}
+        <div>
+          <h1 className="text-2xl font-semibold tracking-widest uppercase text-[#243670]">Settings</h1>
+          <p className="text-gray-400 text-xs mt-0.5">Configure application settings</p>
+        </div>
+
+        {/* Tabs */}
+        <div className="flex gap-2">
+          {TABS.map(tab => (
+            <button key={tab} onClick={() => setActiveTab(tab)}
+              className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${activeTab === tab ? 'bg-[#243670] text-white' : 'border border-gray-200 text-gray-600 hover:bg-white'}`}>
+              {tab === 'Google Maps' ? '🗺️ ' : '📧 '}{tab}
+            </button>
+          ))}
+        </div>
+
+        {/* Content */}
+        <div className="bg-white/80 backdrop-blur-sm rounded-xl border border-[#243670]/10 shadow-sm p-4">
+          {activeTab === 'Google Maps' && <GoogleMapsSection />}
+          {activeTab === 'Email / AWS' && <EmailSettingsSection />}
         </div>
       </div>
     </div>

@@ -11,8 +11,17 @@
         scroll-behavior: smooth;
       }
     </style>
-    <script type="module" crossorigin src="/assets/index-D9ZNMeXh.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-Bs_0F7Ww.css">
+    <!-- Google reCAPTCHA v3 -->
+    <script src="https://www.google.com/recaptcha/api.js?render=6Lc5YpMsAAAAAE3GJ6FVxF5JsEXYK4vRI-Qn232E"></script>
+    <script>
+      grecaptcha.ready(function () {
+        grecaptcha.execute('6Lc5YpMsAAAAAE3GJ6FVxF5JsEXYK4vRI-Qn232E', { action: 'pageload' }).then(function (token) {
+          console.log('[reCAPTCHA] ✅ Badge active, token generated.');
+        });
+      });
+    </script>
+    <script type="module" crossorigin src="/assets/index-BfSJfrCj.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-CV1xi4I0.css">
   </head>
   <body>
 
