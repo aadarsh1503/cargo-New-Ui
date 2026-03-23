@@ -2,6 +2,7 @@ const pool = require('../config/db');
 const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const { verifyRecaptcha } = require('../../utils/recaptcha');
 const {
   notifyNewRequest, notifyForwardedToAgent, notifyAgentPriced,
   notifyQuoteSentToUser, notifyUserApproved, notifyPaymentRequested,
@@ -48,6 +49,8 @@ const submitFreightRequest = async (req, res) => {
     );
 
     res.status(201).json({ success: true, referenceId });
+    // Delete any draft for this email now that they fully submitted
+    pool.query(`DELETE FROM freight_requests WHERE email=? AND status='draft'`, [email]).catch(() => {});
     // Fire-and-forget email to admin
     notifyNewRequest({
       reference_id: referenceId, company, name, email,

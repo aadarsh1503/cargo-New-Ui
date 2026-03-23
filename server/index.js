@@ -2,6 +2,7 @@
 
 require('dotenv').config();
 const express = require('express');
+const cors = require('cors');
 const helmet = require('helmet');
 const axios = require('axios');
 const pool = require('./src/config/db');
@@ -17,6 +18,7 @@ const settingsRoutes = require('./src/routes/settingsRoutes');
 const employmentRoutes = require('./src/routes/employmentRoutes');
 const awsSettingsRoutes = require('./src/routes/awsSettingsRoutes');
 const freightRoutes = require('./src/routes/freightRoutes');
+const exportRoutes = require('./src/routes/exportRoutes');
 
 // --- THE FIX ---
 // Destructure the 'default' export from the library to get the function directly.
@@ -27,6 +29,14 @@ const app = express();
 
 // --- Middleware Setup ---
 app.use(helmet());
+app.use(cors({
+  origin: [
+    'http://localhost:5173',
+    'https://cargo-new-ui.vercel.app',
+    'https://gvscargo.com',
+  ],
+  credentials: true,
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true })); 
 
@@ -40,6 +50,7 @@ app.use('/api/employment', employmentRoutes);
 app.use('/api/aws-settings', awsSettingsRoutes);
 app.use('/api/freight', freightRoutes);
 app.use('/api/freight-settings', require('./src/routes/freightSettingsRoutes'));
+app.use('/api/admin', exportRoutes);
 
 // -----------------
 const DEFAULT_REGION = 'bahrain'; 

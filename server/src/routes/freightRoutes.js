@@ -1,12 +1,14 @@
 const express = require('express');
 const router = express.Router();
 const pool = require('../config/db');
+const crypto = require('crypto');
 const multer = require('multer');
 const imagekit = require('../config/imagekit');
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
 const { protectAdmin } = require('../middleware/authMiddleware');
 const { protectAgent } = require('../middleware/agentAuthMiddleware');
 const { sendMail, getSettings } = require('../../utils/emailProvider');
+const { verifyRecaptcha } = require('../../utils/recaptcha');
 const {
   submitFreightRequest,
   getLeads, getBookings, getFreightRequest,
@@ -21,14 +23,79 @@ const {
 // ── Public ──────────────────────────────────────────────────────────────────
 router.post('/submit', submitFreightRequest);
 
+// ── Save partial draft (user filled Step 1+ but didn't submit) ───────────────
+router.post('/draft', async (req, res) => {
+  try {
+    const {
+      name, email, telephone, company,
+      portOfLoading, portOfLoadingCity, portOfDischarge, portOfDischargeCity,
+      modeOfShipment, commodity, grossWeight, weightUnit,
+      boxesPallets, boxPalletSize, boxPalletUnit,
+      length, width, height, dimensionUnit, message
+    } = req.body;
+
+    if (!name || !email) return res.status(400).json({ message: 'Name and email required' });
+
+    const [existing] = await pool.query(
+      `SELECT id FROM freight_requests WHERE email = ? AND status = 'draft' LIMIT 1`,
+      [email.toLowerCase()]
+    );
+
+    if (existing.length > 0) {
+      await pool.query(
+        `UPDATE freight_requests SET
+          name=?, telephone=?, company=?,
+          port_of_loading=?, port_of_loading_city=?,
+          port_of_discharge=?, port_of_discharge_city=?,
+          mode_of_shipment=?, commodity=?,
+          gross_weight=?, weight_unit=?,
+          boxes_pallets=?, box_pallet_size=?, box_pallet_unit=?,
+          length_dim=?, width_dim=?, height_dim=?, dimension_unit=?,
+          message=?, updated_at=NOW()
+        WHERE id=?`,
+        [
+          name, telephone || '', company || '',
+          portOfLoading || '', portOfLoadingCity || '',
+          portOfDischarge || '', portOfDischargeCity || '',
+          modeOfShipment || '', commodity || '',
+          grossWeight || null, weightUnit || 'kg',
+          boxesPallets || null, boxPalletSize || null, boxPalletUnit || 'cm',
+          length || null, width || null, height || null, dimensionUnit || 'cm',
+          message || '',
+          existing[0].id
+        ]
+      );
+      return res.json({ success: true, updated: true });
+    }
+
+    const referenceId = 'DFT-' + crypto.randomBytes(4).toString('hex').toUpperCase();
+    await pool.query(
+      `INSERT INTO freight_requests
+        (reference_id, company, name, telephone, email,
+         port_of_loading, port_of_loading_city, port_of_discharge, port_of_discharge_city,
+         mode_of_shipment, commodity, status, request_type)
+       VALUES (?,?,?,?,?, '','','','', '','', 'draft','lead')`,
+      [referenceId, company || '', name, telephone || '', email.toLowerCase()]
+    );
+    res.json({ success: true, created: true });
+  } catch (err) {
+    console.error('Draft save error:', err);
+    res.status(500).json({ message: 'Failed to save draft' });
+  }
+});
+
 // ── In-memory OTP store: { email -> { otp, expires } } ───────────────────────
 const otpStore = new Map();
 
 // ── User: send OTP ────────────────────────────────────────────────────────────
 router.post('/user/send-otp', async (req, res) => {
   try {
-    const { email } = req.body;
+    const { email, recaptchaToken } = req.body;
     if (!email) return res.status(400).json({ message: 'Email required' });
+
+    // Verify reCAPTCHA v3
+    const isHuman = await verifyRecaptcha(recaptchaToken);
+    if (!isHuman) return res.status(400).json({ message: 'reCAPTCHA verification failed. Please try again.' });
 
     // Check if this email has any bookings in the system
     const pool = require('../config/db');

@@ -2,6 +2,7 @@ const pool = require('../config/db');
 const { sendMail } = require('../../utils/emailProvider');
 const cloudinary = require('cloudinary').v2;
 const ImageKit = require('imagekit');
+const { verifyRecaptcha } = require('../../utils/recaptcha');
 
 // Configure Cloudinary
 cloudinary.config({
@@ -30,8 +31,14 @@ exports.submitEmploymentApplication = async (req, res) => {
       availableStart, shiftAvailable, canTravel, drivingLicense, skills,
       ref1Name, ref1Contact, ref1Email, ref2Name, ref2Contact, ref2Email,
       ref3Name, ref3Contact, ref3Email, visaStatus, visaValidity,
-      expectedSalary, clientLeadsStrategy
+      expectedSalary, clientLeadsStrategy, recaptchaToken
     } = req.body;
+
+    // Verify reCAPTCHA v3
+    const isHuman = await verifyRecaptcha(recaptchaToken);
+    if (!isHuman) {
+      return res.status(400).json({ success: false, message: 'reCAPTCHA verification failed. Please try again.' });
+    }
 
     console.log('Received employment application:', {
       fullName, email, mobileContact, employmentDesired
