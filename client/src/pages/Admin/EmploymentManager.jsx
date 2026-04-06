@@ -55,7 +55,7 @@ const ResumeViewer = ({ url }) => {
 const Field = ({ label, value }) => (
   <div>
     <p className="text-[10px] text-gray-400 uppercase tracking-wide">{label}</p>
-    <p className="text-xs font-semibold text-gray-800">{value || 'N/A'}</p>
+    <p className="text-xs font-semibold text-gray-800 break-all">{value || 'N/A'}</p>
   </div>
 );
 
@@ -172,9 +172,9 @@ const EmploymentManager = () => {
   const stageCfg = (stage) => STAGE_CFG[stage] || { bg: 'bg-gray-100', text: 'text-gray-700' };
 
   return (
-    <div className="flex h-[calc(100vh-57px)] overflow-hidden bg-gray-50">
+    <div className="flex flex-col md:flex-row md:h-[calc(100vh-57px)] md:overflow-hidden bg-gray-50">
       {/* Left — table list */}
-      <div className="w-[480px] border-r border-gray-200 flex flex-col flex-shrink-0 bg-white">
+      <div className="w-full md:w-[480px] border-b md:border-b-0 md:border-r border-gray-200 flex flex-col flex-shrink-0 bg-white">
         {/* Toolbar */}
         <div className="p-2 border-b border-gray-100 space-y-1.5">
           <div className="flex gap-1.5">
@@ -209,7 +209,7 @@ const EmploymentManager = () => {
         </div>
 
         {/* Table */}
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto md:max-h-none max-h-64">
           {loading ? (
             <div className="flex justify-center items-center h-32">
               <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#0284C7]" />
@@ -324,7 +324,7 @@ const EmploymentManager = () => {
             </div>
 
             <Section title="Personal Information">
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
                 <Field label="Full Name" value={selected.fullName} />
                 <Field label="Email" value={selected.email} />
                 <Field label="Mobile" value={selected.mobileContact} />
@@ -336,8 +336,8 @@ const EmploymentManager = () => {
             </Section>
 
             <Section title="Address">
-              <div className="grid grid-cols-3 gap-2">
-                <div className="col-span-3"><Field label="Current Address" value={selected.currentAddress} /></div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+                <div className="col-span-1 sm:col-span-2 md:col-span-3"><Field label="Current Address" value={selected.currentAddress} /></div>
                 <Field label="City" value={selected.city} />
                 <Field label="Country" value={selected.country} />
                 <Field label="Postal Code" value={selected.postalCode} />
@@ -345,7 +345,7 @@ const EmploymentManager = () => {
             </Section>
 
             <Section title="Identification">
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
                 <Field label="CPR / National ID" value={selected.cprNationalId} />
                 <Field label="Passport ID" value={selected.passportId} />
                 <Field label="Passport Validity" value={selected.passportValidity ? new Date(selected.passportValidity).toLocaleDateString() : null} />
@@ -355,19 +355,19 @@ const EmploymentManager = () => {
             </Section>
 
             <Section title="Education & Experience">
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
                 <Field label="Education Level" value={selected.educationLevel} />
                 <Field label="Course / Degree" value={selected.courseDegree} />
                 <Field label="Currently Employed" value={selected.currentlyEmployed} />
                 <Field label="Years of Experience" value={selected.yearsOfExperience} />
                 <Field label="Position Applied" value={selected.employmentDesired} />
                 <Field label="Expected Salary (BHD)" value={selected.expectedSalary} />
-                <div className="col-span-3"><Field label="Skills" value={selected.skills} /></div>
+                <div className="col-span-1 sm:col-span-2 md:col-span-3"><Field label="Skills" value={selected.skills} /></div>
               </div>
             </Section>
 
             <Section title="Work Preferences">
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
                 <Field label="Available to Start" value={selected.availableStart} />
                 <Field label="Shift Available" value={selected.shiftAvailable} />
                 <Field label="Can Travel" value={selected.canTravel} />
@@ -386,7 +386,7 @@ const EmploymentManager = () => {
                     const name = selected[`ref${n}Name`];
                     if (!name) return null;
                     return (
-                      <div key={n} className="bg-gray-50 rounded p-2 grid grid-cols-3 gap-2">
+                      <div key={n} className="bg-gray-50 rounded p-2 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
                         <Field label={`Ref ${n} Name`} value={name} />
                         <Field label="Contact" value={selected[`ref${n}Contact`]} />
                         <Field label="Email" value={selected[`ref${n}Email`]} />
@@ -404,7 +404,7 @@ const EmploymentManager = () => {
             )}
 
             <Section title="Application Info">
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
                 <Field label="Application ID" value={`#${selected.id}`} />
                 <Field label="Current Stage" value={selected.stage} />
                 <Field label="Applied Date" value={new Date(selected.created_at).toLocaleString()} />

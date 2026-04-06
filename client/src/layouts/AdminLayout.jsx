@@ -110,6 +110,7 @@ const AdminLayout = () => {
 
   const handleConfirmLogout = () => {
     localStorage.removeItem('adminToken');
+    localStorage.removeItem('adminLoginTime');
     setIsLogoutModalOpen(false);
     navigate('/login');
   };
@@ -125,28 +126,28 @@ const AdminLayout = () => {
       <div className="min-h-screen bg-gray-50">
         {/* Admin Header with Dashboard Toggle */}
         <div className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
-          <div className="max-w-7xl mx-auto px-6 py-4">
-            <div className="flex items-center justify-between">
-              <div className="flex-1 flex justify-center">
+          <div className="max-w-7xl mx-auto px-3 md:px-6 py-2 md:py-4">
+            {/* Mobile: toggle on top row, actions on second row */}
+            <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+              <div className="flex justify-center overflow-x-auto">
                 <DashboardToggle activeView={getActiveView()} freightBadge={total} />
               </div>
-              
               {/* Export + Logout */}
-              <div className="flex items-center gap-2">
+              <div className="flex items-center justify-end gap-2 flex-shrink-0">
                 <button
                   onClick={handleExport}
                   disabled={exporting}
-                  className="flex items-center gap-2 font-semibold text-emerald-600 border-2 border-emerald-500/50 px-4 py-2 rounded-lg hover:bg-emerald-500 hover:text-white hover:shadow-lg hover:shadow-emerald-500/30 transition-all duration-300 disabled:opacity-50"
+                  className="flex items-center gap-1.5 font-semibold text-emerald-600 border-2 border-emerald-500/50 px-3 py-1.5 rounded-lg hover:bg-emerald-500 hover:text-white hover:shadow-lg hover:shadow-emerald-500/30 transition-all duration-300 disabled:opacity-50 text-xs md:text-sm md:px-4 md:py-2"
                 >
-                  <FiDownload size={16} />
-                  <span className="text-sm">{exporting ? 'Exporting...' : 'Export'}</span>
+                  <FiDownload size={14} />
+                  <span className="hidden sm:inline">{exporting ? 'Exporting...' : 'Export'}</span>
                 </button>
                 <button
                   onClick={() => setIsLogoutModalOpen(true)}
-                  className="flex items-center gap-2 font-semibold text-amber-600 border-2 border-amber-500/50 px-5 py-2 rounded-lg hover:bg-amber-500 hover:text-white hover:shadow-lg hover:shadow-amber-500/30 transition-all duration-300"
+                  className="flex items-center gap-1.5 font-semibold text-amber-600 border-2 border-amber-500/50 px-3 py-1.5 rounded-lg hover:bg-amber-500 hover:text-white hover:shadow-lg hover:shadow-amber-500/30 transition-all duration-300 text-xs md:text-sm md:px-5 md:py-2"
                 >
-                  <FiLogOut size={18} />
-                  <span>Logout</span>
+                  <FiLogOut size={16} />
+                  <span className="hidden sm:inline">Logout</span>
                 </button>
               </div>
             </div>

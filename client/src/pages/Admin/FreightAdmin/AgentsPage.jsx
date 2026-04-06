@@ -153,7 +153,7 @@ const AgentsPage = () => {
       {/* Filters */}
       <div className="flex flex-wrap gap-1.5 mb-3">
         <input type="text" placeholder="Search name, email, company…" value={search} onChange={e => setSearch(e.target.value)}
-          className="border border-gray-200 rounded px-2.5 py-1 text-xs focus:outline-none focus:border-[#243670] w-52" />
+          className="border border-gray-200 rounded px-2.5 py-1 text-xs focus:outline-none focus:border-[#243670] w-full sm:w-52" />
         <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)}
           className="border border-gray-200 rounded px-2.5 py-1 text-xs focus:outline-none bg-white">
           <option value="">All Status</option>
@@ -177,58 +177,106 @@ const AgentsPage = () => {
         ) : filtered.length === 0 ? (
           <p className="text-xs text-gray-400 text-center py-10">{agents.length === 0 ? 'No agents yet.' : 'No results.'}</p>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-xs">
-              <thead>
-                <tr className="border-b border-gray-200 bg-gray-50">
-                  {['Agent', 'Email', 'Phone', 'Company', 'Password', 'Status', 'Joined', ''].map(h => (
-                    <th key={h} className="text-left py-1.5 px-2 text-[10px] font-semibold text-gray-500 uppercase tracking-wide whitespace-nowrap">{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {filtered.map(a => (
-                  <tr key={a.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors group">
-                    <td className="py-1.5 px-2">
-                      <div className="flex items-center gap-1.5">
-                        <div className="w-5 h-5 rounded-full bg-rose-500 flex items-center justify-center text-white text-[9px] font-bold flex-shrink-0">
-                          {a.name.charAt(0).toUpperCase()}
-                        </div>
-                        <span className="font-semibold text-gray-800 whitespace-nowrap">{a.name}</span>
+          <>
+            {/* Mobile card list */}
+            <div className="md:hidden space-y-2">
+              {filtered.map(a => (
+                <div key={a.id} className="border border-gray-200 rounded-lg p-3 bg-white space-y-2">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="w-7 h-7 rounded-full bg-rose-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                        {a.name.charAt(0).toUpperCase()}
                       </div>
-                    </td>
-                    <td className="py-1.5 px-2 text-gray-500">{a.email}</td>
-                    <td className="py-1.5 px-2 text-gray-500">{a.phone || '—'}</td>
-                    <td className="py-1.5 px-2 text-gray-500">{a.company || '—'}</td>
-                    <td className="py-1.5 px-2">
-                      <div className="flex items-center gap-1">
-                        <span className="font-mono text-[10px] text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded">
-                          {revealedPwd[a.id] ? (a.plain_password || '—') : '••••••••'}
-                        </span>
-                        <button type="button" onClick={() => setRevealedPwd(p => ({ ...p, [a.id]: !p[a.id] }))}
-                          className="text-gray-400 hover:text-gray-600" title={revealedPwd[a.id] ? 'Hide' : 'Show'}>
-                          {revealedPwd[a.id] ? <FiEyeOff size={10} /> : <FiEye size={10} />}
-                        </button>
+                      <div>
+                        <p className="font-semibold text-gray-800 text-sm">{a.name}</p>
+                        <p className="text-xs text-gray-500 break-all">{a.email}</p>
                       </div>
-                    </td>
-                    <td className="py-1.5 px-2">
-                      <button onClick={() => handleToggle(a.id, a.is_active)}
-                        className={`px-2 py-0.5 rounded text-[10px] font-semibold transition-colors ${a.is_active ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}>
-                        {a.is_active ? 'Active' : 'Inactive'}
+                    </div>
+                    <button onClick={() => handleToggle(a.id, a.is_active)}
+                      className={`px-2 py-0.5 rounded text-[10px] font-semibold flex-shrink-0 ${a.is_active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
+                      {a.is_active ? 'Active' : 'Inactive'}
+                    </button>
+                  </div>
+                  <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-xs text-gray-500">
+                    {a.phone && <span>📞 {a.phone}</span>}
+                    {a.company && <span>🏢 {a.company}</span>}
+                    <span className="col-span-2 flex items-center gap-1">
+                      🔑
+                      <span className="font-mono bg-gray-100 px-1.5 py-0.5 rounded text-[10px]">
+                        {revealedPwd[a.id] ? (a.plain_password || '—') : '••••••••'}
+                      </span>
+                      <button type="button" onClick={() => setRevealedPwd(p => ({ ...p, [a.id]: !p[a.id] }))}
+                        className="text-gray-400 hover:text-gray-600">
+                        {revealedPwd[a.id] ? <FiEyeOff size={11} /> : <FiEye size={11} />}
                       </button>
-                    </td>
-                    <td className="py-1.5 px-2 text-gray-400 whitespace-nowrap">{new Date(a.created_at).toLocaleDateString()}</td>
-                    <td className="py-1.5 px-2">
-                      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button onClick={() => setModal(a)} className="p-1 rounded bg-blue-50 text-[#243670] hover:bg-blue-100" title="Edit"><FiEdit2 size={10} /></button>
-                        <button onClick={() => handleDelete(a.id)} className="p-1 rounded bg-red-50 text-red-400 hover:bg-red-100" title="Delete"><FiTrash2 size={10} /></button>
-                      </div>
-                    </td>
+                    </span>
+                  </div>
+                  <div className="flex gap-2 pt-1">
+                    <button onClick={() => setModal(a)} className="flex-1 py-1 rounded border border-blue-200 text-[#243670] text-xs font-semibold hover:bg-blue-50 flex items-center justify-center gap-1">
+                      <FiEdit2 size={11} /> Edit
+                    </button>
+                    <button onClick={() => handleDelete(a.id)} className="flex-1 py-1 rounded border border-red-200 text-red-500 text-xs font-semibold hover:bg-red-50 flex items-center justify-center gap-1">
+                      <FiTrash2 size={11} /> Delete
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Desktop table */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full text-xs">
+                <thead>
+                  <tr className="border-b border-gray-200 bg-gray-50">
+                    {['Agent', 'Email', 'Phone', 'Company', 'Password', 'Status', 'Joined', ''].map(h => (
+                      <th key={h} className="text-left py-1.5 px-2 text-[10px] font-semibold text-gray-500 uppercase tracking-wide whitespace-nowrap">{h}</th>
+                    ))}
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {filtered.map(a => (
+                    <tr key={a.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors group">
+                      <td className="py-1.5 px-2">
+                        <div className="flex items-center gap-1.5">
+                          <div className="w-5 h-5 rounded-full bg-rose-500 flex items-center justify-center text-white text-[9px] font-bold flex-shrink-0">
+                            {a.name.charAt(0).toUpperCase()}
+                          </div>
+                          <span className="font-semibold text-gray-800 whitespace-nowrap">{a.name}</span>
+                        </div>
+                      </td>
+                      <td className="py-1.5 px-2 text-gray-500">{a.email}</td>
+                      <td className="py-1.5 px-2 text-gray-500">{a.phone || '—'}</td>
+                      <td className="py-1.5 px-2 text-gray-500">{a.company || '—'}</td>
+                      <td className="py-1.5 px-2">
+                        <div className="flex items-center gap-1">
+                          <span className="font-mono text-[10px] text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded">
+                            {revealedPwd[a.id] ? (a.plain_password || '—') : '••••••••'}
+                          </span>
+                          <button type="button" onClick={() => setRevealedPwd(p => ({ ...p, [a.id]: !p[a.id] }))}
+                            className="text-gray-400 hover:text-gray-600" title={revealedPwd[a.id] ? 'Hide' : 'Show'}>
+                            {revealedPwd[a.id] ? <FiEyeOff size={10} /> : <FiEye size={10} />}
+                          </button>
+                        </div>
+                      </td>
+                      <td className="py-1.5 px-2">
+                        <button onClick={() => handleToggle(a.id, a.is_active)}
+                          className={`px-2 py-0.5 rounded text-[10px] font-semibold transition-colors ${a.is_active ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}>
+                          {a.is_active ? 'Active' : 'Inactive'}
+                        </button>
+                      </td>
+                      <td className="py-1.5 px-2 text-gray-400 whitespace-nowrap">{new Date(a.created_at).toLocaleDateString()}</td>
+                      <td className="py-1.5 px-2">
+                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button onClick={() => setModal(a)} className="p-1 rounded bg-blue-50 text-[#243670] hover:bg-blue-100" title="Edit"><FiEdit2 size={10} /></button>
+                          <button onClick={() => handleDelete(a.id)} className="p-1 rounded bg-red-50 text-red-400 hover:bg-red-100" title="Delete"><FiTrash2 size={10} /></button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
         );
       })()}
 

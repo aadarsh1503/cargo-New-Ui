@@ -5,7 +5,7 @@ const Field = ({ label, value }) => {
   return (
     <div>
       <p className="text-xs text-gray-400 mb-0.5">{label}</p>
-      <p className="text-sm font-semibold text-gray-800">{value}</p>
+      <p className="text-sm font-semibold text-gray-800 break-all">{value}</p>
     </div>
   );
 };
@@ -13,7 +13,7 @@ const Field = ({ label, value }) => {
 const Section = ({ title, children }) => (
   <div className="border border-gray-200 rounded-xl p-5">
     <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-4">{title}</p>
-    <div className="grid grid-cols-2 gap-x-6 gap-y-3">
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3">
       {children}
     </div>
   </div>

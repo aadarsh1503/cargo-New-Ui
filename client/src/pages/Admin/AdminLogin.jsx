@@ -161,10 +161,23 @@ const AdminLogin = () => {
   const [showSignup, setShowSignup] = useState(false);
   const [deactivated, setDeactivated] = useState(false);
 
-  // Redirect if already logged in
+  // Redirect if already logged in with a valid session
   useEffect(() => {
-    if (localStorage.getItem('adminToken')) { navigate('/admin/dashboard', { replace: true }); return; }
-    if (localStorage.getItem('agentToken'))  { navigate('/agent/dashboard',  { replace: true }); return; }
+    const SESSION_DURATION = 5 * 60 * 60 * 1000;
+    const adminToken = localStorage.getItem('adminToken');
+    const adminLoginTime = parseInt(localStorage.getItem('adminLoginTime') || '0', 10);
+    const agentToken = localStorage.getItem('agentToken');
+
+    if (adminToken && (Date.now() - adminLoginTime) < SESSION_DURATION) {
+      navigate('/admin/dashboard', { replace: true });
+      return;
+    }
+    if (adminToken) {
+      // Token exists but expired — clean it up
+      localStorage.removeItem('adminToken');
+      localStorage.removeItem('adminLoginTime');
+    }
+    if (agentToken) { navigate('/agent/dashboard', { replace: true }); return; }
   }, []);
 
   const handleRoleChange = (r) => {
@@ -211,6 +224,7 @@ const AdminLogin = () => {
 
         if (adminRes.ok) {
           localStorage.setItem('adminToken', adminData.adminToken);
+          localStorage.setItem('adminLoginTime', Date.now().toString());
           navigate('/admin/dashboard');
           return;
         }

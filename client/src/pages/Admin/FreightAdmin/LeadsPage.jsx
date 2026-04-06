@@ -79,9 +79,9 @@ const LeadsPage = () => {
     .sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at));
 
   return (
-    <div className="flex h-[calc(100vh-57px)] overflow-hidden">
+    <div className="flex flex-col md:flex-row md:h-[calc(100vh-57px)] md:overflow-hidden">
       {/* Left — compact table list */}
-      <div className="w-[420px] border-r border-gray-100 flex-shrink-0 flex flex-col h-full">
+      <div className="w-full md:w-[420px] border-b md:border-b-0 md:border-r border-gray-100 flex-shrink-0 flex flex-col md:h-full">
         {/* Filters */}
         <div className="p-2 border-b border-gray-100 flex gap-1.5 flex-wrap flex-shrink-0">
           <input type="text" placeholder="Search…" value={search} onChange={e => setSearch(e.target.value)}
@@ -113,7 +113,6 @@ const LeadsPage = () => {
                 <th className="text-left px-3 py-1.5 font-semibold text-gray-500 uppercase tracking-wide text-[10px]">Company</th>
                 <th className="text-left px-2 py-1.5 font-semibold text-gray-500 uppercase tracking-wide text-[10px]">Route</th>
                 <th className="text-left px-2 py-1.5 font-semibold text-gray-500 uppercase tracking-wide text-[10px]">Status</th>
-                <th className="text-left px-2 py-1.5 font-semibold text-gray-500 uppercase tracking-wide text-[10px]">Date</th>
               </tr>
             </thead>
             <tbody>
@@ -143,7 +142,6 @@ const LeadsPage = () => {
                         <span className={`w-1 h-1 rounded-full ${c.dot}`} />{c.label}
                       </span>
                     </td>
-                    <td className="px-2 py-1.5 text-gray-400 whitespace-nowrap">{new Date(lead.created_at).toLocaleDateString()}</td>
                   </tr>
                 );
               })}
@@ -154,7 +152,7 @@ const LeadsPage = () => {
       </div>
 
       {/* Right detail */}
-      <div className="flex-1 h-full overflow-y-auto p-4">
+      <div className="flex-1 md:h-full overflow-y-auto p-4">
         {!selected ? (
           <p className="text-gray-400 text-xs">Select a lead to view details</p>
         ) : (

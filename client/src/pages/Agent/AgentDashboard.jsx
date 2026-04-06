@@ -248,13 +248,13 @@ const BookingsTab = ({ requests, loading, onSelectRequest, onRefresh, token }) =
     <>
     <div>
       {/* Filters */}
-      <div className="flex flex-wrap items-center gap-3 mb-5">
+      <div className="flex flex-wrap items-center gap-2 mb-5">
         <input
           type="text"
           placeholder="Search ref, company, name, email..."
           value={search}
           onChange={e => setSearch(e.target.value)}
-          className="border border-gray-300 rounded-full px-4 py-1.5 text-sm focus:outline-none focus:border-[#243670] bg-white w-64"
+          className="border border-gray-300 rounded-full px-4 py-1.5 text-sm focus:outline-none focus:border-[#243670] bg-white w-full sm:w-64"
         />
         <select
           value={polFilter}
@@ -657,13 +657,13 @@ const OceanFreightTab = ({ token }) => {
   return (
     <div>
       {/* Filters */}
-      <div className="flex flex-wrap items-center gap-3 mb-4">
+      <div className="flex flex-wrap items-center gap-2 mb-4">
         <input
           type="text"
           placeholder="Search liner, POL, POD, remarks..."
           value={search}
           onChange={e => setSearch(e.target.value)}
-          className="border border-gray-300 rounded-full px-4 py-1.5 text-sm focus:outline-none focus:border-[#243670] bg-white w-64"
+          className="border border-gray-300 rounded-full px-4 py-1.5 text-sm focus:outline-none focus:border-[#243670] bg-white w-full sm:w-64"
         />
         <select
           value={polFilter}
@@ -714,7 +714,8 @@ const OceanFreightTab = ({ token }) => {
       {loading ? (
         <LoadingSpinner />
       ) : (
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto -mx-3 md:mx-0">
+          <div className="min-w-[900px] px-3 md:px-0">
           <table className="w-full text-sm border-collapse">
             <thead>
               <tr className="border-b-2 border-gray-200">
@@ -841,6 +842,7 @@ const OceanFreightTab = ({ token }) => {
               ))}
             </tbody>
           </table>
+          </div>
         </div>
       )}
     </div>
@@ -897,7 +899,7 @@ const PaymentDetailsTab = ({ token }) => {
       {/* Bank Details */}
       <div className="border border-gray-200 rounded-2xl p-6 space-y-4">
         <p className="font-bold text-gray-800 text-sm uppercase tracking-widest">🏦 Bank Details</p>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className={label}>Bank Name *</label>
             <input value={form.bankName} onChange={e => setForm(p => ({ ...p, bankName: e.target.value }))} className={inp} placeholder="e.g. National Bank of Bahrain" />
@@ -992,34 +994,32 @@ const AgentDashboard = () => {
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
-      <div className="border-b border-gray-200 px-8 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-4">
+      <div className="border-b border-gray-200 px-4 md:px-8 py-3 md:py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           {/* Tab toggle */}
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setActiveTab('bookings')}
-              className={`${pill} ${activeTab === 'bookings' ? 'bg-[#243670] text-white' : 'border border-rose-300 text-[#243670] hover:bg-blue-50'}`}
-            >
-              Bookings
-            </button>
-            <button
-              onClick={() => setActiveTab('ocean')}
-              className={`${pill} ${activeTab === 'ocean' ? 'bg-[#243670] text-white' : 'border border-rose-300 text-[#243670] hover:bg-blue-50'}`}
-            >
-              Ocean Freight
-            </button>
-            <button
-              onClick={() => setActiveTab('payment')}
-              className={`${pill} ${activeTab === 'payment' ? 'bg-[#243670] text-white' : 'border border-rose-300 text-[#243670] hover:bg-blue-50'}`}
-            >
-              Payment Details
-            </button>
-          </div>
+          <button
+            onClick={() => setActiveTab('bookings')}
+            className={`${pill} text-xs md:text-sm ${activeTab === 'bookings' ? 'bg-[#243670] text-white' : 'border border-rose-300 text-[#243670] hover:bg-blue-50'}`}
+          >
+            Bookings
+          </button>
+          <button
+            onClick={() => setActiveTab('ocean')}
+            className={`${pill} text-xs md:text-sm ${activeTab === 'ocean' ? 'bg-[#243670] text-white' : 'border border-rose-300 text-[#243670] hover:bg-blue-50'}`}
+          >
+            Ocean Freight
+          </button>
+          <button
+            onClick={() => setActiveTab('payment')}
+            className={`${pill} text-xs md:text-sm ${activeTab === 'payment' ? 'bg-[#243670] text-white' : 'border border-rose-300 text-[#243670] hover:bg-blue-50'}`}
+          >
+            Payment Details
+          </button>
         </div>
 
         <button
           onClick={() => setShowLogoutConfirm(true)}
-          className={`${pill} bg-[#243670] text-white hover:bg-blue-900`}
+          className={`${pill} bg-[#243670] text-white hover:bg-blue-900 text-xs md:text-sm self-end sm:self-auto`}
         >
           Logout
         </button>
@@ -1053,7 +1053,7 @@ const AgentDashboard = () => {
       )}
 
       {/* Content */}
-      <div className="px-8 py-6">
+      <div className="px-3 md:px-8 py-4 md:py-6">
         {activeTab === 'bookings' && (
           <BookingsTab
             requests={requests}

@@ -36,20 +36,21 @@ const DashboardToggle = ({ activeView, freightBadge = 0 }) => {
     ];
 
     return (
-        <div className="relative flex items-center rounded-full bg-slate-200/70 p-1.5 gap-1 backdrop-blur-sm border border-slate-300/50 shadow-inner shadow-slate-900/10 overflow-x-auto max-w-full">
+    <div className="relative flex items-center rounded-full bg-slate-200/70 p-1.5 gap-1 backdrop-blur-sm border border-slate-300/50 shadow-inner shadow-slate-900/10">
             {tabs.map(tab => (
                 <button
                     key={tab.key}
                     onClick={() => handleNavigate(tab.key)}
-                    className={`relative z-10 flex items-center justify-center gap-1.5 rounded-full py-2 px-4 text-xs font-bold transition-all duration-300 whitespace-nowrap focus:outline-none ${
+                    className={`relative z-10 flex items-center justify-center gap-1.5 rounded-full py-2 px-2.5 md:px-4 text-xs font-bold transition-all duration-300 whitespace-nowrap focus:outline-none ${
                         activeView === tab.key
                             ? 'bg-gradient-to-br from-amber-400 to-amber-500 text-white shadow-lg shadow-amber-500/30'
                             : 'text-[#243670] opacity-70 hover:opacity-100 hover:bg-white/40'
                     }`}
                     aria-current={activeView === tab.key}
+                    title={tab.label}
                 >
                     {tab.icon}
-                    {tab.label}
+                    <span className="hidden md:inline">{tab.label}</span>
                     {tab.key === 'freight' && freightBadge > 0 && (
                         <span className="absolute -top-1 -right-1 min-w-[16px] h-[16px] px-0.5 rounded-full bg-rose-500 text-white text-[9px] font-bold flex items-center justify-center leading-none shadow">
                             {freightBadge > 99 ? '99+' : freightBadge}

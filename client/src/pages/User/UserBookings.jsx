@@ -399,7 +399,7 @@ const UserBookingsInner = () => {
   return (
     <>
     <div className="min-h-screen bg-white">
-      <div className="border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+      <div className="border-b border-gray-200 px-4 md:px-6 py-3 md:py-4 flex items-center justify-between">
         <button onClick={resetAll} className="px-5 py-1.5 rounded-full bg-[#243670] text-white text-sm font-semibold hover:bg-blue-900 transition-colors">
           My Bookings
         </button>
@@ -417,9 +417,9 @@ const UserBookingsInner = () => {
           <button onClick={resetAll} className="mt-4 text-[#243670] underline text-sm">Try another email</button>
         </div>
       ) : (
-        <div className="flex h-[calc(100vh-65px)]">
+        <div className="flex flex-col md:flex-row md:h-[calc(100vh-65px)]">
           {/* Left list */}
-          <div className="w-80 border-r border-gray-200 overflow-y-auto flex-shrink-0 flex flex-col">
+          <div className="w-full md:w-80 border-b md:border-b-0 md:border-r border-gray-200 md:overflow-y-auto flex-shrink-0 flex flex-col">
             {/* Filter toggle bar */}
             <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between flex-shrink-0">
               <span className="text-xs text-gray-500 font-semibold uppercase tracking-wide">{filteredBookings.length} booking{filteredBookings.length !== 1 ? 's' : ''}</span>
@@ -478,7 +478,7 @@ const UserBookingsInner = () => {
             )}
 
             {/* Booking list */}
-            <div className="overflow-y-auto flex-1">
+            <div className="overflow-y-auto flex-1 md:max-h-none max-h-[45vh]">
               {filteredBookings.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-10 text-gray-400 text-sm">
                   <p>No bookings match filters</p>
@@ -511,7 +511,7 @@ const UserBookingsInner = () => {
 
           {/* Right detail */}
           {selected && (
-            <div className="flex-1 overflow-y-auto p-8">
+            <div className="flex-1 overflow-y-auto p-4 md:p-8">
               <div className="max-w-2xl space-y-4">
                 <div className="flex items-center justify-between">
                   <h2 className="text-lg font-bold text-gray-800">Booking Details</h2>

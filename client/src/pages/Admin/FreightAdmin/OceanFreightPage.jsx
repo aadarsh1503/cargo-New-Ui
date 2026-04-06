@@ -89,7 +89,7 @@ const OceanFreightPage = () => {
       {/* Filters */}
       <div className="flex flex-wrap items-center gap-1.5 mb-3">
         <input type="text" placeholder="Search liner, agent…" value={search} onChange={e => setSearch(e.target.value)}
-          className="border border-gray-200 rounded px-2.5 py-1 text-xs focus:outline-none focus:border-[#243670] w-36" />
+          className="border border-gray-200 rounded px-2.5 py-1 text-xs focus:outline-none focus:border-[#243670] w-full sm:w-36" />
         <select value={polFilter} onChange={e => setPolFilter(e.target.value)}
           className="border border-gray-200 rounded px-2.5 py-1 text-xs focus:outline-none bg-white">
           <option value="">All POL</option>
