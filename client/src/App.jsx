@@ -68,6 +68,8 @@ import ForgotPassword from './pages/Admin/ForgotPassword';
 import ResetPassword from './pages/Admin/ResetPassword';
 import { API_BASE_URL } from './config/apiConfig';
 
+import AiChat from './components/AiChat/AiChat';
+
 // Standalone WhatsApp widget for agent/user pages (fetches numbers independently)
 const StandaloneChat = () => {
   const [numbers, setNumbers] = useState({});
@@ -192,6 +194,7 @@ function App() {
         }}
       />
       <RegionProvider>
+        <AiChat />
         <Routes>
           {/* Login */}
           <Route path="/login" element={<AdminLogin />} />

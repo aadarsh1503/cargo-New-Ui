@@ -19,6 +19,7 @@ const employmentRoutes = require('./src/routes/employmentRoutes');
 const awsSettingsRoutes = require('./src/routes/awsSettingsRoutes');
 const freightRoutes = require('./src/routes/freightRoutes');
 const exportRoutes = require('./src/routes/exportRoutes');
+const chatRoutes = require('./src/routes/chatRoutes');
 
 // --- THE FIX ---
 // Destructure the 'default' export from the library to get the function directly.
@@ -44,6 +45,7 @@ app.use('/api/aws-settings', awsSettingsRoutes);
 app.use('/api/freight', freightRoutes);
 app.use('/api/freight-settings', require('./src/routes/freightSettingsRoutes'));
 app.use('/api/admin', exportRoutes);
+app.use('/api/chat', chatRoutes);
 
 // -----------------
 const DEFAULT_REGION = 'bahrain'; 
