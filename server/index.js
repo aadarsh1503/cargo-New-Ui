@@ -30,7 +30,14 @@ const app = express();
 
 // --- Middleware Setup ---
 app.use(helmet());
-app.use(cors());
+app.use(cors({
+  origin: [
+    'http://localhost:5173',
+    'https://cargo-new-ui.vercel.app',
+    'https://gvscargo.com',
+  ],
+  credentials: true,
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true })); 
 
